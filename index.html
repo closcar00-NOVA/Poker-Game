@@ -408,22 +408,8 @@
         canvas = document.getElementById('pokerCanvas');
         ctx = canvas.getContext('2d');
         
-        try {
-            let raw = localStorage.getItem('high_stakes_poker_7player_save');
-            let parsed = raw ? JSON.parse(raw) : null;
-            
-            // Safety Check Checkpoint: If structural mapping does not align with a 7-player configuration, wipe it out
-            if (!parsed || !parsed.players || parsed.players.length !== 7) {
-                throw new Error("Outdated save configuration configuration.");
-            }
-            
-            gameState = parsed;
-            logMessage("Loaded active 7-Player ring match environment state from system ledger cache.", "system");
-            updateControls();
-        } catch(e) {
-            // Flawless initialization route execution fallback
-            initNewSession();
-        }
+        // Always force a clean, responsive session boot sequence
+        initNewSession();
         
         refreshLeaderboardHUD();
         setInterval(render, 30);
@@ -518,7 +504,12 @@
 
         logMessage(`--- Hand #${gameState.handCount} Started ---`, "system");
         saveToLocalStorage();
-        updateControls();
+        updateControls(); // Wakes up your dashboard right at the start of the deal
+
+        // If the action landed on a bot first, let it run
+        if (gameState.players[gameState.currentTurn].type === 'bot') {
+            setTimeout(processBotTurn, 900);
+        }
     }
 
     function postBlind(playerIdx, amount) {
@@ -883,6 +874,7 @@
 
     function updateControls() {
         let p = gameState.players[0];
+        // Ensure buttons light up specifically when it is exactly player ID 0's turn to act
         if (gameState.currentTurn !== 0 || gameState.round === 'SHOWDOWN' || p.isEliminated || announcementTimer > 0 || forceShowdownReveal) {
             document.getElementById('btnFold').disabled = true;
             document.getElementById('btnCheck').disabled = true;
@@ -895,8 +887,8 @@
         
         document.getElementById('btnFold').disabled = false;
         document.getElementById('btnCheck').disabled = (needed > 0);
-        document.getElementById('btnCall').disabled = (needed === 0 || p.chips < needed);
-        document.getElementById('btnCall').innerText = needed > 0 ? `Call $${needed.toLocaleString()}` : 'Call';
+        document.getElementById('btnCall').disabled = (p.chips < needed);
+        document.getElementById('btnCall').innerText = needed > 0 ? `Call $${needed.toLocaleString()}` : 'Check / Call';
 
         let minRaise = BB;
         let maxRaise = p.chips - needed;
@@ -1159,6 +1151,7 @@
         logMessage("Active session footprint securely built to clip token.", "system");
     }
 
+    // Explicitly wake up actions upon completion of text decoding templates
     function importSession() {
         let inputString = document.getElementById('sessionText').value.trim();
         if(!inputString) return;
@@ -1182,7 +1175,7 @@
             refreshLeaderboardHUD();
             startNewHand();
         } catch(e) {
-            alert("Error: String profile token parsing data integrity violation.");
+            alert("Error: String profile token data parsing failure.");
         }
     }
 </script>
