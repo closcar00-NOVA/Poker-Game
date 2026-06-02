@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>High-Stakes Texas Hold'em - 7-Player Championship Edition</title>
+    <title>High-Stakes Texas Hold'em - Championship Edition 2.0</title>
     <style>
         :root {
             --bg-color: #05070f;
@@ -331,7 +331,6 @@
     </div>
 
     <div class="sidebar">
-        <!-- Player Actions Grid -->
         <div class="panel">
             <h3>Actions</h3>
             <div class="controls-grid">
@@ -350,13 +349,11 @@
             </div>
         </div>
 
-        <!-- Real-Time Table Leaderboard -->
         <div class="panel">
             <h3>Live Leaderboard</h3>
             <div class="leaderboard-list" id="leaderboardBox"></div>
         </div>
 
-        <!-- System Settings Module -->
         <div class="panel">
             <h3>Table Settings</h3>
             <label style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 6px;">AI Intensity</label>
@@ -368,13 +365,11 @@
             <button class="danger" style="width: 100%; padding: 10px; font-size: 12px;" onclick="resetEntireSession()">Reset Table (Restore Eliminated Players)</button>
         </div>
 
-        <!-- Live History Action Log -->
         <div class="panel">
             <h3>Action Log</h3>
             <div class="log-box" id="logBox"></div>
         </div>
 
-        <!-- Continuity / Persistence Syncing Configuration -->
         <div class="panel">
             <h3>Session Continuity</h3>
             <div class="persistence-box">
@@ -399,6 +394,11 @@
     let announcementText = "";
     let announcementTimer = 0;
     let forceShowdownReveal = false; 
+    let audioCtx = null; // Lazy-initialized sound synthesizer context
+
+    // Kinetic Animation Properties
+    let globalAnimationProgress = 0; 
+    let glowPulseFrame = 0;
 
     const SUITS = ['♠', '♥', '♦', '♣'];
     const VALUES = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
@@ -408,12 +408,53 @@
         canvas = document.getElementById('pokerCanvas');
         ctx = canvas.getContext('2d');
         
-        // Always force a clean, responsive session boot sequence
         initNewSession();
-        
         refreshLeaderboardHUD();
-        setInterval(render, 30);
+        
+        // High refresh animation engine loop 
+        setInterval(tickEngine, 30);
     };
+
+    // --- synthesised web audio sfx sub-module ---
+    function initAudioContext() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+    }
+
+    function playSoundEffect(type) {
+        try {
+            initAudioContext();
+            if (!audioCtx) return;
+
+            let osc = audioCtx.createOscillator();
+            let gainNode = audioCtx.createGain();
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            if (type === 'slide') {
+                // Card Dealing Glide Frequency Swoosh
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.12);
+                gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.12);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.12);
+            } else if (type === 'chip') {
+                // High Frequency Metallic Casino Chip Clink
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(1800, audioCtx.currentTime);
+                osc.frequency.setValueAtTime(1500, audioCtx.currentTime + 0.03);
+                gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.08);
+            }
+        } catch (e) {
+            // Silence if user security profiles block device audio pipelines
+        }
+    }
 
     function initNewSession() {
         gameState = {
@@ -439,14 +480,10 @@
         startNewHand();
     }
 
-    function resetEntireSession() {
-        if(confirm("Are you sure you want to restore all bankrolls to $1,000,000 and bring back eliminated players?")) {
-            initNewSession();
-        }
-    }
-
     function startNewHand() {
         forceShowdownReveal = false; 
+        globalAnimationProgress = 0; // Reset slider timeline animations
+        
         gameState.players.forEach(p => {
             if (p.chips <= 0) {
                 if (!p.isEliminated && p.id !== 0) {
@@ -503,10 +540,10 @@
         }
 
         logMessage(`--- Hand #${gameState.handCount} Started ---`, "system");
+        playSoundEffect('slide'); // Deal sfx trigger
         saveToLocalStorage();
-        updateControls(); // Wakes up your dashboard right at the start of the deal
+        updateControls();
 
-        // If the action landed on a bot first, let it run
         if (gameState.players[gameState.currentTurn].type === 'bot') {
             setTimeout(processBotTurn, 900);
         }
@@ -521,11 +558,13 @@
         if(p.chips === 0) p.isAllIn = true;
         p.actedThisRound = true; 
         logMessage(`${p.name} posts blind $${actual.toLocaleString()}`, "system");
+        playSoundEffect('chip');
     }
 
     function queueNextRoundDealerAction(nextRoundLabel, textAnnouncement, dealingCallback) {
         announcementText = textAnnouncement;
         announcementTimer = 55; 
+        globalAnimationProgress = 0; // Trigger secondary card interpolation sweeps
         
         document.getElementById('btnFold').disabled = true;
         document.getElementById('btnCheck').disabled = true;
@@ -535,7 +574,8 @@
         setTimeout(() => {
             dealingCallback();
             gameState.round = nextRoundLabel;
-            
+            playSoundEffect('slide');
+
             gameState.players.forEach(p => {
                 p.currentBet = 0;
                 if(!p.hasFolded && !p.isEliminated) {
@@ -578,6 +618,7 @@
             forceShowdownReveal = true;
             announcementText = "STUDY WINNING ENVIRONMENT STATE (5s)...";
             announcementTimer = 165; 
+            playSoundEffect('slide');
 
             setTimeout(processShowdown, 5000); 
         }
@@ -594,6 +635,7 @@
         } else if (type === 'CHECK') {
             p.lastAction = 'Check';
             logMessage(`${p.name} checks`, playerIdx === 0 ? "player" : "bot");
+            playSoundEffect('chip');
         } else if (type === 'CALL' || type === 'RAISE') {
             let callAmount = gameState.highestBetThisRound - p.currentBet;
             let extraRaise = amount; 
@@ -610,6 +652,7 @@
             p.chips -= totalNeeded;
             p.currentBet += totalNeeded;
             gameState.pot += totalNeeded;
+            playSoundEffect('chip');
 
             if (p.currentBet > gameState.highestBetThisRound) {
                 gameState.highestBetThisRound = p.currentBet;
@@ -648,6 +691,15 @@
         }
     }
 
+    // --- automated internal loops tick driver frame ---
+    function tickEngine() {
+        glowPulseFrame += 0.08; // Keep glowing neon loops oscillating smoothly
+        if (globalAnimationProgress < 1.0) {
+            globalAnimationProgress += 0.04; // Smoothly slide vector paths down over 25 frames
+        }
+        render();
+    }
+
     function isRoundSettled() {
         let activePlayers = gameState.players.filter(p => !p.hasFolded && !p.isAllIn && !p.isEliminated);
         return activePlayers.every(p => p.currentBet === gameState.highestBetThisRound && p.actedThisRound);
@@ -682,7 +734,6 @@
 
     function endHandResolution() {
         gameState.round = 'SHOWDOWN';
-        
         do {
             gameState.dealerIndex = (gameState.dealerIndex + 1) % 7;
         } while (gameState.players[gameState.dealerIndex].isEliminated);
@@ -874,7 +925,6 @@
 
     function updateControls() {
         let p = gameState.players[0];
-        // Ensure buttons light up specifically when it is exactly player ID 0's turn to act
         if (gameState.currentTurn !== 0 || gameState.round === 'SHOWDOWN' || p.isEliminated || announcementTimer > 0 || forceShowdownReveal) {
             document.getElementById('btnFold').disabled = true;
             document.getElementById('btnCheck').disabled = true;
@@ -910,6 +960,7 @@
         document.getElementById('betValue').innerText = `$${parseInt(val).toLocaleString()}`;
     }
 
+    // --- core aesthetic high refresh canvas rendering grid ---
     function render() {
         let radialGrad = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 50, canvas.width/2, canvas.height/2, 600);
         radialGrad.addColorStop(0, '#162b4c');
@@ -918,6 +969,7 @@
         ctx.fillStyle = radialGrad;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+        // Core Table Ring Shading Borders Track
         ctx.strokeStyle = 'rgba(25, 36, 56, 0.6)';
         ctx.lineWidth = 14;
         ctx.beginPath();
@@ -930,6 +982,7 @@
         ctx.ellipse(canvas.width/2, canvas.height/2, 405, 205, 0, 0, Math.PI * 2);
         ctx.stroke();
 
+        // Total Pot Indicator HUD Element Banner Panel
         ctx.fillStyle = 'rgba(2, 4, 8, 0.85)';
         ctx.beginPath();
         ctx.roundRect(canvas.width/2 - 120, canvas.height/2 - 145, 240, 42, 10);
@@ -954,18 +1007,30 @@
             let coord = seatCoords[idx];
             let isCurrent = (gameState.currentTurn === idx && gameState.round !== 'SHOWDOWN' && announcementTimer <= 0 && !forceShowdownReveal);
 
+            // ANIMATION EXPLICIT UPGRADE: Apply pulsing borders during all-in modes or heavy blue reflections for active turns
             if (p.isEliminated) {
                 ctx.fillStyle = 'rgba(15, 20, 32, 0.4)';
                 ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+                ctx.shadowBlur = 0;
+            } else if (p.isAllIn) {
+                let pulseAlpha = 0.4 + Math.sin(glowPulseFrame) * 0.25;
+                ctx.fillStyle = 'rgba(28, 15, 25, 0.95)';
+                ctx.strokeStyle = `rgba(239, 68, 68, ${pulseAlpha + 0.3})`;
+                ctx.shadowColor = '#ef4444';
+                ctx.shadowBlur = 10 + Math.sin(glowPulseFrame) * 6;
             } else {
                 ctx.fillStyle = isCurrent ? 'rgba(15, 23, 42, 0.95)' : 'rgba(20, 29, 54, 0.85)';
                 ctx.strokeStyle = isCurrent ? '#3b82f6' : 'rgba(255,255,255,0.07)';
+                ctx.shadowColor = isCurrent ? '#3b82f6' : 'transparent';
+                ctx.shadowBlur = isCurrent ? 12 : 0;
             }
-            ctx.lineWidth = isCurrent ? 2.5 : 1;
+            
+            ctx.lineWidth = isCurrent || p.isAllIn ? 2.5 : 1;
             ctx.beginPath();
             ctx.roundRect(coord.x - 90, coord.y - 45, 180, 95, 12);
             ctx.fill();
             ctx.stroke();
+            ctx.shadowBlur = 0; // Clear immediately
 
             ctx.textAlign = 'left';
             ctx.font = 'bold 15px -apple-system, BlinkMacSystemFont, sans-serif';
@@ -1000,36 +1065,46 @@
                 ctx.fillText("D", dX, dY + 3.5);
             }
 
+            // ANIMATION EXPLICIT UPGRADE: Interpolate card vectors to slide linearly from the middle board down to seats
             if (!p.isEliminated) {
                 p.cards.forEach((card, cIdx) => {
                     let hide = (p.type === 'bot' && !p.hasFolded && !forceShowdownReveal);
                     
                     if (idx === 0) {
-                        let cardX = coord.x - 8 + (cIdx * 48);
-                        let cardY = coord.y - 30; 
-                        drawUltraSharpCard(cardX, cardY, card, hide, 46, 66);
+                        let finalX = coord.x - 8 + (cIdx * 48);
+                        let finalY = coord.y - 30;
+                        // Linear vector sliding interpolation math configurations
+                        let animX = (canvas.width / 2) + (finalX - (canvas.width / 2)) * globalAnimationProgress;
+                        let animY = (canvas.height / 2) + (finalY - (canvas.height / 2)) * globalAnimationProgress;
+
+                        drawUltraSharpCard(animX, animY, card, hide, 46, 66);
                     } else {
-                        let cardX = coord.x + 2 + (cIdx * 43);
-                        let cardY = coord.y - 14;
-                        drawUltraSharpCard(cardX, cardY, card, hide, 40, 56);
+                        let finalX = coord.x + 2 + (cIdx * 43);
+                        let finalY = coord.y - 14;
+                        let animX = (canvas.width / 2) + (finalX - (canvas.width / 2)) * globalAnimationProgress;
+                        let animY = (canvas.height / 2) + (finalY - (canvas.height / 2)) * globalAnimationProgress;
+
+                        drawUltraSharpCard(animX, animY, card, hide, 40, 56);
                     }
                 });
             }
         });
 
+        // ANIMATION EXPLICIT UPGRADE: Community shared board slots slide smoothly outwards across standard positions
         let commStartX = canvas.width / 2 - (5 * 26);
         gameState.communityCards.forEach((card, idx) => {
-            drawUltraSharpCard(commStartX + (idx * 52), canvas.height / 2 - 25, card, false, 40, 56);
+            let finalX = commStartX + (idx * 52);
+            let animX = (canvas.width / 2) + (finalX - (canvas.width / 2)) * globalAnimationProgress;
+            drawUltraSharpCard(animX, canvas.height / 2 - 25, card, false, 40, 56);
         });
 
         if (announcementTimer > 0) {
-            announcementTimer--;
-            
             ctx.fillStyle = 'rgba(2, 4, 15, 0.88)';
             ctx.fillRect(0, canvas.height / 2 - 45, canvas.width, 80);
             
             ctx.strokeStyle = 'rgba(217, 119, 6, 0.4)';
             ctx.lineWidth = 2;
+            ctx.shadowBlur = 0;
             ctx.beginPath();
             ctx.moveTo(0, canvas.height / 2 - 45); ctx.lineTo(canvas.width, canvas.height / 2 - 45);
             ctx.moveTo(0, canvas.height / 2 + 35); ctx.lineTo(canvas.width, canvas.height / 2 + 35);
@@ -1058,8 +1133,7 @@
         ctx.fill();
         ctx.stroke();
         
-        ctx.shadowBlur = 0; 
-        ctx.shadowOffsetY = 0;
+        ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
 
         if (isHidden) {
             ctx.strokeStyle = 'rgba(59, 130, 246, 0.12)';
@@ -1130,16 +1204,6 @@
         } catch(e) {}
     }
 
-    function loadFromLocalStorage() {
-        try {
-            let raw = localStorage.getItem('high_stakes_poker_7player_save');
-            if (!raw) return false;
-            gameState = JSON.parse(raw);
-            updateControls();
-            return true;
-        } catch(e) { return false; }
-    }
-
     function exportSession() {
         saveToLocalStorage();
         let payloadString = btoa(JSON.stringify({
@@ -1151,7 +1215,6 @@
         logMessage("Active session footprint securely built to clip token.", "system");
     }
 
-    // Explicitly wake up actions upon completion of text decoding templates
     function importSession() {
         let inputString = document.getElementById('sessionText').value.trim();
         if(!inputString) return;
@@ -1175,7 +1238,7 @@
             refreshLeaderboardHUD();
             startNewHand();
         } catch(e) {
-            alert("Error: String profile token data parsing failure.");
+            alert("Error: String profile token parsing data integrity violation.");
         }
     }
 </script>
