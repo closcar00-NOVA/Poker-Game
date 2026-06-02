@@ -58,7 +58,6 @@
             height: auto;
         }
 
-        /* Re-ordered Ergonomic Sidebar Layout */
         .sidebar {
             display: flex;
             flex-direction: column;
@@ -151,7 +150,6 @@
             height: 6px;
         }
 
-        /* Leaderboard Style Configurations */
         .leaderboard-list {
             display: flex;
             flex-direction: column;
@@ -172,7 +170,6 @@
         .leaderboard-eliminated { border-left-color: #ef4444; opacity: 0.3; }
         .leaderboard-chips { font-family: monospace; font-weight: bold; color: #34d399; }
 
-        /* Log Panel */
         .log-box {
             height: 140px;
             overflow-y: auto;
@@ -195,7 +192,6 @@
         .log-bot { color: #60a5fa; border-left: 2px solid #3b82f6; }
         .log-win { color: #c084fc; border-left: 2px solid #a855f7; font-weight: bold; background: rgba(168, 85, 247, 0.08); }
 
-        /* Visual Modal Popup for Hand Outcomes */
         .modal-overlay {
             position: absolute;
             top: 0;
@@ -262,7 +258,6 @@
         <canvas id="pokerCanvas" width="1000" height="640"></canvas>
     </div>
 
-    <!-- Ergonomically Arranged Sidebar Navigation Panel -->
     <div class="sidebar">
         <!-- 1. Actions Panel (Top) -->
         <div class="panel">
@@ -283,7 +278,7 @@
             </div>
         </div>
 
-        <!-- 2. Action Log Panel (Directly Below Actions) -->
+        <!-- 2. Action Log Panel -->
         <div class="panel">
             <h3>Action Log</h3>
             <div class="log-box" id="logBox"></div>
@@ -331,23 +326,39 @@
     const VALUES = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
     const VALUE_RANKS = {'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'10':10,'J':11,'Q':12,'K':13,'A':14};
 
-    // Color maps for dynamic procedural character profile avatars
     const PROFILE_THEMES = [
-        { bgGrad: ['#3b82f6', '#1d4ed8'], initial: 'C' }, // C. Lo.
-        { bgGrad: ['#ef4444', '#b91c1c'], initial: 'S' }, // The Shark
-        { bgGrad: ['#ec4899', '#be185d'], initial: 'W' }, // The Whale
-        { bgGrad: ['#f59e0b', '#b45309'], initial: 'G' }, // The Grinder
-        { bgGrad: ['#10b981', '#047857'], initial: 'S' }, // Station Sam
-        { bgGrad: ['#8b5cf6', '#6d28d9'], initial: 'R' }, // Rock Rocky
-        { bgGrad: ['#06b6d4', '#0891b2'], initial: 'M' }  // Maverick Max
+        { bgGrad: ['#3b82f6', '#1d4ed8'], initial: 'C' }, 
+        { bgGrad: ['#ef4444', '#b91c1c'], initial: 'S' }, 
+        { bgGrad: ['#ec4899', '#be185d'], initial: 'W' }, 
+        { bgGrad: ['#f59e0b', '#b45309'], initial: 'G' }, 
+        { bgGrad: ['#10b981', '#047857'], initial: 'S' }, 
+        { bgGrad: ['#8b5cf6', '#6d28d9'], initial: 'R' }, 
+        { bgGrad: ['#06b6d4', '#0891b2'], initial: 'M' }  
     ];
 
     window.onload = function() {
         canvas = document.getElementById('pokerCanvas');
         ctx = canvas.getContext('2d');
         
-        // RECOVERY EXPLICIT UPGRADE: Attempt to automatically recover from mid-game page refreshes
-        if (!loadFromLocalStorage()) {
+        // RECOVERY ENGINE: Safe-wrapped boot sequence to prevent memory corruption halts
+        try {
+            let raw = localStorage.getItem('high_stakes_poker_7player_save');
+            if (raw) {
+                let parsed = JSON.parse(raw);
+                // Hard validation check: file must be structurally perfect and contain exactly 7 valid players
+                if (parsed && parsed.players && parsed.players.length === 7 && parsed.round) {
+                    gameState = parsed;
+                    logMessage("Game session safely restored from ledger.", "system");
+                    updateControls();
+                } else {
+                    throw new Error("Invalid storage alignment.");
+                }
+            } else {
+                initNewSession();
+            }
+        } catch(e) {
+            // Safe fallback escape hatch: if anything goes wrong, wipe storage and deploy cleanly
+            localStorage.removeItem('high_stakes_poker_7player_save');
             initNewSession();
         }
         
@@ -355,7 +366,6 @@
         setInterval(tickEngine, 30);
     };
 
-    // --- low-toned organic synthesized sfx engine ---
     function initAudioContext() {
         if (!audioCtx) {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -373,7 +383,6 @@
             gainNode.connect(audioCtx.destination);
 
             if (type === 'slide') {
-                // Low-toned cloth friction sweep simulating a heavy card slide
                 osc.type = 'triangle';
                 osc.frequency.setValueAtTime(220, audioCtx.currentTime);
                 osc.frequency.linearRampToValueAtTime(80, audioCtx.currentTime + 0.18);
@@ -382,7 +391,6 @@
                 osc.start();
                 osc.stop(audioCtx.currentTime + 0.18);
             } else if (type === 'chip') {
-                // Low-pitched dense percussive clack simulating clay sub-stacks crashing down
                 osc.type = 'sine';
                 osc.frequency.setValueAtTime(280, audioCtx.currentTime);
                 osc.frequency.setValueAtTime(240, audioCtx.currentTime + 0.04);
@@ -418,6 +426,14 @@
         startNewHand();
     }
 
+    function resetEntireSession() {
+        if(confirm("Are you sure you want to restore all bankrolls to $1,000,000 and clear your local save history?")) {
+            localStorage.removeItem('high_stakes_poker_7player_save');
+            initNewSession();
+            refreshLeaderboardHUD();
+        }
+    }
+
     function startNewHand() {
         forceShowdownReveal = false; 
         globalAnimationProgress = 0; 
@@ -444,7 +460,7 @@
 
         let activeCount = gameState.players.filter(p => !p.isEliminated).length;
         if (activeCount <= 1) {
-            logMessage("Only one active player left! Reset the session to continue.", "system");
+            logMessage("Only one active player left! Reset the table to start over.", "system");
             return;
         }
 
@@ -523,7 +539,7 @@
             findNextValidActivePlayer();
             
             updateControls();
-            saveToLocalStorage(); // State Lock recovery sync
+            saveToLocalStorage(); 
             
             if (gameState.players[gameState.currentTurn].type === 'bot') {
                 setTimeout(processBotTurn, 900);
@@ -602,7 +618,7 @@
         }
 
         refreshLeaderboardHUD();
-        saveToLocalStorage(); // Lock recovery snapshot instantly after every single mouse action
+        saveToLocalStorage(); 
 
         if (checkHandEndCondition()) return;
 
@@ -635,13 +651,8 @@
         render();
     }
 
-    if (gameState.players) {
-        gameState.players.forEach(p => {
-            if (p.chips === undefined) p.chips = 0;
-        });
-    }
-
     function isRoundSettled() {
+        if (!gameState.players) return false;
         let activePlayers = gameState.players.filter(p => !p.hasFolded && !p.isAllIn && !p.isEliminated);
         return activePlayers.every(p => p.currentBet === gameState.highestBetThisRound && p.actedThisRound);
     }
@@ -860,6 +871,7 @@
     }
 
     function updateControls() {
+        if (!gameState.players) return;
         let p = gameState.players[0];
         if (gameState.currentTurn !== 0 || gameState.round === 'SHOWDOWN' || p.isEliminated || announcementTimer > 0 || forceShowdownReveal) {
             document.getElementById('btnFold').disabled = true;
@@ -896,9 +908,8 @@
         document.getElementById('betValue').innerText = `$${parseInt(val).toLocaleString()}`;
     }
 
-    // --- core aesthetic high refresh canvas rendering grid ---
     function render() {
-        // Render Vegas Emerald Green Felt Table Texture Base
+        if (!gameState.players) return;
         let radialGrad = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 50, canvas.width/2, canvas.height/2, 600);
         radialGrad.addColorStop(0, '#074d27');
         radialGrad.addColorStop(0.7, '#042b15');
@@ -906,20 +917,18 @@
         ctx.fillStyle = radialGrad;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Nested Rich Mahogany and Gold Brass Table Rim Rails
-        ctx.strokeStyle = '#271206'; // Wood Outer Ring
+        ctx.strokeStyle = '#271206'; 
         ctx.lineWidth = 14;
         ctx.beginPath();
         ctx.ellipse(canvas.width/2, canvas.height/2, 422, 222, 0, 0, Math.PI * 2);
         ctx.stroke();
 
-        ctx.strokeStyle = '#fbbf24'; // Polished Gold Inner Inlay
+        ctx.strokeStyle = '#fbbf24'; 
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.ellipse(canvas.width/2, canvas.height/2, 406, 206, 0, 0, Math.PI * 2);
         ctx.stroke();
 
-        // Total Pot Panel Block
         ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
         ctx.beginPath();
         ctx.roundRect(canvas.width/2 - 120, canvas.height/2 - 145, 240, 42, 10);
@@ -944,7 +953,6 @@
             let coord = seatCoords[idx];
             let isCurrent = (gameState.currentTurn === idx && gameState.round !== 'SHOWDOWN' && announcementTimer <= 0 && !forceShowdownReveal);
 
-            // Shading profiles and dynamic glowing halos
             if (p.isEliminated) {
                 ctx.fillStyle = 'rgba(10, 20, 15, 0.4)';
                 ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
@@ -969,7 +977,6 @@
             ctx.stroke();
             ctx.shadowBlur = 0; 
 
-            // EXPLICIT UPGRADE: Draw dynamic procedural vector profile cartoon avatar graphics
             if (!p.isEliminated) {
                 let theme = PROFILE_THEMES[idx];
                 let avX = coord.x - 62;
@@ -984,21 +991,18 @@
                 ctx.arc(avX, avY, 18, 0, Math.PI * 2);
                 ctx.fill();
                 
-                // Add an elegant cartoon inner circle highlight rim 
                 ctx.strokeStyle = 'rgba(255,255,255,0.15)';
                 ctx.lineWidth = 1;
                 ctx.stroke();
 
-                // Draw central initial label tag
                 ctx.font = 'bold 13px -apple-system, BlinkMacSystemFont, sans-serif';
                 ctx.fillStyle = '#ffffff';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText(theme.initial, avX, avY);
-                ctx.textBaseline = 'alphabetic'; // Reset Immediately
+                ctx.textBaseline = 'alphabetic'; 
             }
 
-            // Reposition profile text info blocks nicely to match avatar offsets
             ctx.textAlign = 'left';
             ctx.font = 'bold 14px -apple-system, BlinkMacSystemFont, sans-serif';
             ctx.fillStyle = p.isEliminated ? '#4b5563' : (isCurrent ? '#ffffff' : '#e2e8f0');
@@ -1032,7 +1036,6 @@
                 ctx.fillText("D", dX, dY + 3.5);
             }
 
-            // Render Pocket Card Layout
             if (!p.isEliminated) {
                 p.cards.forEach((card, cIdx) => {
                     let hide = (p.type === 'bot' && !p.hasFolded && !forceShowdownReveal);
@@ -1154,6 +1157,7 @@
 
     function logMessage(msg, type) {
         let box = document.getElementById('logBox');
+        if (!box) return;
         let entry = document.createElement('div');
         entry.className = `log-entry log-${type}`;
         entry.innerText = msg;
@@ -1165,56 +1169,6 @@
         try {
             localStorage.setItem('high_stakes_poker_7player_save', JSON.stringify(gameState));
         } catch(e) {}
-    }
-
-    function loadFromLocalStorage() {
-        try {
-            let raw = localStorage.getItem('high_stakes_poker_7player_save');
-            if (!raw) return false;
-            let parsed = JSON.parse(raw);
-            if (!parsed || !parsed.players || parsed.players.length !== 7) return false;
-            gameState = parsed;
-            updateControls();
-            return true;
-        } catch(e) { return false; }
-    }
-
-    function exportSession() {
-        saveToLocalStorage();
-        let payloadString = btoa(JSON.stringify({
-            p: gameState.players.map(p => ({name: p.name, chips: p.chips, arch: p.archetype, type: p.type, elim: p.isEliminated})),
-            dIdx: gameState.dealerIndex,
-            hCount: gameState.handCount
-        }));
-        document.getElementById('sessionText').value = payloadString;
-        logMessage("Active session footprint securely built to clip token.", "system");
-    }
-
-    function importSession() {
-        let inputString = document.getElementById('sessionText').value.trim();
-        if(!inputString) return;
-        try {
-            let parsed = JSON.parse(atob(inputString));
-            gameState = {
-                players: parsed.p.map((p, idx) => ({
-                    id: idx, name: p.name, chips: p.chips, cards: [], type: p.type, archetype: p.arch, lastAction: '', hasFolded: false, isAllIn: false, currentBet: 0, isEliminated: p.elim || false, actedThisRound: false
-                })),
-                dealerIndex: parsed.dIdx,
-                pot: 0,
-                communityCards: [],
-                round: 'PREFLOP',
-                deck: [],
-                currentTurn: 0,
-                highestBetThisRound: 0,
-                handCount: parsed.hCount || 1
-            };
-            logMessage("Championship session footprint replicated!", "win");
-            saveToLocalStorage();
-            refreshLeaderboardHUD();
-            startNewHand();
-        } catch(e) {
-            alert("Error: String profile token parsing data integrity violation.");
-        }
     }
 </script>
 
