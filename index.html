@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>High-Stakes Texas Hold'em - Championship Edition 2.0</title>
+    <title>High-Stakes Texas Hold'em - Vegas Pro Championship</title>
     <style>
         :root {
             --bg-color: #05070f;
-            --panel-bg: rgba(30, 38, 64, 0.6);
-            --border-accent: rgba(59, 130, 246, 0.25);
-            --accent-color: #3b82f6;
-            --accent-hover: #2563eb;
+            --panel-bg: rgba(20, 35, 30, 0.7);
+            --border-accent: rgba(52, 211, 153, 0.25);
+            --accent-color: #10b981;
+            --accent-hover: #059669;
             --danger-color: #ef4444;
             --text-color: #f3f4f6;
             --text-muted: #9ca3af;
@@ -25,7 +25,7 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
-            background-image: radial-gradient(circle at 50% 50%, #0d1527 0%, #04060b 100%);
+            background-image: radial-gradient(circle at 50% 50%, #0a1c14 0%, #030705 100%);
             color: var(--text-color);
             display: flex;
             justify-content: center;
@@ -45,11 +45,11 @@
 
         .canvas-container {
             position: relative;
-            background: #060911;
+            background: #020704;
             border-radius: 24px;
             overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(52, 211, 153, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9);
         }
 
         canvas {
@@ -58,7 +58,7 @@
             height: auto;
         }
 
-        /* Sidebar Panels Layout */
+        /* Re-ordered Ergonomic Sidebar Layout */
         .sidebar {
             display: flex;
             flex-direction: column;
@@ -72,20 +72,19 @@
             border-radius: 16px;
             padding: 18px;
             border: 1px solid var(--border-accent);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
         }
 
         h3 {
-            font-size: 13px;
+            font-size: 12px;
             text-transform: uppercase;
             letter-spacing: 0.08em;
             margin-bottom: 14px;
-            color: #60a5fa;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            color: #34d399;
+            border-bottom: 1px solid rgba(52, 211, 153, 0.15);
             padding-bottom: 8px;
         }
 
-        /* Controls Panel */
         .controls-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -94,7 +93,7 @@
         }
 
         button {
-            background-color: rgba(255, 255, 255, 0.06);
+            background-color: rgba(255, 255, 255, 0.05);
             color: var(--text-color);
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 8px;
@@ -106,13 +105,13 @@
         }
 
         button:hover:not(:disabled) {
-            background-color: rgba(255, 255, 255, 0.15);
+            background-color: rgba(255, 255, 255, 0.12);
             border-color: rgba(255, 255, 255, 0.2);
             transform: translateY(-1px);
         }
 
         button:disabled {
-            opacity: 0.25;
+            opacity: 0.2;
             cursor: not-allowed;
             transform: none !important;
         }
@@ -120,21 +119,17 @@
         button.primary {
             background-color: var(--accent-color);
             border-color: rgba(255, 255, 255, 0.1);
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
         }
         button.primary:hover:not(:disabled) {
             background-color: var(--accent-hover);
-            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
         }
 
         button.danger {
-            background-color: rgba(239, 68, 68, 0.15);
-            border-color: rgba(239, 68, 68, 0.3);
+            background-color: rgba(239, 68, 68, 0.12);
+            border-color: rgba(239, 68, 68, 0.25);
             color: #f87171;
-        }
-        button.danger:hover:not(:disabled) {
-            background-color: rgba(239, 68, 68, 0.25);
-            border-color: rgba(239, 68, 68, 0.4);
         }
 
         .bet-slider-container {
@@ -143,16 +138,10 @@
             flex-direction: column;
             gap: 8px;
             margin-top: 4px;
-            background: rgba(0, 0, 0, 0.25);
+            background: rgba(0, 0, 0, 0.3);
             padding: 12px;
             border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.03);
-        }
-
-        .slider-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            border: 1px solid rgba(52, 211, 153, 0.05);
         }
 
         input[type="range"] {
@@ -160,7 +149,6 @@
             accent-color: var(--accent-color);
             cursor: pointer;
             height: 6px;
-            border-radius: 3px;
         }
 
         /* Leaderboard Style Configurations */
@@ -175,19 +163,18 @@
             justify-content: space-between;
             align-items: center;
             padding: 6px 8px;
-            background: rgba(0, 0, 0, 0.15);
+            background: rgba(0, 0, 0, 0.2);
             border-radius: 6px;
             font-size: 12.5px;
             border-left: 3px solid transparent;
         }
         .leaderboard-active { border-left-color: #10b981; }
-        .leaderboard-eliminated { border-left-color: #ef4444; opacity: 0.4; }
-        .leaderboard-name { font-weight: 500; }
+        .leaderboard-eliminated { border-left-color: #ef4444; opacity: 0.3; }
         .leaderboard-chips { font-family: monospace; font-weight: bold; color: #34d399; }
 
         /* Log Panel */
         .log-box {
-            height: 150px;
+            height: 140px;
             overflow-y: auto;
             font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
             font-size: 11.5px;
@@ -201,33 +188,12 @@
             line-height: 1.4;
             padding: 4px 6px;
             border-radius: 6px;
-            background: rgba(0, 0, 0, 0.12);
+            background: rgba(0, 0, 0, 0.2);
         }
         .log-system { color: #f59e0b; border-left: 2px solid #f59e0b; }
         .log-player { color: #10b981; border-left: 2px solid #10b981; }
         .log-bot { color: #60a5fa; border-left: 2px solid #3b82f6; }
         .log-win { color: #c084fc; border-left: 2px solid #a855f7; font-weight: bold; background: rgba(168, 85, 247, 0.08); }
-
-        /* Persistence Panel */
-        .persistence-box {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        textarea {
-            width: 100%;
-            height: 54px;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            color: #10b981;
-            font-family: monospace;
-            font-size: 11px;
-            padding: 8px;
-            resize: none;
-            outline: none;
-        }
 
         /* Visual Modal Popup for Hand Outcomes */
         .modal-overlay {
@@ -236,7 +202,7 @@
             left: 0;
             width: 1000px;
             height: 640px;
-            background: rgba(4, 6, 12, 0.8);
+            background: rgba(3, 10, 6, 0.85);
             backdrop-filter: blur(5px);
             display: none;
             justify-content: center;
@@ -246,27 +212,14 @@
         }
 
         .winner-card {
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            border: 2px solid #d97706;
+            background: linear-gradient(135deg, #0f2419 0%, #050d09 100%);
+            border: 2px solid #fbbf24;
             border-radius: 20px;
             padding: 32px;
             width: 460px;
             text-align: center;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9), 0 0 40px rgba(217, 119, 6, 0.15);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9), 0 0 40px rgba(251, 191, 36, 0.15);
             animation: scaleUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        @keyframes scaleUp {
-            from { transform: scale(0.85); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-
-        .winner-card h2 {
-            color: #f59e0b;
-            font-size: 24px;
-            margin-bottom: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
         }
 
         .payout-list-container {
@@ -276,10 +229,10 @@
             max-height: 180px;
             overflow-y: auto;
             margin-bottom: 24px;
-            background: rgba(0, 0, 0, 0.2);
+            background: rgba(0, 0, 0, 0.3);
             padding: 12px;
             border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(52, 211, 153, 0.1);
         }
 
         .payout-row {
@@ -289,30 +242,10 @@
             padding-bottom: 6px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
-        .payout-row:last-child {
-            border-bottom: none;
-            padding-bottom: 0;
-        }
 
-        .payout-user {
-            font-size: 16px;
-            font-weight: 700;
-            color: #f3f4f6;
-        }
-
-        .payout-chips {
-            font-size: 24px;
-            font-family: monospace;
-            font-weight: 800;
-            color: #10b981;
-            margin: 2px 0;
-        }
-
-        .payout-desc {
-            font-size: 13px;
-            color: var(--text-muted);
-            font-style: italic;
-        }
+        .payout-user { font-size: 16px; font-weight: 700; color: #f3f4f6; }
+        .payout-chips { font-size: 24px; font-family: monospace; font-weight: 800; color: #34d399; margin: 2px 0; }
+        .payout-desc { font-size: 13px; color: var(--text-muted); font-style: italic; }
     </style>
 </head>
 <body>
@@ -321,16 +254,17 @@
     <div class="canvas-container">
         <div class="modal-overlay" id="winnerModal">
             <div class="winner-card">
-                <h2>Hand Complete</h2>
+                <h2 style="color: #fbbf24; font-size: 24px; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em;">Hand Complete</h2>
                 <div class="payout-list-container" id="modalPayoutsList"></div>
                 <button class="primary" style="width: 100%; padding: 14px;" onclick="closeModalAndContinue()">Collect Pot & Deal Next Hand</button>
             </div>
         </div>
-        
         <canvas id="pokerCanvas" width="1000" height="640"></canvas>
     </div>
 
+    <!-- Ergonomically Arranged Sidebar Navigation Panel -->
     <div class="sidebar">
+        <!-- 1. Actions Panel (Top) -->
         <div class="panel">
             <h3>Actions</h3>
             <div class="controls-grid">
@@ -340,43 +274,37 @@
                 <button id="btnBet" class="primary" onclick="playerAction('RAISE')">Bet/Raise</button>
                 
                 <div class="bet-slider-container">
-                    <div class="slider-row">
+                    <div class="slider-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
                         <span style="font-size: 12px; color: var(--text-muted);">Amount:</span>
-                        <span id="betValue" style="font-weight: bold; color: #10b981;">$0</span>
+                        <span id="betValue" style="font-weight: bold; color: #34d399;">$0</span>
                     </div>
                     <input type="range" id="betSlider" min="0" max="100" step="1000" oninput="updateBetValue(this.value)">
                 </div>
             </div>
         </div>
 
-        <div class="panel">
-            <h3>Live Leaderboard</h3>
-            <div class="leaderboard-list" id="leaderboardBox"></div>
-        </div>
-
-        <div class="panel">
-            <h3>Table Settings</h3>
-            <label style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 6px;">AI Intensity</label>
-            <select id="aiIntensity" style="width: 100%; background: #111827; color: var(--text-color); border: 1px solid rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 600; outline: none; margin-bottom: 12px;">
-                <option value="0.3">Relaxed (Casual Play)</option>
-                <option value="0.7" selected>Standard (Balanced)</option>
-                <option value="1.0">Aggressive (Pro Stakes)</option>
-            </select>
-            <button class="danger" style="width: 100%; padding: 10px; font-size: 12px;" onclick="resetEntireSession()">Reset Table (Restore Eliminated Players)</button>
-        </div>
-
+        <!-- 2. Action Log Panel (Directly Below Actions) -->
         <div class="panel">
             <h3>Action Log</h3>
             <div class="log-box" id="logBox"></div>
         </div>
 
+        <!-- 3. Live Leaderboard Panel -->
         <div class="panel">
-            <h3>Session Continuity</h3>
-            <div class="persistence-box">
-                <button onclick="exportSession()" style="width: 100%;">Save & Export Session String</button>
-                <textarea id="sessionText" placeholder="Exported token verification text appears or gets pasted here..."></textarea>
-                <button onclick="importSession()" class="primary" style="width: 100%; font-size: 12px;">Import Session String</button>
-            </div>
+            <h3>Live Leaderboard</h3>
+            <div class="leaderboard-list" id="leaderboardBox"></div>
+        </div>
+
+        <!-- 4. Table Settings Panel (Bottom) -->
+        <div class="panel">
+            <h3>Table Settings</h3>
+            <label style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 6px;">AI Intensity</label>
+            <select id="aiIntensity" style="width: 100%; background: #0b1410; color: var(--text-color); border: 1px solid rgba(52,211,153,0.2); padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 600; outline: none; margin-bottom: 12px;">
+                <option value="0.3">Relaxed (Casual Play)</option>
+                <option value="0.7" selected>Standard (Balanced)</option>
+                <option value="1.0">Aggressive (Pro Stakes)</option>
+            </select>
+            <button class="danger" style="width: 100%; padding: 10px; font-size: 12px;" onclick="resetEntireSession()">Reset Table (New Session)</button>
         </div>
     </div>
 </div>
@@ -394,9 +322,8 @@
     let announcementText = "";
     let announcementTimer = 0;
     let forceShowdownReveal = false; 
-    let audioCtx = null; // Lazy-initialized sound synthesizer context
+    let audioCtx = null; 
 
-    // Kinetic Animation Properties
     let globalAnimationProgress = 0; 
     let glowPulseFrame = 0;
 
@@ -404,18 +331,31 @@
     const VALUES = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
     const VALUE_RANKS = {'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'10':10,'J':11,'Q':12,'K':13,'A':14};
 
+    // Color maps for dynamic procedural character profile avatars
+    const PROFILE_THEMES = [
+        { bgGrad: ['#3b82f6', '#1d4ed8'], initial: 'C' }, // C. Lo.
+        { bgGrad: ['#ef4444', '#b91c1c'], initial: 'S' }, // The Shark
+        { bgGrad: ['#ec4899', '#be185d'], initial: 'W' }, // The Whale
+        { bgGrad: ['#f59e0b', '#b45309'], initial: 'G' }, // The Grinder
+        { bgGrad: ['#10b981', '#047857'], initial: 'S' }, // Station Sam
+        { bgGrad: ['#8b5cf6', '#6d28d9'], initial: 'R' }, // Rock Rocky
+        { bgGrad: ['#06b6d4', '#0891b2'], initial: 'M' }  // Maverick Max
+    ];
+
     window.onload = function() {
         canvas = document.getElementById('pokerCanvas');
         ctx = canvas.getContext('2d');
         
-        initNewSession();
-        refreshLeaderboardHUD();
+        // RECOVERY EXPLICIT UPGRADE: Attempt to automatically recover from mid-game page refreshes
+        if (!loadFromLocalStorage()) {
+            initNewSession();
+        }
         
-        // High refresh animation engine loop 
+        refreshLeaderboardHUD();
         setInterval(tickEngine, 30);
     };
 
-    // --- synthesised web audio sfx sub-module ---
+    // --- low-toned organic synthesized sfx engine ---
     function initAudioContext() {
         if (!audioCtx) {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -433,27 +373,25 @@
             gainNode.connect(audioCtx.destination);
 
             if (type === 'slide') {
-                // Card Dealing Glide Frequency Swoosh
+                // Low-toned cloth friction sweep simulating a heavy card slide
                 osc.type = 'triangle';
-                osc.frequency.setValueAtTime(400, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.12);
-                gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.12);
+                osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+                osc.frequency.linearRampToValueAtTime(80, audioCtx.currentTime + 0.18);
+                gainNode.gain.setValueAtTime(0.25, audioCtx.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.18);
                 osc.start();
-                osc.stop(audioCtx.currentTime + 0.12);
+                osc.stop(audioCtx.currentTime + 0.18);
             } else if (type === 'chip') {
-                // High Frequency Metallic Casino Chip Clink
+                // Low-pitched dense percussive clack simulating clay sub-stacks crashing down
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(1800, audioCtx.currentTime);
-                osc.frequency.setValueAtTime(1500, audioCtx.currentTime + 0.03);
-                gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+                osc.frequency.setValueAtTime(280, audioCtx.currentTime);
+                osc.frequency.setValueAtTime(240, audioCtx.currentTime + 0.04);
+                gainNode.gain.setValueAtTime(0.35, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
                 osc.start();
-                osc.stop(audioCtx.currentTime + 0.08);
+                osc.stop(audioCtx.currentTime + 0.1);
             }
-        } catch (e) {
-            // Silence if user security profiles block device audio pipelines
-        }
+        } catch (e) {}
     }
 
     function initNewSession() {
@@ -476,18 +414,18 @@
             highestBetThisRound: 0,
             handCount: 1
         };
-        logMessage("New High-Stakes 7-Player Ring Session Initialized.", "system");
+        logMessage("Vegas Pro Championship Table Initialized.", "system");
         startNewHand();
     }
 
     function startNewHand() {
         forceShowdownReveal = false; 
-        globalAnimationProgress = 0; // Reset slider timeline animations
+        globalAnimationProgress = 0; 
         
         gameState.players.forEach(p => {
             if (p.chips <= 0) {
                 if (!p.isEliminated && p.id !== 0) {
-                    logMessage(`${p.name} is completely felted and ELIMINATED from the session.`, "danger");
+                    logMessage(`${p.name} is broke and ELIMINATED.`, "danger");
                 }
                 p.isEliminated = true;
                 p.hasFolded = true;
@@ -506,7 +444,7 @@
 
         let activeCount = gameState.players.filter(p => !p.isEliminated).length;
         if (activeCount <= 1) {
-            logMessage("Only one player remains active! Reset the session to deal again.", "system");
+            logMessage("Only one active player left! Reset the session to continue.", "system");
             return;
         }
 
@@ -540,13 +478,9 @@
         }
 
         logMessage(`--- Hand #${gameState.handCount} Started ---`, "system");
-        playSoundEffect('slide'); // Deal sfx trigger
+        playSoundEffect('slide'); 
         saveToLocalStorage();
         updateControls();
-
-        if (gameState.players[gameState.currentTurn].type === 'bot') {
-            setTimeout(processBotTurn, 900);
-        }
     }
 
     function postBlind(playerIdx, amount) {
@@ -564,7 +498,7 @@
     function queueNextRoundDealerAction(nextRoundLabel, textAnnouncement, dealingCallback) {
         announcementText = textAnnouncement;
         announcementTimer = 55; 
-        globalAnimationProgress = 0; // Trigger secondary card interpolation sweeps
+        globalAnimationProgress = 0; 
         
         document.getElementById('btnFold').disabled = true;
         document.getElementById('btnCheck').disabled = true;
@@ -589,6 +523,7 @@
             findNextValidActivePlayer();
             
             updateControls();
+            saveToLocalStorage(); // State Lock recovery sync
             
             if (gameState.players[gameState.currentTurn].type === 'bot') {
                 setTimeout(processBotTurn, 900);
@@ -616,7 +551,7 @@
             });
         } else if (gameState.round === 'RIVER') {
             forceShowdownReveal = true;
-            announcementText = "STUDY WINNING ENVIRONMENT STATE (5s)...";
+            announcementText = "REVEALING WINNING HOLDINGS (5s)...";
             announcementTimer = 165; 
             playSoundEffect('slide');
 
@@ -663,10 +598,11 @@
                 });
             }
 
-            logMessage(`${p.name} ${p.lastAction === 'All-In' ? 'goes All-In' : p.lastAction.toLowerCase() + 's'} to $${p.currentBet.toLocaleString()}`, playerIdx === 0 ? "player" : "bot");
+            logMessage(`${p.name} ${p.lastAction === 'All-In' ? 'pushes All-In' : p.lastAction.toLowerCase() + 's'} to $${p.currentBet.toLocaleString()}`, playerIdx === 0 ? "player" : "bot");
         }
 
         refreshLeaderboardHUD();
+        saveToLocalStorage(); // Lock recovery snapshot instantly after every single mouse action
 
         if (checkHandEndCondition()) return;
 
@@ -691,13 +627,18 @@
         }
     }
 
-    // --- automated internal loops tick driver frame ---
     function tickEngine() {
-        glowPulseFrame += 0.08; // Keep glowing neon loops oscillating smoothly
+        glowPulseFrame += 0.08; 
         if (globalAnimationProgress < 1.0) {
-            globalAnimationProgress += 0.04; // Smoothly slide vector paths down over 25 frames
+            globalAnimationProgress += 0.05; 
         }
         render();
+    }
+
+    if (gameState.players) {
+        gameState.players.forEach(p => {
+            if (p.chips === undefined) p.chips = 0;
+        });
     }
 
     function isRoundSettled() {
@@ -740,11 +681,6 @@
 
         gameState.handCount++;
         saveToLocalStorage();
-        
-        document.getElementById('btnFold').disabled = true;
-        document.getElementById('btnCheck').disabled = true;
-        document.getElementById('btnCall').disabled = true;
-        document.getElementById('btnBet').disabled = true;
     }
 
     function triggerOutcomeOverlay(payoutArray) {
@@ -962,28 +898,29 @@
 
     // --- core aesthetic high refresh canvas rendering grid ---
     function render() {
+        // Render Vegas Emerald Green Felt Table Texture Base
         let radialGrad = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 50, canvas.width/2, canvas.height/2, 600);
-        radialGrad.addColorStop(0, '#162b4c');
-        radialGrad.addColorStop(0.6, '#0a1424');
-        radialGrad.addColorStop(1, '#04070d');
+        radialGrad.addColorStop(0, '#074d27');
+        radialGrad.addColorStop(0.7, '#042b15');
+        radialGrad.addColorStop(1, '#021209');
         ctx.fillStyle = radialGrad;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Core Table Ring Shading Borders Track
-        ctx.strokeStyle = 'rgba(25, 36, 56, 0.6)';
+        // Nested Rich Mahogany and Gold Brass Table Rim Rails
+        ctx.strokeStyle = '#271206'; // Wood Outer Ring
         ctx.lineWidth = 14;
         ctx.beginPath();
-        ctx.ellipse(canvas.width/2, canvas.height/2, 420, 220, 0, 0, Math.PI * 2);
+        ctx.ellipse(canvas.width/2, canvas.height/2, 422, 222, 0, 0, Math.PI * 2);
         ctx.stroke();
 
-        ctx.strokeStyle = '#d97706'; 
-        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = '#fbbf24'; // Polished Gold Inner Inlay
+        ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.ellipse(canvas.width/2, canvas.height/2, 405, 205, 0, 0, Math.PI * 2);
+        ctx.ellipse(canvas.width/2, canvas.height/2, 406, 206, 0, 0, Math.PI * 2);
         ctx.stroke();
 
-        // Total Pot Indicator HUD Element Banner Panel
-        ctx.fillStyle = 'rgba(2, 4, 8, 0.85)';
+        // Total Pot Panel Block
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
         ctx.beginPath();
         ctx.roundRect(canvas.width/2 - 120, canvas.height/2 - 145, 240, 42, 10);
         ctx.fill();
@@ -1007,21 +944,21 @@
             let coord = seatCoords[idx];
             let isCurrent = (gameState.currentTurn === idx && gameState.round !== 'SHOWDOWN' && announcementTimer <= 0 && !forceShowdownReveal);
 
-            // ANIMATION EXPLICIT UPGRADE: Apply pulsing borders during all-in modes or heavy blue reflections for active turns
+            // Shading profiles and dynamic glowing halos
             if (p.isEliminated) {
-                ctx.fillStyle = 'rgba(15, 20, 32, 0.4)';
+                ctx.fillStyle = 'rgba(10, 20, 15, 0.4)';
                 ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
                 ctx.shadowBlur = 0;
             } else if (p.isAllIn) {
                 let pulseAlpha = 0.4 + Math.sin(glowPulseFrame) * 0.25;
-                ctx.fillStyle = 'rgba(28, 15, 25, 0.95)';
+                ctx.fillStyle = 'rgba(35, 10, 10, 0.95)';
                 ctx.strokeStyle = `rgba(239, 68, 68, ${pulseAlpha + 0.3})`;
                 ctx.shadowColor = '#ef4444';
-                ctx.shadowBlur = 10 + Math.sin(glowPulseFrame) * 6;
+                ctx.shadowBlur = 12 + Math.sin(glowPulseFrame) * 6;
             } else {
-                ctx.fillStyle = isCurrent ? 'rgba(15, 23, 42, 0.95)' : 'rgba(20, 29, 54, 0.85)';
-                ctx.strokeStyle = isCurrent ? '#3b82f6' : 'rgba(255,255,255,0.07)';
-                ctx.shadowColor = isCurrent ? '#3b82f6' : 'transparent';
+                ctx.fillStyle = isCurrent ? 'rgba(15, 38, 25, 0.95)' : 'rgba(12, 24, 18, 0.85)';
+                ctx.strokeStyle = isCurrent ? '#34d399' : 'rgba(255,255,255,0.08)';
+                ctx.shadowColor = isCurrent ? '#34d399' : 'transparent';
                 ctx.shadowBlur = isCurrent ? 12 : 0;
             }
             
@@ -1030,29 +967,59 @@
             ctx.roundRect(coord.x - 90, coord.y - 45, 180, 95, 12);
             ctx.fill();
             ctx.stroke();
-            ctx.shadowBlur = 0; // Clear immediately
+            ctx.shadowBlur = 0; 
 
+            // EXPLICIT UPGRADE: Draw dynamic procedural vector profile cartoon avatar graphics
+            if (!p.isEliminated) {
+                let theme = PROFILE_THEMES[idx];
+                let avX = coord.x - 62;
+                let avY = coord.y - 12;
+
+                let avGrad = ctx.createLinearGradient(avX - 16, avY - 16, avX + 16, avY + 16);
+                avGrad.addColorStop(0, theme.bgGrad[0]);
+                avGrad.addColorStop(1, theme.bgGrad[1]);
+                
+                ctx.fillStyle = avGrad;
+                ctx.beginPath();
+                ctx.arc(avX, avY, 18, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Add an elegant cartoon inner circle highlight rim 
+                ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+
+                // Draw central initial label tag
+                ctx.font = 'bold 13px -apple-system, BlinkMacSystemFont, sans-serif';
+                ctx.fillStyle = '#ffffff';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(theme.initial, avX, avY);
+                ctx.textBaseline = 'alphabetic'; // Reset Immediately
+            }
+
+            // Reposition profile text info blocks nicely to match avatar offsets
             ctx.textAlign = 'left';
-            ctx.font = 'bold 15px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.font = 'bold 14px -apple-system, BlinkMacSystemFont, sans-serif';
             ctx.fillStyle = p.isEliminated ? '#4b5563' : (isCurrent ? '#ffffff' : '#e2e8f0');
-            ctx.fillText(p.name, coord.x - 78, coord.y - 20);
+            ctx.fillText(p.name, coord.x - 36, coord.y - 18);
 
-            ctx.font = 'bold 14px monospace';
-            ctx.fillStyle = p.isEliminated ? '#374151' : '#10b981';
-            ctx.fillText(p.isEliminated ? 'FELTED' : `$${p.chips.toLocaleString()}`, coord.x - 78, coord.y + 2);
+            ctx.font = 'bold 13px monospace';
+            ctx.fillStyle = p.isEliminated ? '#374151' : '#34d399';
+            ctx.fillText(p.isEliminated ? 'FELTED' : `$${p.chips.toLocaleString()}`, coord.x - 36, coord.y + 1);
 
             if (p.lastAction) {
-                ctx.font = 'italic 12px sans-serif';
+                ctx.font = 'italic 11px sans-serif';
                 ctx.fillStyle = p.hasFolded || p.isEliminated ? '#ef4444' : '#94a3b8';
-                ctx.fillText(p.lastAction, coord.x - 78, coord.y + 22);
+                ctx.fillText(p.lastAction, coord.x - 78, coord.y + 32);
             } else if (p.currentBet > 0) {
-                ctx.font = '12px sans-serif';
+                ctx.font = '11px sans-serif';
                 ctx.fillStyle = '#fbbf24';
-                ctx.fillText(`Bet: $${p.currentBet.toLocaleString()}`, coord.x - 78, coord.y + 22);
+                ctx.fillText(`Bet: $${p.currentBet.toLocaleString()}`, coord.x - 78, coord.y + 32);
             }
 
             if (!p.isEliminated && (p.currentBet > 0 || (p.chips === 0 && p.isAllIn))) {
-                drawPhysicalChipStack(coord.x - 78, coord.y + 36, p.currentBet || 10000);
+                drawPhysicalChipStack(coord.x - 78, coord.y + 38, p.currentBet || 10000);
             }
 
             if (gameState.dealerIndex === idx) {
@@ -1065,32 +1032,30 @@
                 ctx.fillText("D", dX, dY + 3.5);
             }
 
-            // ANIMATION EXPLICIT UPGRADE: Interpolate card vectors to slide linearly from the middle board down to seats
+            // Render Pocket Card Layout
             if (!p.isEliminated) {
                 p.cards.forEach((card, cIdx) => {
                     let hide = (p.type === 'bot' && !p.hasFolded && !forceShowdownReveal);
                     
                     if (idx === 0) {
-                        let finalX = coord.x - 8 + (cIdx * 48);
-                        let finalY = coord.y - 30;
-                        // Linear vector sliding interpolation math configurations
+                        let finalX = coord.x + 10 + (cIdx * 38);
+                        let finalY = coord.y - 12;
                         let animX = (canvas.width / 2) + (finalX - (canvas.width / 2)) * globalAnimationProgress;
                         let animY = (canvas.height / 2) + (finalY - (canvas.height / 2)) * globalAnimationProgress;
 
-                        drawUltraSharpCard(animX, animY, card, hide, 46, 66);
+                        drawUltraSharpCard(animX, animY, card, hide, 46, 64);
                     } else {
-                        let finalX = coord.x + 2 + (cIdx * 43);
-                        let finalY = coord.y - 14;
+                        let finalX = coord.x + 22 + (cIdx * 32);
+                        let finalY = coord.y - 2;
                         let animX = (canvas.width / 2) + (finalX - (canvas.width / 2)) * globalAnimationProgress;
                         let animY = (canvas.height / 2) + (finalY - (canvas.height / 2)) * globalAnimationProgress;
 
-                        drawUltraSharpCard(animX, animY, card, hide, 40, 56);
+                        drawUltraSharpCard(animX, animY, card, hide, 36, 50);
                     }
                 });
             }
         });
 
-        // ANIMATION EXPLICIT UPGRADE: Community shared board slots slide smoothly outwards across standard positions
         let commStartX = canvas.width / 2 - (5 * 26);
         gameState.communityCards.forEach((card, idx) => {
             let finalX = commStartX + (idx * 52);
@@ -1099,19 +1064,18 @@
         });
 
         if (announcementTimer > 0) {
-            ctx.fillStyle = 'rgba(2, 4, 15, 0.88)';
+            ctx.fillStyle = 'rgba(3, 15, 8, 0.92)';
             ctx.fillRect(0, canvas.height / 2 - 45, canvas.width, 80);
             
-            ctx.strokeStyle = 'rgba(217, 119, 6, 0.4)';
+            ctx.strokeStyle = 'rgba(251, 191, 36, 0.4)';
             ctx.lineWidth = 2;
-            ctx.shadowBlur = 0;
             ctx.beginPath();
             ctx.moveTo(0, canvas.height / 2 - 45); ctx.lineTo(canvas.width, canvas.height / 2 - 45);
             ctx.moveTo(0, canvas.height / 2 + 35); ctx.lineTo(canvas.width, canvas.height / 2 + 35);
             ctx.stroke();
 
             ctx.font = 'bold 22px -apple-system, BlinkMacSystemFont, sans-serif';
-            ctx.fillStyle = '#f59e0b';
+            ctx.fillStyle = '#fbbf24';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(announcementText, canvas.width / 2, canvas.height / 2 + 2);
@@ -1132,7 +1096,6 @@
         ctx.roundRect(x, y, width, height, 5);
         ctx.fill();
         ctx.stroke();
-        
         ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
 
         if (isHidden) {
@@ -1149,7 +1112,7 @@
             let isRed = (card.suit === '♥' || card.suit === '♦');
             ctx.fillStyle = isRed ? '#ef4444' : '#0f172a';
             
-            ctx.font = `bold ${width > 42 ? '16px' : '14px'} -apple-system, BlinkMacSystemFont, sans-serif`;
+            ctx.font = `bold ${width > 42 ? '16px' : '13px'} -apple-system, BlinkMacSystemFont, sans-serif`;
             ctx.textAlign = 'left';
             ctx.textBaseline = 'top';
             ctx.fillText(card.val, x + 4, y + 4);
@@ -1164,8 +1127,8 @@
 
     function drawPhysicalChipStack(startX, startY, amount) {
         let stackHeight = Math.min(5, Math.max(2, Math.floor(amount / 50000)));
-        let colorTheme = amount >= 100000 ? '#111827' : '#ef4444';
-        let edgeColor = amount >= 100000 ? '#64748b' : '#991b1b';
+        let colorTheme = amount >= 100000 ? '#1f2937' : '#ef4444';
+        let edgeColor = amount >= 100000 ? '#4b5563' : '#991b1b';
 
         for (let i = 0; i < stackHeight; i++) {
             let currY = startY - (i * 3);
@@ -1204,6 +1167,18 @@
         } catch(e) {}
     }
 
+    function loadFromLocalStorage() {
+        try {
+            let raw = localStorage.getItem('high_stakes_poker_7player_save');
+            if (!raw) return false;
+            let parsed = JSON.parse(raw);
+            if (!parsed || !parsed.players || parsed.players.length !== 7) return false;
+            gameState = parsed;
+            updateControls();
+            return true;
+        } catch(e) { return false; }
+    }
+
     function exportSession() {
         saveToLocalStorage();
         let payloadString = btoa(JSON.stringify({
@@ -1233,7 +1208,7 @@
                 highestBetThisRound: 0,
                 handCount: parsed.hCount || 1
             };
-            logMessage("Ring layout session environment cleanly replicated!", "win");
+            logMessage("Championship session footprint replicated!", "win");
             saveToLocalStorage();
             refreshLeaderboardHUD();
             startNewHand();
