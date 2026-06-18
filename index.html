@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>High-Stakes Texas Hold'em - Vegas Pro Championship</title>
+    <title>High-Stakes Texas Hold'em - Vegas Pro Championship v2.4</title>
     <style>
         :root {
             --bg-color: #05070f;
@@ -11,242 +11,74 @@
             --border-accent: rgba(52, 211, 153, 0.25);
             --accent-color: #10b981;
             --accent-hover: #059669;
-            --danger-color: #ef4444;
             --text-color: #f3f4f6;
             --text-muted: #9ca3af;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg-color);
             background-image: radial-gradient(circle at 50% 50%, #0a1c14 0%, #030705 100%);
             color: var(--text-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-            overflow-x: hidden;
+            display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px;
         }
 
-        .game-container {
-            display: grid;
-            grid-template-columns: 1fr 320px;
-            gap: 24px;
-            max-width: 1440px;
-            width: 100%;
-        }
+        .game-container { display: grid; grid-template-columns: 1fr 320px; gap: 24px; max-width: 1440px; width: 100%; }
 
         .canvas-container {
-            position: relative;
-            background: #020704;
-            border-radius: 24px;
-            overflow: hidden;
-            border: 1px solid rgba(52, 211, 153, 0.1);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9);
+            position: relative; background: #020704; border-radius: 24px; overflow: hidden;
+            border: 1px solid rgba(52, 211, 153, 0.1); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9);
         }
 
-        canvas {
-            display: block;
-            width: 100%;
-            height: auto;
-        }
+        canvas { display: block; width: 100%; height: auto; }
 
-        .sidebar {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
+        .sidebar { display: flex; flex-direction: column; gap: 20px; }
 
         .panel {
-            background-color: var(--panel-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-radius: 16px;
-            padding: 18px;
-            border: 1px solid var(--border-accent);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+            background-color: var(--panel-bg); backdrop-filter: blur(12px); border-radius: 16px;
+            padding: 18px; border: 1px solid var(--border-accent); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
         }
 
-        h3 {
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            margin-bottom: 14px;
-            color: #34d399;
-            border-bottom: 1px solid rgba(52, 211, 153, 0.15);
-            padding-bottom: 8px;
-        }
+        h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 14px; color: #34d399; border-bottom: 1px solid rgba(52, 211, 153, 0.15); padding-bottom: 8px; }
 
-        .controls-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 12px;
-        }
+        .controls-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
 
         button {
-            background-color: rgba(255, 255, 255, 0.05);
-            color: var(--text-color);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 8px;
-            padding: 12px 14px;
-            font-weight: 600;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            background-color: rgba(255, 255, 255, 0.05); color: var(--text-color); border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px; padding: 12px 14px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.2s;
         }
 
-        button:hover:not(:disabled) {
-            background-color: rgba(255, 255, 255, 0.12);
-            border-color: rgba(255, 255, 255, 0.2);
-            transform: translateY(-1px);
-        }
+        button:hover:not(:disabled) { background-color: rgba(255, 255, 255, 0.12); }
+        button:disabled { opacity: 0.2; cursor: not-allowed; }
+        button.primary { background-color: var(--accent-color); border-color: rgba(255, 255, 255, 0.1); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
+        button.primary:hover:not(:disabled) { background-color: var(--accent-hover); }
+        button.danger { background-color: rgba(239, 68, 68, 0.12); color: #f87171; border-color: rgba(239, 68, 68, 0.25); }
 
-        button:disabled {
-            opacity: 0.2;
-            cursor: not-allowed;
-            transform: none !important;
-        }
+        .bet-slider-container { grid-column: span 2; display: flex; flex-direction: column; gap: 8px; margin-top: 4px; background: rgba(0, 0, 0, 0.3); padding: 12px; border-radius: 10px; }
+        input[type="range"] { width: 100%; accent-color: var(--accent-color); cursor: pointer; height: 6px; }
 
-        button.primary {
-            background-color: var(--accent-color);
-            border-color: rgba(255, 255, 255, 0.1);
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-        }
-        button.primary:hover:not(:disabled) {
-            background-color: var(--accent-hover);
-            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
-        }
-
-        button.danger {
-            background-color: rgba(239, 68, 68, 0.12);
-            border-color: rgba(239, 68, 68, 0.25);
-            color: #f87171;
-        }
-
-        .bet-slider-container {
-            grid-column: span 2;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-top: 4px;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 12px;
-            border-radius: 10px;
-            border: 1px solid rgba(52, 211, 153, 0.05);
-        }
-
-        input[type="range"] {
-            width: 100%;
-            accent-color: var(--accent-color);
-            cursor: pointer;
-            height: 6px;
-        }
-
-        .leaderboard-list {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .leaderboard-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 6px 8px;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 6px;
-            font-size: 12.5px;
-            border-left: 3px solid transparent;
-        }
+        .leaderboard-list { display: flex; flex-direction: column; gap: 6px; }
+        .leaderboard-item { display: flex; justify-content: space-between; padding: 6px 8px; background: rgba(0, 0, 0, 0.2); border-radius: 6px; font-size: 12.5px; border-left: 3px solid transparent; }
         .leaderboard-active { border-left-color: #10b981; }
         .leaderboard-eliminated { border-left-color: #ef4444; opacity: 0.3; }
         .leaderboard-chips { font-family: monospace; font-weight: bold; color: #34d399; }
 
-        .log-box {
-            height: 140px;
-            overflow-y: auto;
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-            font-size: 11.5px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            padding-right: 4px;
-        }
-
-        .log-entry {
-            line-height: 1.4;
-            padding: 4px 6px;
-            border-radius: 6px;
-            background: rgba(0, 0, 0, 0.2);
-        }
+        .log-box { height: 140px; overflow-y: auto; font-family: ui-monospace, monospace; font-size: 11.5px; display: flex; flex-direction: column; gap: 6px; }
+        .log-entry { line-height: 1.4; padding: 4px 6px; border-radius: 6px; background: rgba(0, 0, 0, 0.2); }
         .log-system { color: #f59e0b; border-left: 2px solid #f59e0b; }
         .log-player { color: #10b981; border-left: 2px solid #10b981; }
         .log-bot { color: #60a5fa; border-left: 2px solid #3b82f6; }
-        .log-win { color: #c084fc; border-left: 2px solid #a855f7; font-weight: bold; background: rgba(168, 85, 247, 0.08); }
+        .log-win { color: #c084fc; border-left: 2px solid #a855f7; font-weight: bold; }
 
-        .modal-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 1000px;
-            height: 640px;
-            background: rgba(3, 10, 6, 0.85);
-            backdrop-filter: blur(5px);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            border-radius: 24px;
-        }
-
-        .winner-card {
-            background: linear-gradient(135deg, #0f2419 0%, #050d09 100%);
-            border: 2px solid #fbbf24;
-            border-radius: 20px;
-            padding: 32px;
-            width: 460px;
-            text-align: center;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9), 0 0 40px rgba(251, 191, 36, 0.15);
-            animation: scaleUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        .payout-list-container {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            max-height: 180px;
-            overflow-y: auto;
-            margin-bottom: 24px;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 12px;
-            border-radius: 10px;
-            border: 1px solid rgba(52, 211, 153, 0.1);
-        }
-
-        .payout-row {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding-bottom: 6px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .payout-user { font-size: 16px; font-weight: 700; color: #f3f4f6; }
+        .modal-overlay { position: absolute; top: 0; left: 0; width: 1000px; height: 640px; background: rgba(3, 10, 6, 0.85); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 100; border-radius: 24px; }
+        .winner-card { background: linear-gradient(135deg, #0f2419 0%, #050d09 100%); border: 2px solid #fbbf24; border-radius: 20px; padding: 32px; width: 460px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.9); animation: scaleUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        @keyframes scaleUp { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .payout-list-container { display: flex; flex-direction: column; gap: 10px; max-height: 180px; overflow-y: auto; margin-bottom: 24px; background: rgba(0, 0, 0, 0.3); padding: 12px; border-radius: 10px; }
+        .payout-row { display: flex; flex-direction: column; align-items: center; padding-bottom: 6px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
         .payout-chips { font-size: 24px; font-family: monospace; font-weight: 800; color: #34d399; margin: 2px 0; }
         .payout-desc { font-size: 13px; color: var(--text-muted); font-style: italic; }
-
-        @keyframes scaleUp {
-            from { transform: scale(0.9); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
     </style>
 </head>
 <body>
@@ -255,7 +87,7 @@
     <div class="canvas-container">
         <div class="modal-overlay" id="winnerModal">
             <div class="winner-card">
-                <h2 style="color: #fbbf24; font-size: 24px; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em;">Hand Complete</h2>
+                <h2 style="color: #fbbf24; font-size: 24px; margin-bottom: 12px; text-transform: uppercase;">Hand Complete</h2>
                 <div class="payout-list-container" id="modalPayoutsList"></div>
                 <button class="primary" style="width: 100%; padding: 14px;" onclick="closeModalAndContinue()">Collect Pot & Deal Next Hand</button>
             </div>
@@ -271,152 +103,84 @@
                 <button id="btnCheck" onclick="playerAction('CHECK')">Check</button>
                 <button id="btnCall" onclick="playerAction('CALL')">Call</button>
                 <button id="btnBet" class="primary" onclick="playerAction('RAISE')">Bet/Raise</button>
-                
                 <div class="bet-slider-container">
-                    <div class="slider-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                        <span style="font-size: 12px; color: var(--text-muted);">Amount:</span>
-                        <span id="betValue" style="font-weight: bold; color: #34d399;">$0</span>
+                    <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;">
+                        <span style="color: var(--text-muted);">Amount:</span><span id="betValue" style="font-weight: bold; color: #34d399;">$0</span>
                     </div>
                     <input type="range" id="betSlider" min="0" max="100" step="1000" oninput="updateBetValue(this.value)">
                 </div>
             </div>
         </div>
-
-        <div class="panel">
-            <h3>Action Log</h3>
-            <div class="log-box" id="logBox"></div>
-        </div>
-
-        <div class="panel">
-            <h3>Live Leaderboard</h3>
-            <div class="leaderboard-list" id="leaderboardBox"></div>
-        </div>
-
+        <div class="panel"><h3>Action Log</h3><div class="log-box" id="logBox"></div></div>
+        <div class="panel"><h3>Live Leaderboard</h3><div class="leaderboard-list" id="leaderboardBox"></div></div>
         <div class="panel">
             <h3>Table Settings</h3>
-            <label style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 6px;">AI Intensity</label>
-            <select id="aiIntensity" style="width: 100%; background: #0b1410; color: var(--text-color); border: 1px solid rgba(52,211,153,0.2); padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 600; outline: none; margin-bottom: 12px;">
-                <option value="0.3">Relaxed (Casual Play)</option>
-                <option value="0.7" selected>Standard (Balanced)</option>
-                <option value="1.0">Aggressive (Pro Stakes)</option>
+            <select id="aiIntensity" style="width: 100%; background: #0b1410; color: white; padding: 10px; border-radius: 8px; margin-bottom: 12px;">
+                <option value="0.3">Relaxed (Casual Play)</option><option value="0.7" selected>Standard (Balanced)</option><option value="1.0">Aggressive (Pro Stakes)</option>
             </select>
-            <button class="danger" style="width: 100%; padding: 10px; font-size: 12px;" onclick="resetEntireSession()">Reset Table (New Session)</button>
+            <button class="danger" style="width: 100%; padding: 10px;" onclick="resetEntireSession()">Reset Table (New Session)</button>
         </div>
     </div>
 </div>
 
 <script>
-    // --- game configuration constants ---
-    const SB = 5000;
-    const BB = 10000;
-    const STARTING_STACK = 1000000;
-
-    // --- application state ---
-    let canvas, ctx;
-    let gameState = {};
-    
-    let announcementText = "";
-    let announcementTimer = 0;
-    let forceShowdownReveal = false; 
-    let audioCtx = null; 
-
-    let globalAnimationProgress = 0; 
-    let glowPulseFrame = 0;
-
-    // Kinetic Animation State
-    let potAnimationState = {
-        active: false,
-        progress: 0,
-        winners: [],
-        amount: 0,
-        payoutBlueprint: []
-    };
-
+    const SB = 5000, BB = 10000, STARTING_STACK = 1000000;
     const SUITS = ['♠', '♥', '♦', '♣'];
     const VALUES = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
     const VALUE_RANKS = {'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'10':10,'J':11,'Q':12,'K':13,'A':14};
-
-    const PROFILE_THEMES = [
-        { bgGrad: ['#3b82f6', '#1d4ed8'], initial: 'C' }, 
-        { bgGrad: ['#ef4444', '#b91c1c'], initial: 'S' }, 
-        { bgGrad: ['#ec4899', '#be185d'], initial: 'W' }, 
-        { bgGrad: ['#f59e0b', '#b45309'], initial: 'G' }, 
-        { bgGrad: ['#10b981', '#047857'], initial: 'S' }, 
-        { bgGrad: ['#8b5cf6', '#6d28d9'], initial: 'R' }, 
-        { bgGrad: ['#06b6d4', '#0891b2'], initial: 'M' }  
+    const SEAT_COORDS = [
+        {x: 500, y: 555}, {x: 140, y: 490}, {x: 130, y: 190}, {x: 363, y: 85}, 
+        {x: 636, y: 85}, {x: 870, y: 190}, {x: 860, y: 490}
     ];
 
-    const getSeatCoords = (width, height) => [
-        {x: width / 2, y: height - 85},     
-        {x: 140, y: height - 150},                 
-        {x: 130, y: 190},                                 
-        {x: width / 3 + 30, y: 85},                
-        {x: (width / 3) * 2 - 30, y: 85},          
-        {x: width - 130, y: 190},                  
-        {x: width - 140, y: height - 150}   
+    let canvas, ctx, audioCtx = null;
+    let gameState = {};
+    let announcementText = "", announcementTimer = 0, forceShowdownReveal = false;
+    let globalAnimationProgress = 0, glowPulseFrame = 0;
+    
+    // Kinetic Animation State
+    let potAnimation = { active: false, progress: 0, winners: [], payouts: [] };
+
+    const PROFILE_THEMES = [
+        { bg: ['#3b82f6', '#1d4ed8'], initial: 'C' }, { bg: ['#ef4444', '#b91c1c'], initial: 'S' },
+        { bg: ['#ec4899', '#be185d'], initial: 'W' }, { bg: ['#f59e0b', '#b45309'], initial: 'G' },
+        { bg: ['#10b981', '#047857'], initial: 'S' }, { bg: ['#8b5cf6', '#6d28d9'], initial: 'R' },
+        { bg: ['#06b6d4', '#0891b2'], initial: 'M' }
     ];
 
     window.onload = function() {
-        canvas = document.getElementById('pokerCanvas');
-        ctx = canvas.getContext('2d');
-        
+        canvas = document.getElementById('pokerCanvas'); ctx = canvas.getContext('2d');
         try {
             let raw = localStorage.getItem('high_stakes_poker_7player_save');
             if (raw) {
                 let parsed = JSON.parse(raw);
-                if (parsed && parsed.players && parsed.players.length === 7 && parsed.round) {
-                    gameState = parsed;
-                    logMessage("Game session safely restored from ledger.", "system");
-                    updateControls();
-                } else {
-                    throw new Error("Invalid storage alignment.");
-                }
-            } else {
-                initNewSession();
-            }
-        } catch(e) {
-            localStorage.removeItem('high_stakes_poker_7player_save');
-            initNewSession();
-        }
-        
+                if (parsed && parsed.players && parsed.players.length === 7) {
+                    gameState = parsed; updateControls();
+                } else throw new Error();
+            } else initNewSession();
+        } catch(e) { localStorage.removeItem('high_stakes_poker_7player_save'); initNewSession(); }
         refreshLeaderboardHUD();
         setInterval(tickEngine, 30);
     };
 
-    function initAudioContext() {
-        if (!audioCtx) {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-    }
-
-    function playSoundEffect(type) {
+    function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    function playSound(type) {
         try {
-            initAudioContext();
-            if (!audioCtx) return;
-
-            let osc = audioCtx.createOscillator();
-            let gainNode = audioCtx.createGain();
-            osc.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-
+            initAudio(); if (!audioCtx) return;
+            let osc = audioCtx.createOscillator(), gainNode = audioCtx.createGain();
+            osc.connect(gainNode); gainNode.connect(audioCtx.destination);
             if (type === 'slide') {
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+                osc.type = 'triangle'; osc.frequency.setValueAtTime(220, audioCtx.currentTime);
                 osc.frequency.linearRampToValueAtTime(80, audioCtx.currentTime + 0.18);
-                gainNode.gain.setValueAtTime(0.25, audioCtx.currentTime);
-                gainNode.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.18);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.18);
+                gainNode.gain.setValueAtTime(0.25, audioCtx.currentTime); gainNode.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.18);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.18);
             } else if (type === 'chip') {
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(280, audioCtx.currentTime);
+                osc.type = 'sine'; osc.frequency.setValueAtTime(280, audioCtx.currentTime);
                 osc.frequency.setValueAtTime(240, audioCtx.currentTime + 0.04);
-                gainNode.gain.setValueAtTime(0.35, audioCtx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.1);
+                gainNode.gain.setValueAtTime(0.35, audioCtx.currentTime); gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.1);
             }
-        } catch (e) {}
+        } catch(e) {}
     }
 
     function initNewSession() {
@@ -429,884 +193,264 @@
                 { id: 4, name: "Station Sam", chips: STARTING_STACK, cards: [], type: 'bot', archetype: 'station', lastAction: '', hasFolded: false, isAllIn: false, currentBet: 0, isEliminated: false, actedThisRound: false },
                 { id: 5, name: "Rock Rocky", chips: STARTING_STACK, cards: [], type: 'bot', archetype: 'rock', lastAction: '', hasFolded: false, isAllIn: false, currentBet: 0, isEliminated: false, actedThisRound: false },
                 { id: 6, name: "Maverick Max", chips: STARTING_STACK, cards: [], type: 'bot', archetype: 'maverick', lastAction: '', hasFolded: false, isAllIn: false, currentBet: 0, isEliminated: false, actedThisRound: false }
-            ],
-            dealerIndex: 0,
-            pot: 0,
-            communityCards: [],
-            round: 'PREFLOP',
-            deck: [],
-            currentTurn: 0,
-            highestBetThisRound: 0,
-            handCount: 1
+            ], dealerIndex: 0, pot: 0, communityCards: [], round: 'PREFLOP', deck: [], currentTurn: 0, highestBetThisRound: 0, handCount: 1
         };
-        logMessage("Vegas Pro Championship Table Initialized.", "system");
         startNewHand();
     }
 
-    function resetEntireSession() {
-        if(confirm("Are you sure you want to restore all bankrolls to $1,000,000 and clear your local save history?")) {
-            localStorage.removeItem('high_stakes_poker_7player_save');
-            initNewSession();
-            refreshLeaderboardHUD();
-        }
-    }
+    function resetEntireSession() { if(confirm("Restore bankrolls?")) { localStorage.clear(); initNewSession(); refreshLeaderboardHUD(); } }
 
     function startNewHand() {
-        forceShowdownReveal = false; 
-        globalAnimationProgress = 0; 
-        potAnimationState.active = false;
+        forceShowdownReveal = false; globalAnimationProgress = 0; potAnimation.active = false;
+        gameState.players.forEach(p => {
+            if (p.chips <= 0) { p.isEliminated = true; p.hasFolded = true; p.chips = 0; p.lastAction = 'ELIMINATED'; }
+            else { p.hasFolded = false; p.isAllIn = false; p.currentBet = 0; p.lastAction = ''; p.actedThisRound = false; }
+        });
+        if (gameState.players.filter(p => !p.isEliminated).length <= 1) return;
+
+        gameState.deck = []; SUITS.forEach(s => VALUES.forEach(v => gameState.deck.push({suit: s, val: v})));
+        for(let i = gameState.deck.length - 1; i > 0; i--) { let j = Math.floor(Math.random() * (i+1)); [gameState.deck[i], gameState.deck[j]] = [gameState.deck[j], gameState.deck[i]]; }
         
-        gameState.players.forEach(p => {
-            if (p.chips <= 0) {
-                if (!p.isEliminated && p.id !== 0) {
-                    logMessage(`${p.name} is broke and ELIMINATED.`, "danger");
-                }
-                p.isEliminated = true;
-                p.hasFolded = true;
-                p.chips = 0;
-                p.lastAction = 'ELIMINATED';
-            } else {
-                p.hasFolded = false;
-                p.isAllIn = false;
-                p.currentBet = 0;
-                p.lastAction = '';
-                p.actedThisRound = false;
-            }
-        });
+        gameState.communityCards = []; gameState.pot = 0; gameState.round = 'PREFLOP'; gameState.highestBetThisRound = BB;
+        gameState.players.forEach(p => { p.cards = !p.isEliminated ? [gameState.deck.pop(), gameState.deck.pop()] : []; });
 
-        refreshLeaderboardHUD();
+        let sbIdx = (gameState.dealerIndex + 1) % 7; while(gameState.players[sbIdx].isEliminated) sbIdx = (sbIdx + 1) % 7;
+        let bbIdx = (sbIdx + 1) % 7; while(gameState.players[bbIdx].isEliminated) bbIdx = (bbIdx + 1) % 7;
+        postBlind(sbIdx, SB); postBlind(bbIdx, BB);
 
-        let activeCount = gameState.players.filter(p => !p.isEliminated).length;
-        if (activeCount <= 1) {
-            logMessage("Only one active player left! Reset the table to start over.", "system");
-            return;
-        }
-
-        gameState.deck = createDeck();
-        shuffle(gameState.deck);
-        gameState.communityCards = [];
-        gameState.pot = 0;
-        gameState.round = 'PREFLOP';
-        gameState.highestBetThisRound = BB;
-
-        gameState.players.forEach(p => {
-            if (!p.isEliminated) {
-                p.cards = [gameState.deck.pop(), gameState.deck.pop()];
-            } else {
-                p.cards = [];
-            }
-        });
-
-        let sbIndex = (gameState.dealerIndex + 1) % 7;
-        while(gameState.players[sbIndex].isEliminated) sbIndex = (sbIndex + 1) % 7;
-
-        let bbIndex = (sbIndex + 1) % 7;
-        while(gameState.players[bbIndex].isEliminated) bbIndex = (bbIndex + 1) % 7;
-
-        postBlind(sbIndex, SB);
-        postBlind(bbIndex, BB);
-
-        gameState.currentTurn = (bbIndex + 1) % 7;
-        while(gameState.players[gameState.currentTurn].isEliminated) {
-            gameState.currentTurn = (gameState.currentTurn + 1) % 7;
-        }
-
-        logMessage(`--- Hand #${gameState.handCount} Started ---`, "system");
-        playSoundEffect('slide'); 
-        saveToLocalStorage();
-        updateControls();
+        gameState.currentTurn = (bbIdx + 1) % 7; while(gameState.players[gameState.currentTurn].isEliminated) gameState.currentTurn = (gameState.currentTurn + 1) % 7;
+        
+        playSound('slide'); saveToLocalStorage(); updateControls(); refreshLeaderboardHUD();
+        if (gameState.players[gameState.currentTurn].type === 'bot') setTimeout(processBotTurn, 900);
     }
 
-    function postBlind(playerIdx, amount) {
-        let p = gameState.players[playerIdx];
-        let actual = Math.min(p.chips, amount);
-        p.chips -= actual;
-        p.currentBet = actual;
-        gameState.pot += actual;
-        if(p.chips === 0) p.isAllIn = true;
-        p.actedThisRound = true; 
-        logMessage(`${p.name} posts blind $${actual.toLocaleString()}`, "system");
-        playSoundEffect('chip');
-    }
+    function postBlind(idx, amt) { let p = gameState.players[idx]; let act = Math.min(p.chips, amt); p.chips -= act; p.currentBet = act; gameState.pot += act; if(p.chips===0) p.isAllIn = true; p.actedThisRound = true; playSound('chip'); }
 
-    function queueNextRoundDealerAction(nextRoundLabel, textAnnouncement, dealingCallback) {
-        announcementText = textAnnouncement;
-        announcementTimer = 55; 
-        globalAnimationProgress = 0; 
-        
-        document.getElementById('btnFold').disabled = true;
-        document.getElementById('btnCheck').disabled = true;
-        document.getElementById('btnCall').disabled = true;
-        document.getElementById('btnBet').disabled = true;
-
+    function queueAction(label, txt, cb) {
+        announcementText = txt; announcementTimer = 55; globalAnimationProgress = 0;
+        document.querySelectorAll('button').forEach(b => b.disabled = true);
         setTimeout(() => {
-            dealingCallback();
-            gameState.round = nextRoundLabel;
-            playSoundEffect('slide');
-
-            gameState.players.forEach(p => {
-                p.currentBet = 0;
-                if(!p.hasFolded && !p.isEliminated) {
-                    p.actedThisRound = false;
-                    if(!p.isAllIn) p.lastAction = '';
-                }
-            });
-            gameState.highestBetThisRound = 0;
-
-            gameState.currentTurn = (gameState.dealerIndex + 1) % 7;
-            findNextValidActivePlayer();
-            
-            updateControls();
-            saveToLocalStorage(); 
-            
-            if (gameState.players[gameState.currentTurn].type === 'bot') {
-                setTimeout(processBotTurn, 900);
-            }
+            cb(); gameState.round = label; playSound('slide');
+            gameState.players.forEach(p => { p.currentBet = 0; if(!p.hasFolded && !p.isEliminated) { p.actedThisRound = false; if(!p.isAllIn) p.lastAction = ''; } });
+            gameState.highestBetThisRound = 0; gameState.currentTurn = (gameState.dealerIndex + 1) % 7; findNextValid();
+            updateControls(); saveToLocalStorage();
+            if (gameState.players[gameState.currentTurn].type === 'bot') setTimeout(processBotTurn, 900);
         }, 1600);
     }
 
     function nextRound() {
         if (checkHandEndCondition()) return;
-
-        if (gameState.round === 'PREFLOP') {
-            queueNextRoundDealerAction('FLOP', "DEALING THE FLOP...", () => {
-                gameState.communityCards.push(gameState.deck.pop(), gameState.deck.pop(), gameState.deck.pop());
-                logMessage("--- The Flop Deal ---", "system");
-            });
-        } else if (gameState.round === 'FLOP') {
-            queueNextRoundDealerAction('TURN', "DEALING THE TURN...", () => {
-                gameState.communityCards.push(gameState.deck.pop());
-                logMessage("--- The Turn Deal ---", "system");
-            });
-        } else if (gameState.round === 'TURN') {
-            queueNextRoundDealerAction('RIVER', "DEALING THE RIVER...", () => {
-                gameState.communityCards.push(gameState.deck.pop());
-                logMessage("--- The River Deal ---", "system");
-            });
-        } else if (gameState.round === 'RIVER') {
-            forceShowdownReveal = true;
-            announcementText = "REVEALING WINNING HOLDINGS (5s)...";
-            announcementTimer = 165; 
-            playSoundEffect('slide');
-
-            setTimeout(processShowdown, 5000); 
-        }
+        if (gameState.round === 'PREFLOP') queueAction('FLOP', "DEALING FLOP...", () => gameState.communityCards.push(gameState.deck.pop(), gameState.deck.pop(), gameState.deck.pop()));
+        else if (gameState.round === 'FLOP') queueAction('TURN', "DEALING TURN...", () => gameState.communityCards.push(gameState.deck.pop()));
+        else if (gameState.round === 'TURN') queueAction('RIVER', "DEALING RIVER...", () => gameState.communityCards.push(gameState.deck.pop()));
+        else if (gameState.round === 'RIVER') { forceShowdownReveal = true; announcementText = "SHOWDOWN..."; announcementTimer = 100; playSound('slide'); setTimeout(processShowdown, 3000); }
     }
 
-    function executeAction(playerIdx, type, amount = 0) {
-        let p = gameState.players[playerIdx];
-        p.actedThisRound = true;
-        
-        if (type === 'FOLD') {
-            p.hasFolded = true;
-            p.lastAction = 'Fold';
-            logMessage(`${p.name} folds`, playerIdx === 0 ? "player" : "bot");
-        } else if (type === 'CHECK') {
-            p.lastAction = 'Check';
-            logMessage(`${p.name} checks`, playerIdx === 0 ? "player" : "bot");
-            playSoundEffect('chip');
-        } else if (type === 'CALL' || type === 'RAISE') {
-            let callAmount = gameState.highestBetThisRound - p.currentBet;
-            let extraRaise = amount; 
-            let totalNeeded = callAmount + extraRaise;
-
-            if (totalNeeded >= p.chips) {
-                totalNeeded = p.chips;
-                p.isAllIn = true;
-                p.lastAction = 'All-In';
-            } else {
-                p.lastAction = type === 'CALL' ? 'Call' : 'Raise';
-            }
-
-            p.chips -= totalNeeded;
-            p.currentBet += totalNeeded;
-            gameState.pot += totalNeeded;
-            playSoundEffect('chip');
-
-            if (p.currentBet > gameState.highestBetThisRound) {
-                gameState.highestBetThisRound = p.currentBet;
-                gameState.players.forEach(otherPlayer => {
-                    if (otherPlayer.id !== playerIdx) {
-                        otherPlayer.actedThisRound = false; 
-                    }
-                });
-            }
-
-            logMessage(`${p.name} ${p.lastAction === 'All-In' ? 'pushes All-In' : p.lastAction.toLowerCase() + 's'} to $${p.currentBet.toLocaleString()}`, playerIdx === 0 ? "player" : "bot");
+    function executeAction(idx, type, amt = 0) {
+        let p = gameState.players[idx]; p.actedThisRound = true;
+        if (type === 'FOLD') { p.hasFolded = true; p.lastAction = 'Fold'; }
+        else if (type === 'CHECK') { p.lastAction = 'Check'; playSound('chip'); }
+        else {
+            let total = (gameState.highestBetThisRound - p.currentBet) + amt;
+            if (total >= p.chips) { total = p.chips; p.isAllIn = true; p.lastAction = 'All-In'; }
+            else p.lastAction = type === 'CALL' ? 'Call' : 'Raise';
+            p.chips -= total; p.currentBet += total; gameState.pot += total; playSound('chip');
+            if (p.currentBet > gameState.highestBetThisRound) { gameState.highestBetThisRound = p.currentBet; gameState.players.forEach(o => { if(o.id !== idx) o.actedThisRound = false; }); }
         }
-
-        refreshLeaderboardHUD();
-        saveToLocalStorage(); 
-
+        refreshLeaderboardHUD(); saveToLocalStorage();
         if (checkHandEndCondition()) return;
-
-        gameState.currentTurn = (gameState.currentTurn + 1) % 7;
-        findNextValidActivePlayer();
-
-        if (isRoundSettled()) {
-            setTimeout(nextRound, 800);
-        } else {
-            updateControls();
-            if (gameState.players[gameState.currentTurn].type === 'bot' && announcementTimer <= 0) {
-                setTimeout(processBotTurn, 900);
-            }
-        }
+        gameState.currentTurn = (gameState.currentTurn + 1) % 7; findNextValid();
+        let active = gameState.players.filter(p => !p.hasFolded && !p.isAllIn && !p.isEliminated);
+        if (active.every(p => p.currentBet === gameState.highestBetThisRound && p.actedThisRound)) setTimeout(nextRound, 800);
+        else { updateControls(); if (gameState.players[gameState.currentTurn].type === 'bot' && announcementTimer <= 0) setTimeout(processBotTurn, 900); }
     }
 
-    function findNextValidActivePlayer() {
-        let loops = 0;
-        while ((gameState.players[gameState.currentTurn].hasFolded || gameState.players[gameState.currentTurn].isAllIn || gameState.players[gameState.currentTurn].isEliminated) && loops < 10) {
-            gameState.currentTurn = (gameState.currentTurn + 1) % 7;
-            loops++;
-        }
-    }
-
-    function tickEngine() {
-        glowPulseFrame += 0.08; 
-        if (globalAnimationProgress < 1.0) {
-            globalAnimationProgress += 0.05; 
-        }
-
-        if (potAnimationState.active) {
-            potAnimationState.progress += 0.035; 
-            if (potAnimationState.progress >= 1.0) {
-                potAnimationState.active = false;
-                playSoundEffect('chip');
-                triggerOutcomeOverlay(potAnimationState.payoutBlueprint);
-                gameState.pot = 0;
-                endHandResolution();
-            }
-        }
-
-        render();
-    }
-
-    function isRoundSettled() {
-        if (!gameState.players) return false;
-        let activePlayers = gameState.players.filter(p => !p.hasFolded && !p.isAllIn && !p.isEliminated);
-        return activePlayers.every(p => p.currentBet === gameState.highestBetThisRound && p.actedThisRound);
-    }
+    function findNextValid() { let loops = 0; while ((gameState.players[gameState.currentTurn].hasFolded || gameState.players[gameState.currentTurn].isAllIn || gameState.players[gameState.currentTurn].isEliminated) && loops < 10) { gameState.currentTurn = (gameState.currentTurn + 1) % 7; loops++; } }
 
     function checkHandEndCondition() {
-        if (potAnimationState.active) return true;
-
         let active = gameState.players.filter(p => !p.hasFolded && !p.isEliminated);
-        if (active.length === 1) {
-            let winner = active[0];
-            winner.chips += gameState.pot;
-            
-            potAnimationState = {
-                active: true,
-                progress: 0,
-                winners: [winner.id],
-                amount: gameState.pot,
-                payoutBlueprint: [{ name: winner.name, amount: gameState.pot, desc: "Everyone Folded" }]
-            };
-            playSoundEffect('slide');
-            return true;
+        if (active.length === 1) { 
+            potAnimation = { active: true, progress: 0, winners: [active[0]], payouts: [{name: active[0].name, amount: gameState.pot, desc: "Everyone Folded"}] };
+            return true; 
         }
-        
-        let nonAllInActive = gameState.players.filter(p => !p.hasFolded && !p.isAllIn && !p.isEliminated);
-        if (nonAllInActive.length <= 1 && isRoundSettled() && gameState.round !== 'SHOWDOWN' && !forceShowdownReveal) {
-            runRemainingCommunityCards();
-            nextRound(); 
-            return true;
+        let nonAllIn = active.filter(p => !p.isAllIn);
+        if (nonAllIn.length <= 1 && gameState.players.filter(p => !p.hasFolded && !p.isAllIn && !p.isEliminated).every(p => p.currentBet === gameState.highestBetThisRound && p.actedThisRound) && gameState.round !== 'SHOWDOWN' && !forceShowdownReveal) {
+            while(gameState.communityCards.length < 5) gameState.communityCards.push(gameState.deck.pop());
+            nextRound(); return true;
         }
         return false;
     }
 
-    function runRemainingCommunityCards() {
-        while(gameState.communityCards.length < 5) {
-            gameState.communityCards.push(gameState.deck.pop());
+    // --- NEW: FLAWLESS POKER EVALUATION MATH ---
+    function evaluateSevenCardHand(cards) {
+        let ranks = cards.map(c => VALUE_RANKS[c.val]).sort((a,b) => b-a);
+        let suits = {}, counts = {};
+        cards.forEach(c => { suits[c.suit] = (suits[c.suit] || 0) + 1; counts[c.val] = (counts[c.val] || 0) + 1; });
+        
+        let isFlush = false, fSuit = null;
+        for(let s in suits) if(suits[s] >= 5) { isFlush = true; fSuit = s; }
+        let fCards = isFlush ? cards.filter(c => c.suit === fSuit).map(c => VALUE_RANKS[c.val]).sort((a,b) => b-a) : [];
+
+        function getStraight(arr) {
+            let u = [...new Set(arr)]; if(u.includes(14)) u.push(1);
+            let str = 1, hi = 0;
+            for(let i=0; i<u.length-1; i++) {
+                if(u[i]-1 === u[i+1]) { str++; if(str===5) { hi = u[i-3]; break; } } else str=1;
+            }
+            return hi;
         }
-    }
 
-    function endHandResolution() {
-        gameState.round = 'SHOWDOWN';
-        do {
-            gameState.dealerIndex = (gameState.dealerIndex + 1) % 7;
-        } while (gameState.players[gameState.dealerIndex].isEliminated);
+        let sHigh = getStraight(ranks), sfHigh = isFlush ? getStraight(fCards) : 0;
+        let p=[], t=[], q=[];
+        for(let v in counts) { let r = VALUE_RANKS[v]; if(counts[v]===2) p.push(r); if(counts[v]===3) t.push(r); if(counts[v]===4) q.push(r); }
+        p.sort((a,b)=>b-a); t.sort((a,b)=>b-a); q.sort((a,b)=>b-a);
 
-        gameState.handCount++;
-        saveToLocalStorage();
-    }
-
-    function triggerOutcomeOverlay(payoutArray) {
-        let listContainer = document.getElementById('modalPayoutsList');
-        listContainer.innerHTML = '';
-
-        payoutArray.forEach(item => {
-            let row = document.createElement('div');
-            row.className = 'payout-row';
-            row.innerHTML = `
-                <div class="payout-user">${item.name}</div>
-                <div class="payout-chips">+$${item.amount.toLocaleString()}</div>
-                <div class="payout-desc">${item.desc}</div>
-            `;
-            listContainer.appendChild(row);
-        });
-
-        document.getElementById('winnerModal').style.display = 'flex';
-    }
-
-    function closeModalAndContinue() {
-        document.getElementById('winnerModal').style.display = 'none';
-        startNewHand();
+        if (sfHigh > 0) return { score: 9000000 + sfHigh, label: sfHigh===14 ? "Royal Flush" : "Straight Flush" };
+        if (q.length > 0) return { score: 8000000 + q[0]*100 + ranks.find(r=>r!==q[0]), label: "Four of a Kind" };
+        if (t.length > 0 && (p.length > 0 || t.length > 1)) return { score: 7000000 + t[0]*100 + (p.length>0?p[0]:t[1]), label: "Full House" };
+        if (isFlush) return { score: 6000000 + fCards[0]*10000 + fCards[1]*1000 + fCards[2]*100 + fCards[3]*10 + fCards[4], label: "Flush" };
+        if (sHigh > 0) return { score: 5000000 + sHigh, label: "Straight" };
+        if (t.length > 0) { let k = ranks.filter(r=>r!==t[0]); return { score: 4000000 + t[0]*1000 + k[0]*10 + k[1], label: "Three of a Kind" }; }
+        if (p.length >= 2) { let k = ranks.filter(r=>r!==p[0]&&r!==p[1]); return { score: 3000000 + p[0]*10000 + p[1]*100 + k[0], label: "Two Pair" }; }
+        if (p.length === 1) { let k = ranks.filter(r=>r!==p[0]); return { score: 2000000 + p[0]*10000 + k[0]*100 + k[1]*10 + k[2], label: "One Pair" }; }
+        return { score: 1000000 + ranks[0]*10000 + ranks[1]*1000 + ranks[2]*100 + ranks[3]*10 + ranks[4], label: `High Card (${cards.find(c=>VALUE_RANKS[c.val]===ranks[0]).val})` };
     }
 
     function processShowdown() {
         let active = gameState.players.filter(p => !p.hasFolded && !p.isEliminated);
-        let bestScore = -1;
-        let winners = [];
-
+        let best = -1, winners = [];
         active.forEach(p => {
-            let fullSeven = [...p.cards, ...gameState.communityCards];
-            let evalResult = evaluateSevenCardHand(fullSeven);
-            p.handStrengthText = evalResult.label;
-            p.handScore = evalResult.score;
-
-            if (evalResult.score > bestScore) {
-                bestScore = evalResult.score;
-                winners = [p];
-            } else if (evalResult.score === bestScore) {
-                winners.push(p);
-            }
+            let res = evaluateSevenCardHand([...p.cards, ...gameState.communityCards]);
+            p.handStrengthText = res.label;
+            if (res.score > best) { best = res.score; winners = [p]; } else if (res.score === best) winners.push(p);
         });
 
         let share = Math.floor(gameState.pot / winners.length);
-        let payoutBlueprint = [];
-
-        winners.forEach(w => { 
-            w.chips += share; 
-            payoutBlueprint.push({
-                name: w.name,
-                amount: share,
-                desc: winners.length > 1 ? `Split Pot with ${w.handStrengthText}` : `Won Pot with ${w.handStrengthText}`
-            });
-            logMessage(`${w.name} wins $${share.toLocaleString()} with ${w.handStrengthText}!`, "win");
-        });
-
-        potAnimationState = {
-            active: true,
-            progress: 0,
-            winners: winners.map(w => w.id),
-            amount: share,
-            payoutBlueprint: payoutBlueprint
-        };
-        playSoundEffect('slide');
+        let payouts = winners.map(w => ({ name: w.name, amount: share, desc: winners.length > 1 ? `Split Pot: ${w.handStrengthText}` : `Winning Hand: ${w.handStrengthText}` }));
+        
+        // Trigger Kinetic Animation instead of instant popup
+        potAnimation = { active: true, progress: 0, winners: winners, payouts: payouts };
     }
 
-    // --- MATHEMATICALLY PERFECT COMPLETE HAND EVALUATION ENGINE ---
-    
-    function getCombinations(arr, k) {
-        if (k === 0) return [[]];
-        if (arr.length === 0) return [];
-        let [head, ...tail] = arr;
-        let combsWithHead = getCombinations(tail, k - 1).map(c => [head, ...c]);
-        let combsWithoutHead = getCombinations(tail, k);
-        return combsWithHead.concat(combsWithoutHead);
+    function triggerOutcomeOverlay(payouts) {
+        let box = document.getElementById('modalPayoutsList'); box.innerHTML = '';
+        payouts.forEach(i => { box.innerHTML += `<div class="payout-row"><div style="font-weight:700;">${i.name}</div><div class="payout-chips">+$${i.amount.toLocaleString()}</div><div class="payout-desc">${i.desc}</div></div>`; });
+        document.getElementById('winnerModal').style.display = 'flex';
     }
 
-    function evaluateFiveCards(cards) {
-        let ranks = cards.map(c => VALUE_RANKS[c.val]).sort((a,b) => b - a);
-        let isFlush = cards.every(c => c.suit === cards[0].suit);
-        
-        let isStraight = false;
-        // Edge Case: Ace-Low Straight (A-5-4-3-2)
-        if (ranks[0] === 14 && ranks[1] === 5 && ranks[2] === 4 && ranks[3] === 3 && ranks[4] === 2) {
-            isStraight = true;
-            ranks = [5, 4, 3, 2, 1]; // Temporarily remap Ace to 1 for straight score
-        } else {
-            isStraight = (ranks[0] - ranks[4] === 4) && (new Set(ranks).size === 5);
-        }
+    function closeModalAndContinue() { document.getElementById('winnerModal').style.display = 'none'; gameState.handCount++; do { gameState.dealerIndex = (gameState.dealerIndex + 1) % 7; } while (gameState.players[gameState.dealerIndex].isEliminated); startNewHand(); }
 
-        let counts = {};
-        ranks.forEach(r => counts[r] = (counts[r] || 0) + 1);
-        let groups = Object.keys(counts).map(Number).map(r => ({rank: r, count: counts[r]}));
-        groups.sort((a,b) => b.count - a.count || b.rank - a.rank); 
-
-        let type = 0;
-        let label = "";
-        let tieBreaker = [];
-
-        if (isStraight && isFlush) {
-            type = 8; label = (ranks[0] === 14) ? "Royal Flush" : "Straight Flush";
-            tieBreaker = [ranks[0]];
-        } else if (groups[0].count === 4) {
-            type = 7; label = "Four of a Kind";
-            tieBreaker = [groups[0].rank, groups[1].rank];
-        } else if (groups[0].count === 3 && groups[1].count === 2) {
-            type = 6; label = "Full House";
-            tieBreaker = [groups[0].rank, groups[1].rank];
-        } else if (isFlush) {
-            type = 5; label = "Flush";
-            tieBreaker = ranks;
-        } else if (isStraight) {
-            type = 4; label = "Straight";
-            tieBreaker = [ranks[0]];
-        } else if (groups[0].count === 3) {
-            type = 3; label = "Three of a Kind";
-            tieBreaker = [groups[0].rank, groups[1].rank, groups[2].rank];
-        } else if (groups[0].count === 2 && groups[1].count === 2) {
-            type = 2; label = "Two Pair";
-            tieBreaker = [groups[0].rank, groups[1].rank, groups[2].rank];
-        } else if (groups[0].count === 2) {
-            type = 1; label = "One Pair";
-            tieBreaker = [groups[0].rank, groups[1].rank, groups[2].rank, groups[3].rank];
-        } else {
-            type = 0; 
-            let origTop = [...cards].sort((a,b) => VALUE_RANKS[b.val] - VALUE_RANKS[a.val])[0];
-            label = `High Card (${origTop.val})`;
-            tieBreaker = ranks;
-        }
-
-        // Generate Base-16 numerical score resolving any exact fractional kickers securely
-        let score = type * Math.pow(16, 5);
-        for (let i = 0; i < tieBreaker.length; i++) {
-            score += tieBreaker[i] * Math.pow(16, 4 - i);
-        }
-        
-        return { score, label };
-    }
-
-    function evaluateSevenCardHand(cards) {
-        if (cards.length < 5) return {score:0, label:"Invalid"};
-        let combs = getCombinations(cards, 5);
-        let best = { score: -1, label: "" };
-        
-        combs.forEach(c => {
-            let res = evaluateFiveCards(c);
-            if (res.score > best.score) best = res;
-        });
-        
-        return best;
-    }
-
-    function refreshLeaderboardHUD() {
-        let box = document.getElementById('leaderboardBox');
-        if (!box || !gameState.players) return;
-
-        let sorted = [...gameState.players].sort((a, b) => b.chips - a.chips);
-        box.innerHTML = '';
-
-        sorted.forEach(p => {
-            let item = document.createElement('div');
-            item.className = `leaderboard-item ${p.isEliminated ? 'leaderboard-eliminated' : 'leaderboard-active'}`;
-            
-            item.innerHTML = `
-                <span class="leaderboard-name">${p.name}</span>
-                <span class="leaderboard-chips">
-                    ${p.isEliminated ? 'OUT' : '$' + p.chips.toLocaleString()}
-                </span>
-            `;
-            box.appendChild(item);
-        });
-    }
-
-    function processBotTurn() {
-        if (gameState.round === 'SHOWDOWN' || checkHandEndCondition() || announcementTimer > 0 || forceShowdownReveal) return;
-        
-        let bot = gameState.players[gameState.currentTurn];
-        if (!bot || bot.type !== 'bot' || bot.hasFolded || bot.isAllIn || bot.isEliminated) return;
-
-        let needed = gameState.highestBetThisRound - bot.currentBet;
-        let randomFactor = Math.random();
-        let intensity = parseFloat(document.getElementById('aiIntensity').value || 0.7);
-
-        if (bot.archetype === 'shark') {
-            if (needed === 0) {
-                if (randomFactor > (1.0 - (0.6 * intensity))) executeAction(bot.id, 'RAISE', BB * 2);
-                else executeAction(bot.id, 'CHECK');
-            } else {
-                if (needed > bot.chips * 0.4) {
-                    randomFactor > 0.6 ? executeAction(bot.id, 'CALL') : executeAction(bot.id, 'FOLD');
-                } else {
-                    randomFactor > (1.0 - (0.7 * intensity)) ? executeAction(bot.id, 'RAISE', BB) : executeAction(bot.id, 'CALL');
-                }
-            }
-        } 
-        else if (bot.archetype === 'whale') {
-            if (needed === 0) {
-                randomFactor > (1.0 - (0.8 * intensity)) ? executeAction(bot.id, 'RAISE', BB * 3) : executeAction(bot.id, 'CHECK');
-            } else {
-                if (randomFactor > (1.0 - (0.8 * intensity))) executeAction(bot.id, 'RAISE', BB * 2);
-                else executeAction(bot.id, 'CALL');
-            }
-        } 
-        else if (bot.archetype === 'grinder') {
-            if (needed === 0) executeAction(bot.id, 'CHECK');
-            else {
-                if (needed <= BB * 2) executeAction(bot.id, 'CALL');
-                else randomFactor > (1.0 - (0.25 * intensity)) ? executeAction(bot.id, 'CALL') : executeAction(bot.id, 'FOLD');
+    function tickEngine() {
+        glowPulseFrame += 0.08; if (globalAnimationProgress < 1.0) globalAnimationProgress += 0.05;
+        // Run pot collection animation loop
+        if (potAnimation.active) {
+            potAnimation.progress += 0.035;
+            if (potAnimation.progress >= 1) {
+                potAnimation.active = false;
+                potAnimation.winners.forEach(w => w.chips += Math.floor(gameState.pot / potAnimation.winners.length));
+                gameState.pot = 0; refreshLeaderboardHUD();
+                triggerOutcomeOverlay(potAnimation.payouts);
             }
         }
-        else if (bot.archetype === 'station') {
-            if (needed === 0) executeAction(bot.id, 'CHECK');
-            else {
-                if (needed > bot.chips * 0.5 && randomFactor > (0.4 * intensity)) executeAction(bot.id, 'FOLD');
-                else executeAction(bot.id, 'CALL');
-            }
-        }
-        else if (bot.archetype === 'rock') {
-            if (needed === 0) executeAction(bot.id, 'CHECK');
-            else {
-                if (needed <= BB && randomFactor > 0.3) executeAction(bot.id, 'CALL');
-                else randomFactor > (0.9 - (0.2 * intensity)) ? executeAction(bot.id, 'CALL') : executeAction(bot.id, 'FOLD');
-            }
-        }
-        else if (bot.archetype === 'maverick') {
-            if (needed === 0) {
-                randomFactor > 0.6 ? executeAction(bot.id, 'RAISE', BB * (Math.floor(Math.random() * 3) + 1)) : executeAction(bot.id, 'CHECK');
-            } else {
-                if (randomFactor > 0.7) executeAction(bot.id, 'RAISE', BB);
-                else if (randomFactor > 0.2) executeAction(bot.id, 'CALL');
-                else executeAction(bot.id, 'FOLD');
-            }
-        }
-    }
-
-    function playerAction(type) {
-        if (announcementTimer > 0 || forceShowdownReveal) return; 
-        let p = gameState.players[0];
-        let sliderVal = parseInt(document.getElementById('betSlider').value);
-
-        if (type === 'FOLD') executeAction(0, 'FOLD');
-        if (type === 'CHECK') executeAction(0, 'CHECK');
-        if (type === 'CALL') executeAction(0, 'CALL');
-        if (type === 'RAISE') executeAction(0, 'RAISE', sliderVal);
-    }
-
-    function updateControls() {
-        if (!gameState.players) return;
-        let p = gameState.players[0];
-        if (gameState.currentTurn !== 0 || gameState.round === 'SHOWDOWN' || p.isEliminated || announcementTimer > 0 || forceShowdownReveal) {
-            document.getElementById('btnFold').disabled = true;
-            document.getElementById('btnCheck').disabled = true;
-            document.getElementById('btnCall').disabled = true;
-            document.getElementById('btnBet').disabled = true;
-            return;
-        }
-
-        let needed = gameState.highestBetThisRound - p.currentBet;
-        
-        document.getElementById('btnFold').disabled = false;
-        document.getElementById('btnCheck').disabled = (needed > 0);
-        document.getElementById('btnCall').disabled = (p.chips < needed);
-        document.getElementById('btnCall').innerText = needed > 0 ? `Call $${needed.toLocaleString()}` : 'Check / Call';
-
-        let minRaise = BB;
-        let maxRaise = p.chips - needed;
-        
-        if (maxRaise <= minRaise) {
-            document.getElementById('btnBet').disabled = true;
-        } else {
-            document.getElementById('btnBet').disabled = false;
-            let slider = document.getElementById('betSlider');
-            slider.min = minRaise;
-            slider.max = maxRaise;
-            slider.step = BB;
-            slider.value = minRaise;
-            updateBetValue(minRaise);
-        }
-    }
-
-    function updateBetValue(val) {
-        document.getElementById('betValue').innerText = `$${parseInt(val).toLocaleString()}`;
+        render();
     }
 
     function render() {
         if (!gameState.players) return;
-        let radialGrad = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 50, canvas.width/2, canvas.height/2, 600);
-        radialGrad.addColorStop(0, '#074d27');
-        radialGrad.addColorStop(0.7, '#042b15');
-        radialGrad.addColorStop(1, '#021209');
-        ctx.fillStyle = radialGrad;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        ctx.strokeStyle = '#271206'; 
-        ctx.lineWidth = 14;
-        ctx.beginPath();
-        ctx.ellipse(canvas.width/2, canvas.height/2, 422, 222, 0, 0, Math.PI * 2);
-        ctx.stroke();
-
-        ctx.strokeStyle = '#fbbf24'; 
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.ellipse(canvas.width/2, canvas.height/2, 406, 206, 0, 0, Math.PI * 2);
-        ctx.stroke();
-
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
-        ctx.beginPath();
-        ctx.roundRect(canvas.width/2 - 120, canvas.height/2 - 145, 240, 42, 10);
-        ctx.fill();
-
-        ctx.font = 'bold 15px monospace';
-        ctx.fillStyle = '#34d399';
-        ctx.textAlign = 'center';
-        ctx.fillText(`TOTAL POT: $${gameState.pot.toLocaleString()}`, canvas.width/2, canvas.height/2 - 119);
-
-        const seatCoords = getSeatCoords(canvas.width, canvas.height);
+        ctx.fillStyle = '#074d27'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = '#271206'; ctx.lineWidth = 14; ctx.beginPath(); ctx.ellipse(500, 320, 422, 222, 0, 0, Math.PI*2); ctx.stroke();
+        ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(500, 320, 406, 206, 0, 0, Math.PI*2); ctx.stroke();
+        
+        ctx.fillStyle = 'rgba(0,0,0,0.75)'; ctx.beginPath(); ctx.roundRect(380, 175, 240, 42, 10); ctx.fill();
+        ctx.font = 'bold 15px monospace'; ctx.fillStyle = '#34d399'; ctx.textAlign = 'center'; ctx.fillText(`TOTAL POT: $${gameState.pot.toLocaleString()}`, 500, 201);
 
         gameState.players.forEach((p, idx) => {
-            let coord = seatCoords[idx];
-            let isCurrent = (gameState.currentTurn === idx && gameState.round !== 'SHOWDOWN' && announcementTimer <= 0 && !forceShowdownReveal && !potAnimationState.active);
-
-            if (p.isEliminated) {
-                ctx.fillStyle = 'rgba(10, 20, 15, 0.4)';
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
-                ctx.shadowBlur = 0;
-            } else if (p.isAllIn) {
-                let pulseAlpha = 0.4 + Math.sin(glowPulseFrame) * 0.25;
-                ctx.fillStyle = 'rgba(35, 10, 10, 0.95)';
-                ctx.strokeStyle = `rgba(239, 68, 68, ${pulseAlpha + 0.3})`;
-                ctx.shadowColor = '#ef4444';
-                ctx.shadowBlur = 12 + Math.sin(glowPulseFrame) * 6;
-            } else {
-                ctx.fillStyle = isCurrent ? 'rgba(15, 38, 25, 0.95)' : 'rgba(12, 24, 18, 0.85)';
-                ctx.strokeStyle = isCurrent ? '#34d399' : 'rgba(255,255,255,0.08)';
-                ctx.shadowColor = isCurrent ? '#34d399' : 'transparent';
-                ctx.shadowBlur = isCurrent ? 12 : 0;
-            }
+            let c = SEAT_COORDS[idx], cur = (gameState.currentTurn === idx && gameState.round !== 'SHOWDOWN' && announcementTimer <= 0 && !forceShowdownReveal && !potAnimation.active);
+            if (p.isEliminated) { ctx.fillStyle = 'rgba(10,20,15,0.4)'; ctx.strokeStyle = 'rgba(255,255,255,0.03)'; ctx.shadowBlur = 0; }
+            else if (p.isAllIn) { ctx.fillStyle = 'rgba(35,10,10,0.95)'; ctx.strokeStyle = `rgba(239,68,68,${0.4+Math.sin(glowPulseFrame)*0.25})`; ctx.shadowColor = '#ef4444'; ctx.shadowBlur = 12+Math.sin(glowPulseFrame)*6; }
+            else { ctx.fillStyle = cur ? 'rgba(15,38,25,0.95)' : 'rgba(12,24,18,0.85)'; ctx.strokeStyle = cur ? '#34d399' : 'rgba(255,255,255,0.08)'; ctx.shadowColor = cur ? '#34d399' : 'transparent'; ctx.shadowBlur = cur ? 12 : 0; }
             
-            ctx.lineWidth = isCurrent || p.isAllIn ? 2.5 : 1;
-            ctx.beginPath();
-            ctx.roundRect(coord.x - 90, coord.y - 45, 180, 95, 12);
-            ctx.fill();
-            ctx.stroke();
-            ctx.shadowBlur = 0; 
+            ctx.lineWidth = cur || p.isAllIn ? 2.5 : 1; ctx.beginPath(); ctx.roundRect(c.x-90, c.y-45, 180, 95, 12); ctx.fill(); ctx.stroke(); ctx.shadowBlur = 0;
 
             if (!p.isEliminated) {
-                let theme = PROFILE_THEMES[idx];
-                let avX = coord.x - 62;
-                let avY = coord.y - 12;
-
-                let avGrad = ctx.createLinearGradient(avX - 16, avY - 16, avX + 16, avY + 16);
-                avGrad.addColorStop(0, theme.bgGrad[0]);
-                avGrad.addColorStop(1, theme.bgGrad[1]);
-                
-                ctx.fillStyle = avGrad;
-                ctx.beginPath();
-                ctx.arc(avX, avY, 18, 0, Math.PI * 2);
-                ctx.fill();
-                
-                ctx.strokeStyle = 'rgba(255,255,255,0.15)';
-                ctx.lineWidth = 1;
-                ctx.stroke();
-
-                ctx.font = 'bold 13px -apple-system, BlinkMacSystemFont, sans-serif';
-                ctx.fillStyle = '#ffffff';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(theme.initial, avX, avY);
-                ctx.textBaseline = 'alphabetic'; 
+                let th = PROFILE_THEMES[idx], avGrad = ctx.createLinearGradient(c.x-78, c.y-28, c.x-46, c.y+4);
+                avGrad.addColorStop(0, th.bg[0]); avGrad.addColorStop(1, th.bg[1]);
+                ctx.fillStyle = avGrad; ctx.beginPath(); ctx.arc(c.x-62, c.y-12, 18, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = '#fff'; ctx.font = 'bold 13px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline='middle'; ctx.fillText(th.initial, c.x-62, c.y-12); ctx.textBaseline='alphabetic';
             }
+            ctx.textAlign = 'left'; ctx.font = 'bold 14px sans-serif'; ctx.fillStyle = p.isEliminated ? '#4b5563' : (cur ? '#fff' : '#e2e8f0'); ctx.fillText(p.name, c.x-36, c.y-18);
+            ctx.font = 'bold 13px monospace'; ctx.fillStyle = p.isEliminated ? '#374151' : '#34d399'; ctx.fillText(p.isEliminated ? 'FELTED' : `$${p.chips.toLocaleString()}`, c.x-36, c.y+1);
+            
+            if (p.lastAction) { ctx.font = 'italic 11px sans-serif'; ctx.fillStyle = p.hasFolded || p.isEliminated ? '#ef4444' : '#94a3b8'; ctx.fillText(p.lastAction, c.x-78, c.y+32); }
+            else if (p.currentBet > 0) { ctx.font = '11px sans-serif'; ctx.fillStyle = '#fbbf24'; ctx.fillText(`Bet: $${p.currentBet.toLocaleString()}`, c.x-78, c.y+32); }
 
-            ctx.textAlign = 'left';
-            ctx.font = 'bold 14px -apple-system, BlinkMacSystemFont, sans-serif';
-            ctx.fillStyle = p.isEliminated ? '#4b5563' : (isCurrent ? '#ffffff' : '#e2e8f0');
-            ctx.fillText(p.name, coord.x - 36, coord.y - 18);
-
-            ctx.font = 'bold 13px monospace';
-            ctx.fillStyle = p.isEliminated ? '#374151' : '#34d399';
-            ctx.fillText(p.isEliminated ? 'FELTED' : `$${p.chips.toLocaleString()}`, coord.x - 36, coord.y + 1);
-
-            if (p.lastAction) {
-                ctx.font = 'italic 11px sans-serif';
-                ctx.fillStyle = p.hasFolded || p.isEliminated ? '#ef4444' : '#94a3b8';
-                ctx.fillText(p.lastAction, coord.x - 78, coord.y + 32);
-            } else if (p.currentBet > 0) {
-                ctx.font = '11px sans-serif';
-                ctx.fillStyle = '#fbbf24';
-                ctx.fillText(`Bet: $${p.currentBet.toLocaleString()}`, coord.x - 78, coord.y + 32);
-            }
-
-            // Draw player active bets
-            if (!p.isEliminated && (p.currentBet > 0 || (p.chips === 0 && p.isAllIn))) {
-                drawPhysicalChipStack(coord.x - 70, coord.y + 38, p.currentBet || 10000, false);
-            }
-
-            if (gameState.dealerIndex === idx) {
-                let dX = coord.x + 68, dY = coord.y - 28;
-                let goldGrad = ctx.createLinearGradient(dX-10, dY-10, dX+10, dY+10);
-                goldGrad.addColorStop(0, '#fbbf24'); goldGrad.addColorStop(1, '#b45309');
-                ctx.fillStyle = goldGrad;
-                ctx.beginPath(); ctx.arc(dX, dY, 10, 0, Math.PI*2); ctx.fill();
-                ctx.fillStyle = '#000'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center';
-                ctx.fillText("D", dX, dY + 3.5);
-            }
+            if (!p.isEliminated && p.currentBet > 0 && !potAnimation.active) drawPhysicalChipStack(c.x-78, c.y+38, p.currentBet);
 
             if (!p.isEliminated) {
-                p.cards.forEach((card, cIdx) => {
+                p.cards.forEach((card, ci) => {
                     let hide = (p.type === 'bot' && !p.hasFolded && !forceShowdownReveal);
-                    
-                    if (idx === 0) {
-                        let finalX = coord.x + 10 + (cIdx * 38);
-                        let finalY = coord.y - 12;
-                        let animX = (canvas.width / 2) + (finalX - (canvas.width / 2)) * globalAnimationProgress;
-                        let animY = (canvas.height / 2) + (finalY - (canvas.height / 2)) * globalAnimationProgress;
-
-                        drawUltraSharpCard(animX, animY, card, hide, 46, 64);
-                    } else {
-                        let finalX = coord.x + 22 + (cIdx * 32);
-                        let finalY = coord.y - 2;
-                        let animX = (canvas.width / 2) + (finalX - (canvas.width / 2)) * globalAnimationProgress;
-                        let animY = (canvas.height / 2) + (finalY - (canvas.height / 2)) * globalAnimationProgress;
-
-                        drawUltraSharpCard(animX, animY, card, hide, 36, 50);
-                    }
+                    let fw = idx===0?46:36, fh = idx===0?64:50, fx = idx===0?c.x+10+(ci*38):c.x+22+(ci*32), fy = idx===0?c.y-12:c.y-2;
+                    let ax = 500 + (fx - 500) * globalAnimationProgress, ay = 320 + (fy - 320) * globalAnimationProgress;
+                    drawUltraSharpCard(ax, ay, card, hide, fw, fh);
                 });
             }
         });
 
-        let commStartX = canvas.width / 2 - (5 * 26);
         gameState.communityCards.forEach((card, idx) => {
-            let finalX = commStartX + (idx * 52);
-            let animX = (canvas.width / 2) + (finalX - (canvas.width / 2)) * globalAnimationProgress;
-            drawUltraSharpCard(animX, canvas.height / 2 - 25, card, false, 40, 56);
+            let fx = 370 + (idx * 52), ax = 500 + (fx - 500) * globalAnimationProgress;
+            drawUltraSharpCard(ax, 295, card, false, 40, 56);
         });
 
-        if (announcementTimer > 0 && !potAnimationState.active) {
-            announcementTimer--;
-            ctx.fillStyle = 'rgba(3, 15, 8, 0.92)';
-            ctx.fillRect(0, canvas.height / 2 - 45, canvas.width, 80);
-            
-            ctx.strokeStyle = 'rgba(251, 191, 36, 0.4)';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(0, canvas.height / 2 - 45); ctx.lineTo(canvas.width, canvas.height / 2 - 45);
-            ctx.moveTo(0, canvas.height / 2 + 35); ctx.lineTo(canvas.width, canvas.height / 2 + 35);
-            ctx.stroke();
-
-            ctx.font = 'bold 22px -apple-system, BlinkMacSystemFont, sans-serif';
-            ctx.fillStyle = '#fbbf24';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(announcementText, canvas.width / 2, canvas.height / 2 + 2);
-            ctx.textBaseline = 'alphabetic'; 
+        // Kinetic Pot Collection Animation Render Math
+        if (potAnimation.active && potAnimation.winners.length > 0) {
+            let cx = 500, cy = 196; // Pot center
+            potAnimation.winners.forEach(w => {
+                let sc = SEAT_COORDS[w.id];
+                // Ease in-out interpolation
+                let p = potAnimation.progress; let ease = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+                let ax = cx + (sc.x - cx) * ease;
+                let ay = cy + ((sc.y+38) - cy) * ease;
+                drawPhysicalChipStack(ax, ay, gameState.pot / potAnimation.winners.length);
+            });
         }
 
-        // Draw Central Pot / Kinetic Chip Slide Animation
-        let centerX = canvas.width / 2;
-        let centerY = canvas.height / 2 - 60; // Center position above community cards
-
-        if (potAnimationState.active) {
-            let t = potAnimationState.progress;
-            let ease = 1 - Math.pow(1 - t, 3); // EaseOutCubic function for buttery smooth slide
-            
-            potAnimationState.winners.forEach(wId => {
-                let dest = seatCoords[wId];
-                // Aim directly for their avatar badge
-                let destX = dest.x - 62;
-                let destY = dest.y - 12;
-                
-                let currX = centerX + (destX - centerX) * ease;
-                let currY = centerY + (destY - centerY) * ease;
-                
-                drawPhysicalChipStack(currX, currY, potAnimationState.amount, true);
-            });
-        } else if (gameState.pot > 0 && gameState.round !== 'PREFLOP') {
-            // Draw static massive central pot pile
-            drawPhysicalChipStack(centerX, centerY, gameState.pot, true);
+        if (announcementTimer > 0) {
+            announcementTimer--; ctx.fillStyle = 'rgba(3,15,8,0.92)'; ctx.fillRect(0, 275, canvas.width, 80);
+            ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(0, 275); ctx.lineTo(1000, 275); ctx.moveTo(0, 355); ctx.lineTo(1000, 355); ctx.stroke();
+            ctx.font = 'bold 22px sans-serif'; ctx.fillStyle = '#fbbf24'; ctx.textAlign = 'center'; ctx.fillText(announcementText, 500, 322);
         }
     }
 
-    function drawUltraSharpCard(x, y, card, isHidden, width, height) {
-        ctx.save();
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
-        ctx.shadowBlur = 5;
-        ctx.shadowOffsetY = 2;
-
-        ctx.fillStyle = isHidden ? '#1e293b' : '#ffffff';
-        ctx.strokeStyle = isHidden ? '#475569' : '#e2e8f0';
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.roundRect(x, y, width, height, 5);
-        ctx.fill();
-        ctx.stroke();
-        ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
-
-        if (isHidden) {
-            ctx.strokeStyle = 'rgba(59, 130, 246, 0.12)';
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            for (let offset = 4; offset < width - 4; offset += 8) {
-                ctx.moveTo(x + offset, y + 4); ctx.lineTo(x + offset + 2, y + height - 4);
-            }
-            ctx.stroke();
-            ctx.fillStyle = '#3b82f6';
-            ctx.beginPath(); ctx.arc(x + (width/2), y + (height/2), 2.5, 0, Math.PI*2); ctx.fill();
-        } else {
-            let isRed = (card.suit === '♥' || card.suit === '♦');
-            ctx.fillStyle = isRed ? '#ef4444' : '#0f172a';
-            
-            ctx.font = `bold ${width > 42 ? '16px' : '13px'} -apple-system, BlinkMacSystemFont, sans-serif`;
-            ctx.textAlign = 'left';
-            ctx.textBaseline = 'top';
-            ctx.fillText(card.val, x + 4, y + 4);
-            
-            ctx.font = `${width > 42 ? '22px' : '18px'} Arial, sans-serif`;
-            ctx.textAlign = 'right';
-            ctx.textBaseline = 'bottom';
-            ctx.fillText(card.suit, x + width - 4, y + height - 3);
-        }
+    function drawUltraSharpCard(x, y, card, hide, w, h) {
+        ctx.save(); ctx.shadowColor = 'rgba(0,0,0,0.6)'; ctx.shadowBlur = 5; ctx.shadowOffsetY = 2;
+        ctx.fillStyle = hide ? '#1e293b' : '#fff'; ctx.strokeStyle = hide ? '#475569' : '#e2e8f0'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.roundRect(x, y, w, h, 5); ctx.fill(); ctx.stroke(); ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+        if (hide) { ctx.strokeStyle = 'rgba(59,130,246,0.12)'; ctx.lineWidth=1; ctx.beginPath(); for(let i=4;i<w-4;i+=8){ctx.moveTo(x+i,y+4);ctx.lineTo(x+i+2,y+h-4);} ctx.stroke(); ctx.fillStyle='#3b82f6'; ctx.beginPath(); ctx.arc(x+w/2,y+h/2,2.5,0,Math.PI*2); ctx.fill(); }
+        else { let red = (card.suit==='♥'||card.suit==='♦'); ctx.fillStyle = red?'#ef4444':'#0f172a'; ctx.font = `bold ${w>42?'16px':'13px'} sans-serif`; ctx.textAlign='left'; ctx.fillText(card.val, x+4, y+16); ctx.font = `${w>42?'22px':'18px'} Arial`; ctx.textAlign='right'; ctx.fillText(card.suit, x+w-4, y+h-4); }
         ctx.restore();
     }
 
-    function drawPhysicalChipStack(startX, startY, amount, isCenterPot = false) {
-        let stackHeight = isCenterPot ? Math.min(12, Math.max(3, Math.floor(amount / 30000))) 
-                                      : Math.min(5, Math.max(2, Math.floor(amount / 50000)));
-        
-        let colorTheme = amount >= 100000 ? '#1f2937' : '#ef4444';
-        let edgeColor = amount >= 100000 ? '#4b5563' : '#991b1b';
-
-        // Add pure Gold stacks for massive pots!
-        if (isCenterPot && amount >= 500000) {
-            colorTheme = '#fbbf24';
-            edgeColor = '#b45309';
-        }
-
-        let radiusX = isCenterPot ? 14 : 10;
-        let radiusY = isCenterPot ? 6 : 4;
-        let yOffset = isCenterPot ? 4 : 3;
-
-        for (let i = 0; i < stackHeight; i++) {
-            let currY = startY - (i * yOffset);
-            ctx.fillStyle = colorTheme;
-            ctx.beginPath(); ctx.ellipse(startX, currY, radiusX, radiusY, 0, 0, Math.PI * 2); ctx.fill();
-            ctx.strokeStyle = edgeColor; ctx.lineWidth = isCenterPot ? 1.2 : 0.75;
-            ctx.beginPath(); ctx.ellipse(startX, currY, radiusX, radiusY, 0, 0, Math.PI * 2); ctx.stroke();
-        }
+    function drawPhysicalChipStack(sx, sy, amt) {
+        let h = Math.min(5, Math.max(2, Math.floor(amt / 50000))), fill = amt>=100000?'#1f2937':'#ef4444', str = amt>=100000?'#4b5563':'#991b1b';
+        for(let i=0; i<h; i++) { let cy=sy-(i*3); ctx.fillStyle=fill; ctx.beginPath(); ctx.ellipse(sx+8, cy, 10, 4, 0, 0, Math.PI*2); ctx.fill(); ctx.strokeStyle=str; ctx.lineWidth=0.75; ctx.stroke(); }
     }
 
-    function createDeck() {
-        let d = [];
-        SUITS.forEach(s => { VALUES.forEach(v => { d.push({suit: s, val: v}); }); });
-        return d;
+    function processBotTurn() {
+        if(gameState.round==='SHOWDOWN'||checkHandEndCondition()||announcementTimer>0||potAnimation.active) return;
+        let b = gameState.players[gameState.currentTurn]; if(!b||b.type!=='bot'||b.hasFolded||b.isAllIn) return;
+        let nd = gameState.highestBetThisRound - b.currentBet, r = Math.random(), i = parseFloat(document.getElementById('aiIntensity').value||0.7);
+        if(b.archetype==='shark') { if(nd===0) r>1-(0.6*i)?executeAction(b.id,'RAISE',BB*2):executeAction(b.id,'CHECK'); else if(nd>b.chips*0.4) r>0.6?executeAction(b.id,'CALL'):executeAction(b.id,'FOLD'); else r>1-(0.7*i)?executeAction(b.id,'RAISE',BB):executeAction(b.id,'CALL'); }
+        else if(b.archetype==='whale') { if(nd===0) r>1-(0.8*i)?executeAction(b.id,'RAISE',BB*3):executeAction(b.id,'CHECK'); else r>1-(0.8*i)?executeAction(b.id,'RAISE',BB*2):executeAction(b.id,'CALL'); }
+        else if(b.archetype==='grinder') { if(nd===0) executeAction(b.id,'CHECK'); else nd<=BB*2?executeAction(b.id,'CALL'):(r>1-(0.25*i)?executeAction(b.id,'CALL'):executeAction(b.id,'FOLD')); }
+        else if(b.archetype==='station') { if(nd===0) executeAction(b.id,'CHECK'); else nd>b.chips*0.5&&r>(0.4*i)?executeAction(b.id,'FOLD'):executeAction(b.id,'CALL'); }
+        else if(b.archetype==='rock') { if(nd===0) executeAction(b.id,'CHECK'); else nd<=BB&&r>0.3?executeAction(b.id,'CALL'):(r>(0.9-(0.2*i))?executeAction(b.id,'CALL'):executeAction(b.id,'FOLD')); }
+        else { if(nd===0) r>0.6?executeAction(b.id,'RAISE',BB*2):executeAction(b.id,'CHECK'); else r>0.7?executeAction(b.id,'RAISE',BB):(r>0.2?executeAction(b.id,'CALL'):executeAction(b.id,'FOLD')); }
     }
 
-    function shuffle(arr) {
-        for (let i = arr.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [arr[j], arr[i]] = [arr[i], arr[j]];
-        }
-    }
-
-    function logMessage(msg, type) {
-        let box = document.getElementById('logBox');
-        if (!box) return;
-        let entry = document.createElement('div');
-        entry.className = `log-entry log-${type}`;
-        entry.innerText = msg;
-        box.appendChild(entry);
-        box.scrollTop = box.scrollHeight;
-    }
-
-    function saveToLocalStorage() {
-        try {
-            localStorage.setItem('high_stakes_poker_7player_save', JSON.stringify(gameState));
-        } catch(e) {}
-    }
+    function playerAction(type) { if(announcementTimer>0||potAnimation.active) return; let v=parseInt(document.getElementById('betSlider').value); executeAction(0, type, type==='RAISE'?v:0); }
+    function updateControls() { if(!gameState.players) return; let p=gameState.players[0]; if(gameState.currentTurn!==0||gameState.round==='SHOWDOWN'||p.isEliminated||announcementTimer>0||potAnimation.active) { document.querySelectorAll('.controls-grid button').forEach(b=>b.disabled=true); return; } let nd=gameState.highestBetThisRound-p.currentBet; document.getElementById('btnFold').disabled=false; document.getElementById('btnCheck').disabled=nd>0; let cb=document.getElementById('btnCall'); cb.disabled=p.chips<nd; cb.innerText=nd>0?`Call $${nd.toLocaleString()}`:'Check / Call'; let mx=p.chips-nd; if(mx<=BB) document.getElementById('btnBet').disabled=true; else { document.getElementById('btnBet').disabled=false; let s=document.getElementById('betSlider'); s.min=BB; s.max=mx; s.value=BB; updateBetValue(BB); } }
+    function updateBetValue(v) { document.getElementById('betValue').innerText=`$${parseInt(v).toLocaleString()}`; }
+    function saveToLocalStorage() { try{ localStorage.setItem('high_stakes_poker_7player_save', JSON.stringify(gameState)); }catch(e){} }
 </script>
-
 </body>
 </html>
