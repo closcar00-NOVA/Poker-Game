@@ -242,6 +242,11 @@
         .payout-user { font-size: 16px; font-weight: 700; color: #f3f4f6; }
         .payout-chips { font-size: 24px; font-family: monospace; font-weight: 800; color: #34d399; margin: 2px 0; }
         .payout-desc { font-size: 13px; color: var(--text-muted); font-style: italic; }
+
+        @keyframes scaleUp {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
     </style>
 </head>
 <body>
@@ -259,7 +264,6 @@
     </div>
 
     <div class="sidebar">
-        <!-- 1. Actions Panel (Top) -->
         <div class="panel">
             <h3>Actions</h3>
             <div class="controls-grid">
@@ -278,19 +282,16 @@
             </div>
         </div>
 
-        <!-- 2. Action Log Panel -->
         <div class="panel">
             <h3>Action Log</h3>
             <div class="log-box" id="logBox"></div>
         </div>
 
-        <!-- 3. Live Leaderboard Panel -->
         <div class="panel">
             <h3>Live Leaderboard</h3>
             <div class="leaderboard-list" id="leaderboardBox"></div>
         </div>
 
-        <!-- 4. Table Settings Panel (Bottom) -->
         <div class="panel">
             <h3>Table Settings</h3>
             <label style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 6px;">AI Intensity</label>
@@ -322,6 +323,15 @@
     let globalAnimationProgress = 0; 
     let glowPulseFrame = 0;
 
+    // Kinetic Animation State
+    let potAnimationState = {
+        active: false,
+        progress: 0,
+        winners: [],
+        amount: 0,
+        payoutBlueprint: []
+    };
+
     const SUITS = ['♠', '♥', '♦', '♣'];
     const VALUES = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
     const VALUE_RANKS = {'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'10':10,'J':11,'Q':12,'K':13,'A':14};
@@ -336,16 +346,24 @@
         { bgGrad: ['#06b6d4', '#0891b2'], initial: 'M' }  
     ];
 
+    const getSeatCoords = (width, height) => [
+        {x: width / 2, y: height - 85},     
+        {x: 140, y: height - 150},                 
+        {x: 130, y: 190},                                 
+        {x: width / 3 + 30, y: 85},                
+        {x: (width / 3) * 2 - 30, y: 85},          
+        {x: width - 130, y: 190},                  
+        {x: width - 140, y: height - 150}   
+    ];
+
     window.onload = function() {
         canvas = document.getElementById('pokerCanvas');
         ctx = canvas.getContext('2d');
         
-        // RECOVERY ENGINE: Safe-wrapped boot sequence to prevent memory corruption halts
         try {
             let raw = localStorage.getItem('high_stakes_poker_7player_save');
             if (raw) {
                 let parsed = JSON.parse(raw);
-                // Hard validation check: file must be structurally perfect and contain exactly 7 valid players
                 if (parsed && parsed.players && parsed.players.length === 7 && parsed.round) {
                     gameState = parsed;
                     logMessage("Game session safely restored from ledger.", "system");
@@ -357,7 +375,6 @@
                 initNewSession();
             }
         } catch(e) {
-            // Safe fallback escape hatch: if anything goes wrong, wipe storage and deploy cleanly
             localStorage.removeItem('high_stakes_poker_7player_save');
             initNewSession();
         }
@@ -437,6 +454,7 @@
     function startNewHand() {
         forceShowdownReveal = false; 
         globalAnimationProgress = 0; 
+        potAnimationState.active = false;
         
         gameState.players.forEach(p => {
             if (p.chips <= 0) {
@@ -648,6 +666,18 @@
         if (globalAnimationProgress < 1.0) {
             globalAnimationProgress += 0.05; 
         }
+
+        if (potAnimationState.active) {
+            potAnimationState.progress += 0.035; 
+            if (potAnimationState.progress >= 1.0) {
+                potAnimationState.active = false;
+                playSoundEffect('chip');
+                triggerOutcomeOverlay(potAnimationState.payoutBlueprint);
+                gameState.pot = 0;
+                endHandResolution();
+            }
+        }
+
         render();
     }
 
@@ -658,14 +688,21 @@
     }
 
     function checkHandEndCondition() {
+        if (potAnimationState.active) return true;
+
         let active = gameState.players.filter(p => !p.hasFolded && !p.isEliminated);
         if (active.length === 1) {
             let winner = active[0];
             winner.chips += gameState.pot;
             
-            triggerOutcomeOverlay([{ name: winner.name, amount: gameState.pot, desc: "Everyone Folded" }]);
-            gameState.pot = 0;
-            endHandResolution();
+            potAnimationState = {
+                active: true,
+                progress: 0,
+                winners: [winner.id],
+                amount: gameState.pot,
+                payoutBlueprint: [{ name: winner.name, amount: gameState.pot, desc: "Everyone Folded" }]
+            };
+            playSoundEffect('slide');
             return true;
         }
         
@@ -749,31 +786,100 @@
             logMessage(`${w.name} wins $${share.toLocaleString()} with ${w.handStrengthText}!`, "win");
         });
 
-        triggerOutcomeOverlay(payoutBlueprint);
-        gameState.pot = 0;
-        endHandResolution();
+        potAnimationState = {
+            active: true,
+            progress: 0,
+            winners: winners.map(w => w.id),
+            amount: share,
+            payoutBlueprint: payoutBlueprint
+        };
+        playSoundEffect('slide');
+    }
+
+    // --- MATHEMATICALLY PERFECT COMPLETE HAND EVALUATION ENGINE ---
+    
+    function getCombinations(arr, k) {
+        if (k === 0) return [[]];
+        if (arr.length === 0) return [];
+        let [head, ...tail] = arr;
+        let combsWithHead = getCombinations(tail, k - 1).map(c => [head, ...c]);
+        let combsWithoutHead = getCombinations(tail, k);
+        return combsWithHead.concat(combsWithoutHead);
+    }
+
+    function evaluateFiveCards(cards) {
+        let ranks = cards.map(c => VALUE_RANKS[c.val]).sort((a,b) => b - a);
+        let isFlush = cards.every(c => c.suit === cards[0].suit);
+        
+        let isStraight = false;
+        // Edge Case: Ace-Low Straight (A-5-4-3-2)
+        if (ranks[0] === 14 && ranks[1] === 5 && ranks[2] === 4 && ranks[3] === 3 && ranks[4] === 2) {
+            isStraight = true;
+            ranks = [5, 4, 3, 2, 1]; // Temporarily remap Ace to 1 for straight score
+        } else {
+            isStraight = (ranks[0] - ranks[4] === 4) && (new Set(ranks).size === 5);
+        }
+
+        let counts = {};
+        ranks.forEach(r => counts[r] = (counts[r] || 0) + 1);
+        let groups = Object.keys(counts).map(Number).map(r => ({rank: r, count: counts[r]}));
+        groups.sort((a,b) => b.count - a.count || b.rank - a.rank); 
+
+        let type = 0;
+        let label = "";
+        let tieBreaker = [];
+
+        if (isStraight && isFlush) {
+            type = 8; label = (ranks[0] === 14) ? "Royal Flush" : "Straight Flush";
+            tieBreaker = [ranks[0]];
+        } else if (groups[0].count === 4) {
+            type = 7; label = "Four of a Kind";
+            tieBreaker = [groups[0].rank, groups[1].rank];
+        } else if (groups[0].count === 3 && groups[1].count === 2) {
+            type = 6; label = "Full House";
+            tieBreaker = [groups[0].rank, groups[1].rank];
+        } else if (isFlush) {
+            type = 5; label = "Flush";
+            tieBreaker = ranks;
+        } else if (isStraight) {
+            type = 4; label = "Straight";
+            tieBreaker = [ranks[0]];
+        } else if (groups[0].count === 3) {
+            type = 3; label = "Three of a Kind";
+            tieBreaker = [groups[0].rank, groups[1].rank, groups[2].rank];
+        } else if (groups[0].count === 2 && groups[1].count === 2) {
+            type = 2; label = "Two Pair";
+            tieBreaker = [groups[0].rank, groups[1].rank, groups[2].rank];
+        } else if (groups[0].count === 2) {
+            type = 1; label = "One Pair";
+            tieBreaker = [groups[0].rank, groups[1].rank, groups[2].rank, groups[3].rank];
+        } else {
+            type = 0; 
+            let origTop = [...cards].sort((a,b) => VALUE_RANKS[b.val] - VALUE_RANKS[a.val])[0];
+            label = `High Card (${origTop.val})`;
+            tieBreaker = ranks;
+        }
+
+        // Generate Base-16 numerical score resolving any exact fractional kickers securely
+        let score = type * Math.pow(16, 5);
+        for (let i = 0; i < tieBreaker.length; i++) {
+            score += tieBreaker[i] * Math.pow(16, 4 - i);
+        }
+        
+        return { score, label };
     }
 
     function evaluateSevenCardHand(cards) {
-        let maxRank = 0;
-        cards.forEach(c => { if(VALUE_RANKS[c.val] > maxRank) maxRank = VALUE_RANKS[c.val]; });
+        if (cards.length < 5) return {score:0, label:"Invalid"};
+        let combs = getCombinations(cards, 5);
+        let best = { score: -1, label: "" };
         
-        let counts = {};
-        cards.forEach(c => counts[c.val] = (counts[c.val] || 0) + 1);
-        let pairs = 0, trips = 0, quads = 0;
-        for(let v in counts) {
-            if(counts[v] === 2) pairs++;
-            if(counts[v] === 3) trips++;
-            if(counts[v] === 4) quads++;
-        }
-
-        if (quads > 0) return { score: 700 + maxRank, label: "Four of a Kind" };
-        if (trips > 0 && pairs > 0) return { score: 600 + maxRank, label: "Full House" };
-        if (trips > 0) return { score: 300 + maxRank, label: "Three of a Kind" };
-        if (pairs >= 2) return { score: 200 + maxRank, label: "Two Pair" };
-        if (pairs === 1) return { score: 100 + maxRank, label: "One Pair" };
+        combs.forEach(c => {
+            let res = evaluateFiveCards(c);
+            if (res.score > best.score) best = res;
+        });
         
-        return { score: maxRank, label: `High Card (${cards[0].val})` };
+        return best;
     }
 
     function refreshLeaderboardHUD() {
@@ -939,19 +1045,11 @@
         ctx.textAlign = 'center';
         ctx.fillText(`TOTAL POT: $${gameState.pot.toLocaleString()}`, canvas.width/2, canvas.height/2 - 119);
 
-        const seatCoords = [
-            {x: canvas.width / 2, y: canvas.height - 85},     
-            {x: 140, y: canvas.height - 150},                 
-            {x: 130, y: 190},                                 
-            {x: canvas.width / 3 + 30, y: 85},                
-            {x: (canvas.width / 3) * 2 - 30, y: 85},          
-            {x: canvas.width - 130, y: 190},                  
-            {x: canvas.width - 140, y: canvas.height - 150}   
-        ];
+        const seatCoords = getSeatCoords(canvas.width, canvas.height);
 
         gameState.players.forEach((p, idx) => {
             let coord = seatCoords[idx];
-            let isCurrent = (gameState.currentTurn === idx && gameState.round !== 'SHOWDOWN' && announcementTimer <= 0 && !forceShowdownReveal);
+            let isCurrent = (gameState.currentTurn === idx && gameState.round !== 'SHOWDOWN' && announcementTimer <= 0 && !forceShowdownReveal && !potAnimationState.active);
 
             if (p.isEliminated) {
                 ctx.fillStyle = 'rgba(10, 20, 15, 0.4)';
@@ -1022,8 +1120,9 @@
                 ctx.fillText(`Bet: $${p.currentBet.toLocaleString()}`, coord.x - 78, coord.y + 32);
             }
 
+            // Draw player active bets
             if (!p.isEliminated && (p.currentBet > 0 || (p.chips === 0 && p.isAllIn))) {
-                drawPhysicalChipStack(coord.x - 78, coord.y + 38, p.currentBet || 10000);
+                drawPhysicalChipStack(coord.x - 70, coord.y + 38, p.currentBet || 10000, false);
             }
 
             if (gameState.dealerIndex === idx) {
@@ -1066,7 +1165,8 @@
             drawUltraSharpCard(animX, canvas.height / 2 - 25, card, false, 40, 56);
         });
 
-        if (announcementTimer > 0) {
+        if (announcementTimer > 0 && !potAnimationState.active) {
+            announcementTimer--;
             ctx.fillStyle = 'rgba(3, 15, 8, 0.92)';
             ctx.fillRect(0, canvas.height / 2 - 45, canvas.width, 80);
             
@@ -1083,6 +1183,30 @@
             ctx.textBaseline = 'middle';
             ctx.fillText(announcementText, canvas.width / 2, canvas.height / 2 + 2);
             ctx.textBaseline = 'alphabetic'; 
+        }
+
+        // Draw Central Pot / Kinetic Chip Slide Animation
+        let centerX = canvas.width / 2;
+        let centerY = canvas.height / 2 - 60; // Center position above community cards
+
+        if (potAnimationState.active) {
+            let t = potAnimationState.progress;
+            let ease = 1 - Math.pow(1 - t, 3); // EaseOutCubic function for buttery smooth slide
+            
+            potAnimationState.winners.forEach(wId => {
+                let dest = seatCoords[wId];
+                // Aim directly for their avatar badge
+                let destX = dest.x - 62;
+                let destY = dest.y - 12;
+                
+                let currX = centerX + (destX - centerX) * ease;
+                let currY = centerY + (destY - centerY) * ease;
+                
+                drawPhysicalChipStack(currX, currY, potAnimationState.amount, true);
+            });
+        } else if (gameState.pot > 0 && gameState.round !== 'PREFLOP') {
+            // Draw static massive central pot pile
+            drawPhysicalChipStack(centerX, centerY, gameState.pot, true);
         }
     }
 
@@ -1128,17 +1252,29 @@
         ctx.restore();
     }
 
-    function drawPhysicalChipStack(startX, startY, amount) {
-        let stackHeight = Math.min(5, Math.max(2, Math.floor(amount / 50000)));
+    function drawPhysicalChipStack(startX, startY, amount, isCenterPot = false) {
+        let stackHeight = isCenterPot ? Math.min(12, Math.max(3, Math.floor(amount / 30000))) 
+                                      : Math.min(5, Math.max(2, Math.floor(amount / 50000)));
+        
         let colorTheme = amount >= 100000 ? '#1f2937' : '#ef4444';
         let edgeColor = amount >= 100000 ? '#4b5563' : '#991b1b';
 
+        // Add pure Gold stacks for massive pots!
+        if (isCenterPot && amount >= 500000) {
+            colorTheme = '#fbbf24';
+            edgeColor = '#b45309';
+        }
+
+        let radiusX = isCenterPot ? 14 : 10;
+        let radiusY = isCenterPot ? 6 : 4;
+        let yOffset = isCenterPot ? 4 : 3;
+
         for (let i = 0; i < stackHeight; i++) {
-            let currY = startY - (i * 3);
+            let currY = startY - (i * yOffset);
             ctx.fillStyle = colorTheme;
-            ctx.beginPath(); ctx.ellipse(startX + 8, currY, 10, 4, 0, 0, Math.PI * 2); ctx.fill();
-            ctx.strokeStyle = edgeColor; ctx.lineWidth = 0.75;
-            ctx.beginPath(); ctx.ellipse(startX + 8, currY, 10, 4, 0, 0, Math.PI * 2); ctx.stroke();
+            ctx.beginPath(); ctx.ellipse(startX, currY, radiusX, radiusY, 0, 0, Math.PI * 2); ctx.fill();
+            ctx.strokeStyle = edgeColor; ctx.lineWidth = isCenterPot ? 1.2 : 0.75;
+            ctx.beginPath(); ctx.ellipse(startX, currY, radiusX, radiusY, 0, 0, Math.PI * 2); ctx.stroke();
         }
     }
 
