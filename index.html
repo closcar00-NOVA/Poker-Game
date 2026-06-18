@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>High-Stakes Texas Hold'em - Vegas Pro Championship v2.6</title>
+    <title>High-Stakes Texas Hold'em - Vegas Pro Championship v2.7</title>
     <style>
         :root {
             --bg-color: #05070f; --panel-bg: rgba(20, 35, 30, 0.7); --border-accent: rgba(52, 211, 153, 0.25);
@@ -111,7 +111,6 @@
     let canvas, ctx, gameState = {}, audioCtx = null;
     let announcementText = "", announcementTimer = 0, forceShowdownReveal = false; 
     let globalAnimationProgress = 0, glowPulseFrame = 0;
-
     let potAnimationState = { active: false, progress: 0, winners: [], amount: 0, payoutBlueprint: [] };
 
     window.onload = function() {
@@ -135,7 +134,15 @@
         setInterval(tickEngine, 30);
     };
 
+    // Fix for Chrome AutoPlay warning - resumes audio context on first click
+    document.addEventListener('click', function() {
+        if (audioCtx && audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+    }, { once: true });
+
     function initAudioContext() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    
     function playSoundEffect(type) {
         try {
             initAudioContext(); if (!audioCtx) return;
@@ -213,7 +220,12 @@
         gameState.currentTurn = (bbIndex + 1) % 7; while(gameState.players[gameState.currentTurn].isEliminated) { gameState.currentTurn = (gameState.currentTurn + 1) % 7; }
 
         logMessage(`--- Hand #${gameState.handCount} Started ---`, "system");
-        playSoundEffect('slide'); saveToLocalStorage(); updateControls();
+        playSoundEffect('slide'); 
+        saveToLocalStorage(); 
+        updateControls();
+        
+        // THE FIX: This triggers the bots to start playing if it is their turn!
+        if (gameState.players[gameState.currentTurn].type === 'bot') setTimeout(processBotTurn, 900);
     }
 
     function postBlind(playerIdx, amount) {
