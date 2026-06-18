@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>High-Stakes Texas Hold'em - Urban Edition v2.9</title>
+    <title>High-Stakes Texas Hold'em - Broadcast Edition v3.0</title>
     <style>
         :root {
             --bg-color: #040609; --panel-bg: rgba(15, 20, 26, 0.75); --border-accent: rgba(56, 189, 248, 0.2);
@@ -114,28 +114,27 @@
     let announcementText = "", announcementTimer = 0, forceShowdownReveal = false; 
     let globalAnimationProgress = 0, glowPulseFrame = 0, lastDealtSoundIndex = -1;
     let potAnimationState = { active: false, progress: 0, winners: [], amount: 0, payoutBlueprint: [] };
+    let victorySequenceTimer = 0, pendingPayoutBlueprint = [];
     let particles = [];
 
     window.onload = function() {
         canvas = document.getElementById('pokerCanvas');
         ctx = canvas.getContext('2d');
         try {
-            let raw = localStorage.getItem('vpro_champ_v2_save');
+            let raw = localStorage.getItem('vpro_champ_v3_0_save');
             if (raw) {
                 let parsed = JSON.parse(raw);
                 if (parsed && parsed.players && parsed.players.length === 7 && parsed.round) {
-                    gameState = parsed; logMessage("Urban Edition safely restored from ledger.", "system"); updateControls();
+                    gameState = parsed; logMessage("Urban Broadcast Edition restored.", "system"); updateControls();
                 } else throw new Error("Invalid format.");
             } else initNewSession();
-        } catch(e) { localStorage.removeItem('vpro_champ_v2_save'); initNewSession(); }
+        } catch(e) { localStorage.removeItem('vpro_champ_v3_0_save'); initNewSession(); }
         refreshLeaderboardHUD(); setInterval(tickEngine, 30);
     };
 
-    // PATCH: Fix for Chrome AutoPlay warning - resumes audio context on first click
+    // AutoPlay audio resume fix
     document.addEventListener('click', function() {
-        if (audioCtx && audioCtx.state === 'suspended') {
-            audioCtx.resume();
-        }
+        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
     }, { once: true });
 
     function initAudioContext() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
@@ -163,23 +162,26 @@
         } catch (e) {}
     }
 
-    function createPlayer(id, name, type, archetype) { return { id, name, chips: STARTING_STACK, cards: [], type, archetype, lastAction: '', hasFolded: false, isAllIn: false, currentBet: 0, isEliminated: false, actedThisRound: false }; }
+    function createPlayer(id, name, type, archetype) { return { id, name, chips: STARTING_STACK, cards: [], type, archetype, lastAction: '', hasFolded: false, isAllIn: false, currentBet: 0, isEliminated: false, actedThisRound: false, equity: null }; }
 
     function initNewSession() {
         gameState = {
             players: [ createPlayer(0, "C. Lo.", 'human', 'player'), createPlayer(1, "The Shark", 'bot', 'shark'), createPlayer(2, "The Whale", 'bot', 'whale'), createPlayer(3, "The Grinder", 'bot', 'grinder'), createPlayer(4, "Station Sam", 'bot', 'station'), createPlayer(5, "Rock Rocky", 'bot', 'rock'), createPlayer(6, "Maverick Max", 'bot', 'maverick') ],
             dealerIndex: 0, pot: 0, communityCards: [], round: 'PREFLOP', deck: [], currentTurn: 0, highestBetThisRound: 0, handCount: 1
         };
-        logMessage("Vegas Pro Urban Edition Initialized.", "system"); startNewHand();
+        logMessage("Vegas Pro Broadcast Edition Initialized.", "system"); startNewHand();
     }
 
     function resetEntireSession() {
-        if(confirm("Restore all bankrolls to $1,000,000 and clear local history?")) { localStorage.removeItem('vpro_champ_v2_save'); initNewSession(); refreshLeaderboardHUD(); }
+        if(confirm("Restore all bankrolls to $1,000,000 and clear local history?")) { localStorage.removeItem('vpro_champ_v3_0_save'); initNewSession(); refreshLeaderboardHUD(); }
     }
 
+    function isSpectator() { return gameState.players[0].hasFolded || gameState.players[0].isEliminated; }
+
     function startNewHand() {
-        forceShowdownReveal = false; globalAnimationProgress = 0; lastDealtSoundIndex = -1; potAnimationState.active = false; particles = [];
+        forceShowdownReveal = false; globalAnimationProgress = 0; lastDealtSoundIndex = -1; potAnimationState.active = false; victorySequenceTimer = 0; particles = [];
         gameState.players.forEach(p => {
+            p.equity = null;
             if (p.chips <= 0) {
                 if (!p.isEliminated && p.id !== 0) logMessage(`${p.name} is broke and ELIMINATED.`, "danger");
                 p.isEliminated = true; p.hasFolded = true; p.chips = 0; p.lastAction = 'ELIMINATED';
@@ -200,11 +202,31 @@
         gameState.currentTurn = (bbIndex + 1) % 7; while(gameState.players[gameState.currentTurn].isEliminated) gameState.currentTurn = (gameState.currentTurn + 1) % 7;
 
         logMessage(`--- Hand #${gameState.handCount} Started ---`, "system"); 
-        saveToLocalStorage(); 
-        updateControls();
+        saveToLocalStorage(); updateControls();
         
-        // PATCH: The bot wake-up trigger restored
+        if (isSpectator()) calculateEquities();
         if (gameState.players[gameState.currentTurn].type === 'bot') setTimeout(processBotTurn, 900);
+    }
+
+    function calculateEquities() {
+        let active = gameState.players.filter(p => !p.hasFolded && !p.isEliminated);
+        if (active.length < 2) { active.forEach(p => p.equity = null); return; }
+        let wins = {}; active.forEach(p => wins[p.id] = 0);
+        let iters = 500, needed = 5 - gameState.communityCards.length;
+        for (let i = 0; i < iters; i++) {
+            let simComm = [...gameState.communityCards], tempDeck = [...gameState.deck];
+            for (let j = 0; j < needed; j++) {
+                let r = Math.floor(Math.random() * tempDeck.length);
+                simComm.push(tempDeck[r]); tempDeck[r] = tempDeck[tempDeck.length - 1]; tempDeck.pop();
+            }
+            let bestScore = -1, winners = [];
+            active.forEach(p => {
+                let s = evaluateSevenCardHand([...p.cards, ...simComm]).score;
+                if (s > bestScore) { bestScore = s; winners = [p.id]; } else if (s === bestScore) winners.push(p.id);
+            });
+            winners.forEach(w => wins[w] += (1 / winners.length));
+        }
+        active.forEach(p => p.equity = (wins[p.id] / iters) * 100);
     }
 
     function postBlind(playerIdx, amount) {
@@ -221,7 +243,16 @@
             dealingCallback(); gameState.round = nextRoundLabel; 
             gameState.players.forEach(p => { p.currentBet = 0; if(!p.hasFolded && !p.isEliminated) { p.actedThisRound = false; if(!p.isAllIn) p.lastAction = ''; } });
             gameState.highestBetThisRound = 0; gameState.currentTurn = (gameState.dealerIndex + 1) % 7; findNextValidActivePlayer();
-            updateControls(); saveToLocalStorage(); if (gameState.players[gameState.currentTurn].type === 'bot') setTimeout(processBotTurn, 900);
+            
+            if (isSpectator()) calculateEquities();
+            
+            updateControls(); saveToLocalStorage(); 
+            
+            if (isRoundSettled() && gameState.round !== 'SHOWDOWN') {
+                setTimeout(nextRound, isSpectator() ? 2500 : 800);
+            } else if (gameState.players[gameState.currentTurn].type === 'bot') {
+                setTimeout(processBotTurn, 900);
+            }
         }, 1600);
     }
 
@@ -235,7 +266,10 @@
 
     function executeAction(playerIdx, type, amount = 0) {
         let p = gameState.players[playerIdx]; p.actedThisRound = true;
-        if (type === 'FOLD') { p.hasFolded = true; p.lastAction = 'Fold'; logMessage(`${p.name} folds`, playerIdx === 0 ? "player" : "bot"); } 
+        if (type === 'FOLD') { 
+            p.hasFolded = true; p.lastAction = 'Fold'; logMessage(`${p.name} folds`, playerIdx === 0 ? "player" : "bot");
+            if (playerIdx === 0) { logMessage("TV Spectator Mode Activated", "system"); calculateEquities(); }
+        } 
         else if (type === 'CHECK') { p.lastAction = 'Check'; logMessage(`${p.name} checks`, playerIdx === 0 ? "player" : "bot"); playSoundEffect('chip'); } 
         else if (type === 'CALL' || type === 'RAISE') {
             let totalNeeded = (gameState.highestBetThisRound - p.currentBet) + amount;
@@ -246,7 +280,13 @@
         }
         refreshLeaderboardHUD(); saveToLocalStorage(); if (checkHandEndCondition()) return;
         gameState.currentTurn = (gameState.currentTurn + 1) % 7; findNextValidActivePlayer();
-        if (isRoundSettled()) setTimeout(nextRound, 800); else { updateControls(); if (gameState.players[gameState.currentTurn].type === 'bot' && announcementTimer <= 0) setTimeout(processBotTurn, 900); }
+        
+        if (isRoundSettled()) {
+            setTimeout(nextRound, isSpectator() ? 2500 : 800);
+        } else { 
+            updateControls(); 
+            if (gameState.players[gameState.currentTurn].type === 'bot' && announcementTimer <= 0) setTimeout(processBotTurn, 900); 
+        }
     }
 
     function findNextValidActivePlayer() { let loops = 0; while ((gameState.players[gameState.currentTurn].hasFolded || gameState.players[gameState.currentTurn].isAllIn || gameState.players[gameState.currentTurn].isEliminated) && loops < 10) { gameState.currentTurn = (gameState.currentTurn + 1) % 7; loops++; } }
@@ -258,19 +298,17 @@
     function tickEngine() {
         glowPulseFrame += 0.08; 
         
-        // Staggered Cinematic Dealing Physics & Audio
         if (globalAnimationProgress < 1.0) {
             let speed = gameState.round === 'PREFLOP' ? 0.012 : 0.025;
             globalAnimationProgress = Math.min(1.0, globalAnimationProgress + speed);
             let totalCards = gameState.round === 'PREFLOP' ? gameState.players.filter(p=>!p.isEliminated).length * 2 : (gameState.round === 'FLOP' ? 3 : 1);
-            let animStagger = 0.8 / totalCards;
+            let animStagger = 0.8 / Math.max(1, totalCards);
             if (globalAnimationProgress > 0 && totalCards > 0) {
                 let currentIdx = Math.floor(globalAnimationProgress / animStagger);
                 if (currentIdx > lastDealtSoundIndex && currentIdx < totalCards) { playSoundEffect('fwip'); lastDealtSoundIndex = currentIdx; }
             }
         }
 
-        // Particle Physics
         for(let i=particles.length-1; i>=0; i--) {
             let p = particles[i]; p.x += p.vx; p.y += p.vy; p.vy += 0.2; p.life -= p.decay;
             if(p.life <= 0) particles.splice(i, 1);
@@ -284,23 +322,37 @@
                     let dest = getSeatCoords(canvas.width, canvas.height)[wId];
                     spawnParticles(dest.x - 62, dest.y - 12);
                 });
-                triggerOutcomeOverlay(potAnimationState.payoutBlueprint); gameState.pot = 0; endHandResolution();
+                
+                victorySequenceTimer = 50; 
+                pendingPayoutBlueprint = potAnimationState.payoutBlueprint;
             }
         }
+
+        if (victorySequenceTimer > 0) {
+            victorySequenceTimer--;
+            if (victorySequenceTimer === 0) {
+                triggerOutcomeOverlay(pendingPayoutBlueprint); 
+                gameState.pot = 0; 
+                endHandResolution();
+            }
+        }
+
         render();
     }
 
-    function isRoundSettled() { let active = gameState.players.filter(p => !p.hasFolded && !p.isAllIn && !p.isEliminated); return active.every(p => p.currentBet === gameState.highestBetThisRound && p.actedThisRound); }
+    function isRoundSettled() { 
+        let active = gameState.players.filter(p => !p.hasFolded && !p.isAllIn && !p.isEliminated); 
+        if (active.length === 0) return true;
+        return active.every(p => p.currentBet === gameState.highestBetThisRound && p.actedThisRound); 
+    }
+    
     function checkHandEndCondition() {
-        if (potAnimationState.active) return true;
+        if (potAnimationState.active || victorySequenceTimer > 0) return true;
         let active = gameState.players.filter(p => !p.hasFolded && !p.isEliminated);
         if (active.length === 1) {
             let winner = active[0]; winner.chips += gameState.pot;
-            potAnimationState = { active: true, progress: 0, winners: [winner.id], amount: gameState.pot, payoutBlueprint: [{ name: winner.name, amount: gameState.pot, desc: "Everyone Folded" }] }; playSoundEffect('slide'); return true;
-        }
-        let nonAllInActive = gameState.players.filter(p => !p.hasFolded && !p.isAllIn && !p.isEliminated);
-        if (nonAllInActive.length <= 1 && isRoundSettled() && gameState.round !== 'SHOWDOWN' && !forceShowdownReveal) {
-            while(gameState.communityCards.length < 5) gameState.communityCards.push(gameState.deck.pop()); nextRound(); return true;
+            potAnimationState = { active: true, progress: 0, winners: [winner.id], amount: gameState.pot, payoutBlueprint: [{ name: winner.name, amount: gameState.pot, desc: "Everyone Folded" }] }; 
+            playSoundEffect('slide'); return true;
         }
         return false;
     }
@@ -415,7 +467,7 @@
 
             if (!p.isEliminated) {
                 p.cards.forEach((card, cIdx) => {
-                    let hide = (p.type === 'bot' && !p.hasFolded && !forceShowdownReveal);
+                    let hide = (p.type === 'bot' && !p.hasFolded && !forceShowdownReveal && !isSpectator());
                     let finalX = idx === 0 ? coord.x + 10 + (cIdx * 38) : coord.x + 22 + (cIdx * 32);
                     let finalY = idx === 0 ? coord.y - 12 : coord.y - 2;
                     let width = idx === 0 ? 46 : 36, height = idx === 0 ? 64 : 50;
@@ -429,11 +481,20 @@
                     let animX = (w / 2) + (finalX - (w / 2)) * ease; 
                     
                     // PATCH: Fixed the Y-axis typo (changed +120 to -120 to correctly calculate the distance)
-                    let animY = (h / 2 - 120) + (finalY - (h / 2 - 120)) * ease;
+                    let animY = (h / 2 - 120) + (finalY - (h / 2 - 120)) * ease; 
                     
                     let rot = (1 - ease) * Math.PI * 4;
                     drawUltraSharpCard(animX, animY, rot, card, hide, width, height);
                 });
+            }
+
+            // TV Broadcast Win % Badge
+            if (isSpectator() && p.equity !== undefined && p.equity !== null && !p.hasFolded && !p.isEliminated && p.type === 'bot') {
+                let bx = coord.x + 40, by = coord.y - 32;
+                ctx.fillStyle = 'rgba(15, 23, 42, 0.95)'; ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 1.5;
+                ctx.beginPath(); ctx.roundRect(bx, by, 46, 20, 6); ctx.fill(); ctx.stroke();
+                ctx.font = 'bold 11px sans-serif'; ctx.fillStyle = '#f8fafc'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.fillText(p.equity.toFixed(1) + '%', bx + 23, by + 10);
             }
         });
 
@@ -498,7 +559,7 @@
     }
 
     function logMessage(msg, type) { let box = document.getElementById('logBox'); if (!box) return; box.innerHTML += `<div class="log-entry log-${type}">${msg}</div>`; box.scrollTop = box.scrollHeight; }
-    function saveToLocalStorage() { try { localStorage.setItem('vpro_champ_v2_save', JSON.stringify(gameState)); } catch(e) {} }
+    function saveToLocalStorage() { try { localStorage.setItem('vpro_champ_v3_0_save', JSON.stringify(gameState)); } catch(e) {} }
 </script>
 
 </body>
