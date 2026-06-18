@@ -3,19 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>High-Stakes Texas Hold'em - Broadcast Edition v3.0</title>
+    <title>High-Stakes Texas Hold'em - Broadcast Edition v3.1</title>
     <style>
-        :root {
-            --bg-color: #040609; --panel-bg: rgba(15, 20, 26, 0.75); --border-accent: rgba(56, 189, 248, 0.2);
-            --accent-color: #38bdf8; --accent-hover: #0284c7; --danger-color: #f43f5e; --text-color: #f8fafc; --text-muted: #94a3b8;
-        }
+        :root { --bg-color: #040609; --panel-bg: rgba(15, 20, 26, 0.75); --border-accent: rgba(56, 189, 248, 0.2); --accent-color: #38bdf8; --accent-hover: #0284c7; --danger-color: #f43f5e; --text-color: #f8fafc; --text-muted: #94a3b8; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: radial-gradient(circle at 50% 50%, #0f172a 0%, #020617 100%);
-            color: var(--text-color); display: flex; justify-content: center; align-items: center;
-            min-height: 100vh; padding: 20px; overflow-x: hidden;
-        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: radial-gradient(circle at 50% 50%, #0f172a 0%, #020617 100%); color: var(--text-color); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; overflow-x: hidden; }
         .game-container { display: grid; grid-template-columns: 1fr 320px; gap: 24px; max-width: 1440px; width: 100%; }
         .canvas-container { position: relative; background: #020617; border-radius: 24px; overflow: hidden; border: 1px solid var(--border-accent); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9); aspect-ratio: 1000 / 640; }
         canvas { display: block; width: 100%; height: 100%; object-fit: contain; }
@@ -44,7 +36,6 @@
         .payout-list-container { display: flex; flex-direction: column; gap: 10px; max-height: 180px; overflow-y: auto; margin-bottom: 24px; background: rgba(0, 0, 0, 0.3); padding: 12px; border-radius: 10px; border: 1px solid rgba(245, 158, 11, 0.2); }
         .payout-row { display: flex; flex-direction: column; align-items: center; padding-bottom: 6px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
         .payout-user { font-size: 16px; font-weight: 700; color: #f8fafc; } .payout-chips { font-size: 24px; font-family: monospace; font-weight: 800; color: #f59e0b; margin: 2px 0; } .payout-desc { font-size: 13px; color: var(--text-muted); font-style: italic; }
-        
         @keyframes scaleUp { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         @media (max-width: 960px) { .game-container { grid-template-columns: 1fr; } .canvas-container { max-height: 55vh; } }
     </style>
@@ -100,15 +91,9 @@
 
 <script>
     const SB = 5000, BB = 10000, STARTING_STACK = 1000000;
-    const SUITS = ['♠', '♥', '♦', '♣'];
-    const VALUES = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+    const SUITS = ['♠', '♥', '♦', '♣']; const VALUES = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
     const VALUE_RANKS = {'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'10':10,'J':11,'Q':12,'K':13,'A':14};
-    const PROFILE_THEMES = [
-        { bgGrad: ['#38bdf8', '#0284c7'], initial: 'C' }, { bgGrad: ['#f43f5e', '#e11d48'], initial: 'S' }, 
-        { bgGrad: ['#d946ef', '#c026d3'], initial: 'W' }, { bgGrad: ['#f59e0b', '#d97706'], initial: 'G' }, 
-        { bgGrad: ['#10b981', '#059669'], initial: 'S' }, { bgGrad: ['#8b5cf6', '#6d28d9'], initial: 'R' }, 
-        { bgGrad: ['#64748b', '#475569'], initial: 'M' }  
-    ];
+    const PROFILE_THEMES = [ { bgGrad: ['#38bdf8', '#0284c7'], initial: 'C' }, { bgGrad: ['#f43f5e', '#e11d48'], initial: 'S' }, { bgGrad: ['#d946ef', '#c026d3'], initial: 'W' }, { bgGrad: ['#f59e0b', '#d97706'], initial: 'G' }, { bgGrad: ['#10b981', '#059669'], initial: 'S' }, { bgGrad: ['#8b5cf6', '#6d28d9'], initial: 'R' }, { bgGrad: ['#64748b', '#475569'], initial: 'M' } ];
     
     let canvas, ctx, gameState = {}, audioCtx = null;
     let announcementText = "", announcementTimer = 0, forceShowdownReveal = false; 
@@ -118,24 +103,24 @@
     let particles = [];
 
     window.onload = function() {
-        canvas = document.getElementById('pokerCanvas');
-        ctx = canvas.getContext('2d');
+        canvas = document.getElementById('pokerCanvas'); ctx = canvas.getContext('2d');
         try {
-            let raw = localStorage.getItem('vpro_champ_v3_0_save');
+            let raw = localStorage.getItem('vpro_champ_v3_1_save');
             if (raw) {
                 let parsed = JSON.parse(raw);
                 if (parsed && parsed.players && parsed.players.length === 7 && parsed.round) {
-                    gameState = parsed; logMessage("Urban Broadcast Edition restored.", "system"); updateControls();
+                    gameState = parsed; 
+                    // Master Ledger Hook
+                    let masterLedger = localStorage.getItem('vegas_pro_master_bankroll');
+                    if(masterLedger) gameState.players[0].chips = parseInt(masterLedger);
+                    logMessage("Urban Broadcast Edition restored with Unified Bankroll.", "system"); updateControls();
                 } else throw new Error("Invalid format.");
             } else initNewSession();
-        } catch(e) { localStorage.removeItem('vpro_champ_v3_0_save'); initNewSession(); }
+        } catch(e) { localStorage.removeItem('vpro_champ_v3_1_save'); initNewSession(); }
         refreshLeaderboardHUD(); setInterval(tickEngine, 30);
     };
 
-    // AutoPlay audio resume fix
-    document.addEventListener('click', function() {
-        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-    }, { once: true });
+    document.addEventListener('click', function() { if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); }, { once: true });
 
     function initAudioContext() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
     function playSoundEffect(type) {
@@ -143,22 +128,9 @@
             initAudioContext(); if (!audioCtx) return;
             let osc = audioCtx.createOscillator(), gainNode = audioCtx.createGain();
             osc.connect(gainNode); gainNode.connect(audioCtx.destination);
-            if (type === 'slide') {
-                osc.type = 'triangle'; osc.frequency.setValueAtTime(180, audioCtx.currentTime);
-                osc.frequency.linearRampToValueAtTime(60, audioCtx.currentTime + 0.2);
-                gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime); gainNode.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.2);
-            } else if (type === 'chip') {
-                osc.type = 'sine'; osc.frequency.setValueAtTime(320, audioCtx.currentTime);
-                osc.frequency.setValueAtTime(260, audioCtx.currentTime + 0.05);
-                gainNode.gain.setValueAtTime(0.4, audioCtx.currentTime); gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.1);
-            } else if (type === 'fwip') {
-                osc.type = 'sine'; osc.frequency.setValueAtTime(1400, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.08);
-                gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime); gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.08);
-            }
+            if (type === 'slide') { osc.type = 'triangle'; osc.frequency.setValueAtTime(180, audioCtx.currentTime); osc.frequency.linearRampToValueAtTime(60, audioCtx.currentTime + 0.2); gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime); gainNode.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.2); osc.start(); osc.stop(audioCtx.currentTime + 0.2); }
+            else if (type === 'chip') { osc.type = 'sine'; osc.frequency.setValueAtTime(320, audioCtx.currentTime); osc.frequency.setValueAtTime(260, audioCtx.currentTime + 0.05); gainNode.gain.setValueAtTime(0.4, audioCtx.currentTime); gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1); osc.start(); osc.stop(audioCtx.currentTime + 0.1); }
+            else if (type === 'fwip') { osc.type = 'sine'; osc.frequency.setValueAtTime(1400, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.08); gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime); gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08); osc.start(); osc.stop(audioCtx.currentTime + 0.08); }
         } catch (e) {}
     }
 
@@ -169,17 +141,25 @@
             players: [ createPlayer(0, "C. Lo.", 'human', 'player'), createPlayer(1, "The Shark", 'bot', 'shark'), createPlayer(2, "The Whale", 'bot', 'whale'), createPlayer(3, "The Grinder", 'bot', 'grinder'), createPlayer(4, "Station Sam", 'bot', 'station'), createPlayer(5, "Rock Rocky", 'bot', 'rock'), createPlayer(6, "Maverick Max", 'bot', 'maverick') ],
             dealerIndex: 0, pot: 0, communityCards: [], round: 'PREFLOP', deck: [], currentTurn: 0, highestBetThisRound: 0, handCount: 1
         };
+        // Master Ledger Hook
+        let masterLedger = localStorage.getItem('vegas_pro_master_bankroll');
+        if(masterLedger) gameState.players[0].chips = parseInt(masterLedger);
+        else localStorage.setItem('vegas_pro_master_bankroll', STARTING_STACK);
         logMessage("Vegas Pro Broadcast Edition Initialized.", "system"); startNewHand();
     }
 
     function resetEntireSession() {
-        if(confirm("Restore all bankrolls to $1,000,000 and clear local history?")) { localStorage.removeItem('vpro_champ_v3_0_save'); initNewSession(); refreshLeaderboardHUD(); }
+        if(confirm("Restore all bankrolls to $1,000,000 and clear local history?")) { localStorage.removeItem('vpro_champ_v3_1_save'); localStorage.setItem('vegas_pro_master_bankroll', STARTING_STACK); initNewSession(); refreshLeaderboardHUD(); }
     }
 
     function isSpectator() { return gameState.players[0].hasFolded || gameState.players[0].isEliminated; }
 
     function startNewHand() {
         forceShowdownReveal = false; globalAnimationProgress = 0; lastDealtSoundIndex = -1; potAnimationState.active = false; victorySequenceTimer = 0; particles = [];
+        // Resync human ledger before the hand begins in case slots altered it
+        let masterLedger = localStorage.getItem('vegas_pro_master_bankroll');
+        if(masterLedger && gameState.players[0]) gameState.players[0].chips = parseInt(masterLedger);
+
         gameState.players.forEach(p => {
             p.equity = null;
             if (p.chips <= 0) {
@@ -243,16 +223,10 @@
             dealingCallback(); gameState.round = nextRoundLabel; 
             gameState.players.forEach(p => { p.currentBet = 0; if(!p.hasFolded && !p.isEliminated) { p.actedThisRound = false; if(!p.isAllIn) p.lastAction = ''; } });
             gameState.highestBetThisRound = 0; gameState.currentTurn = (gameState.dealerIndex + 1) % 7; findNextValidActivePlayer();
-            
             if (isSpectator()) calculateEquities();
-            
             updateControls(); saveToLocalStorage(); 
-            
-            if (isRoundSettled() && gameState.round !== 'SHOWDOWN') {
-                setTimeout(nextRound, isSpectator() ? 2500 : 800);
-            } else if (gameState.players[gameState.currentTurn].type === 'bot') {
-                setTimeout(processBotTurn, 900);
-            }
+            if (isRoundSettled() && gameState.round !== 'SHOWDOWN') { setTimeout(nextRound, isSpectator() ? 2500 : 800); } 
+            else if (gameState.players[gameState.currentTurn].type === 'bot') { setTimeout(processBotTurn, 900); }
         }, 1600);
     }
 
@@ -281,71 +255,38 @@
         refreshLeaderboardHUD(); saveToLocalStorage(); if (checkHandEndCondition()) return;
         gameState.currentTurn = (gameState.currentTurn + 1) % 7; findNextValidActivePlayer();
         
-        if (isRoundSettled()) {
-            setTimeout(nextRound, isSpectator() ? 2500 : 800);
-        } else { 
-            updateControls(); 
-            if (gameState.players[gameState.currentTurn].type === 'bot' && announcementTimer <= 0) setTimeout(processBotTurn, 900); 
-        }
+        if (isRoundSettled()) { setTimeout(nextRound, isSpectator() ? 2500 : 800); } 
+        else { updateControls(); if (gameState.players[gameState.currentTurn].type === 'bot' && announcementTimer <= 0) setTimeout(processBotTurn, 900); }
     }
 
     function findNextValidActivePlayer() { let loops = 0; while ((gameState.players[gameState.currentTurn].hasFolded || gameState.players[gameState.currentTurn].isAllIn || gameState.players[gameState.currentTurn].isEliminated) && loops < 10) { gameState.currentTurn = (gameState.currentTurn + 1) % 7; loops++; } }
-
-    function spawnParticles(x, y) {
-        for(let i=0; i<45; i++) particles.push({ x: x, y: y, vx: (Math.random()-0.5)*10, vy: (Math.random()-0.5)*10 - 2, life: 1.0, decay: 0.015 + Math.random()*0.02 });
-    }
+    function spawnParticles(x, y) { for(let i=0; i<45; i++) particles.push({ x: x, y: y, vx: (Math.random()-0.5)*10, vy: (Math.random()-0.5)*10 - 2, life: 1.0, decay: 0.015 + Math.random()*0.02 }); }
 
     function tickEngine() {
         glowPulseFrame += 0.08; 
-        
         if (globalAnimationProgress < 1.0) {
             let speed = gameState.round === 'PREFLOP' ? 0.012 : 0.025;
             globalAnimationProgress = Math.min(1.0, globalAnimationProgress + speed);
             let totalCards = gameState.round === 'PREFLOP' ? gameState.players.filter(p=>!p.isEliminated).length * 2 : (gameState.round === 'FLOP' ? 3 : 1);
             let animStagger = 0.8 / Math.max(1, totalCards);
-            if (globalAnimationProgress > 0 && totalCards > 0) {
-                let currentIdx = Math.floor(globalAnimationProgress / animStagger);
-                if (currentIdx > lastDealtSoundIndex && currentIdx < totalCards) { playSoundEffect('fwip'); lastDealtSoundIndex = currentIdx; }
-            }
+            if (globalAnimationProgress > 0 && totalCards > 0) { let currentIdx = Math.floor(globalAnimationProgress / animStagger); if (currentIdx > lastDealtSoundIndex && currentIdx < totalCards) { playSoundEffect('fwip'); lastDealtSoundIndex = currentIdx; } }
         }
 
-        for(let i=particles.length-1; i>=0; i--) {
-            let p = particles[i]; p.x += p.vx; p.y += p.vy; p.vy += 0.2; p.life -= p.decay;
-            if(p.life <= 0) particles.splice(i, 1);
-        }
+        for(let i=particles.length-1; i>=0; i--) { let p = particles[i]; p.x += p.vx; p.y += p.vy; p.vy += 0.2; p.life -= p.decay; if(p.life <= 0) particles.splice(i, 1); }
 
         if (potAnimationState.active) {
             potAnimationState.progress += 0.035; 
             if (potAnimationState.progress >= 1.0) {
                 potAnimationState.active = false; playSoundEffect('slide');
-                potAnimationState.winners.forEach(wId => {
-                    let dest = getSeatCoords(canvas.width, canvas.height)[wId];
-                    spawnParticles(dest.x - 62, dest.y - 12);
-                });
-                
-                victorySequenceTimer = 50; 
-                pendingPayoutBlueprint = potAnimationState.payoutBlueprint;
+                potAnimationState.winners.forEach(wId => { let dest = getSeatCoords(canvas.width, canvas.height)[wId]; spawnParticles(dest.x - 62, dest.y - 12); });
+                victorySequenceTimer = 50; pendingPayoutBlueprint = potAnimationState.payoutBlueprint;
             }
         }
-
-        if (victorySequenceTimer > 0) {
-            victorySequenceTimer--;
-            if (victorySequenceTimer === 0) {
-                triggerOutcomeOverlay(pendingPayoutBlueprint); 
-                gameState.pot = 0; 
-                endHandResolution();
-            }
-        }
-
+        if (victorySequenceTimer > 0) { victorySequenceTimer--; if (victorySequenceTimer === 0) { triggerOutcomeOverlay(pendingPayoutBlueprint); gameState.pot = 0; endHandResolution(); } }
         render();
     }
 
-    function isRoundSettled() { 
-        let active = gameState.players.filter(p => !p.hasFolded && !p.isAllIn && !p.isEliminated); 
-        if (active.length === 0) return true;
-        return active.every(p => p.currentBet === gameState.highestBetThisRound && p.actedThisRound); 
-    }
-    
+    function isRoundSettled() { let active = gameState.players.filter(p => !p.hasFolded && !p.isAllIn && !p.isEliminated); if (active.length === 0) return true; return active.every(p => p.currentBet === gameState.highestBetThisRound && p.actedThisRound); }
     function checkHandEndCondition() {
         if (potAnimationState.active || victorySequenceTimer > 0) return true;
         let active = gameState.players.filter(p => !p.hasFolded && !p.isEliminated);
@@ -353,36 +294,23 @@
             let winner = active[0]; winner.chips += gameState.pot;
             potAnimationState = { active: true, progress: 0, winners: [winner.id], amount: gameState.pot, payoutBlueprint: [{ name: winner.name, amount: gameState.pot, desc: "Everyone Folded" }] }; 
             playSoundEffect('slide'); return true;
-        }
-        return false;
+        } return false;
     }
 
     function endHandResolution() { gameState.round = 'SHOWDOWN'; do { gameState.dealerIndex = (gameState.dealerIndex + 1) % 7; } while (gameState.players[gameState.dealerIndex].isEliminated); gameState.handCount++; saveToLocalStorage(); }
-
-    function triggerOutcomeOverlay(payoutArray) {
-        let listContainer = document.getElementById('modalPayoutsList'); listContainer.innerHTML = '';
-        payoutArray.forEach(item => { listContainer.innerHTML += `<div class="payout-row"><div class="payout-user">${item.name}</div><div class="payout-chips">+$${item.amount.toLocaleString()}</div><div class="payout-desc">${item.desc}</div></div>`; });
-        document.getElementById('winnerModal').style.display = 'flex';
-    }
+    function triggerOutcomeOverlay(payoutArray) { let listContainer = document.getElementById('modalPayoutsList'); listContainer.innerHTML = ''; payoutArray.forEach(item => { listContainer.innerHTML += `<div class="payout-row"><div class="payout-user">${item.name}</div><div class="payout-chips">+$${item.amount.toLocaleString()}</div><div class="payout-desc">${item.desc}</div></div>`; }); document.getElementById('winnerModal').style.display = 'flex'; }
     function closeModalAndContinue() { document.getElementById('winnerModal').style.display = 'none'; startNewHand(); }
-
     function getCombinations(arr, k) { if (k === 0) return [[]]; if (arr.length === 0) return []; let [head, ...tail] = arr; return getCombinations(tail, k - 1).map(c => [head, ...c]).concat(getCombinations(tail, k)); }
+    
     function evaluateFiveCards(cards) {
         let ranks = cards.map(c => VALUE_RANKS[c.val]).sort((a,b) => b - a), isFlush = cards.every(c => c.suit === cards[0].suit), isStraight = false;
         if (ranks[0] === 14 && ranks[1] === 5 && ranks[2] === 4 && ranks[3] === 3 && ranks[4] === 2) { isStraight = true; ranks = [5, 4, 3, 2, 1]; } else isStraight = (ranks[0] - ranks[4] === 4) && (new Set(ranks).size === 5);
         let counts = {}; ranks.forEach(r => counts[r] = (counts[r] || 0) + 1); let groups = Object.keys(counts).map(Number).map(r => ({rank: r, count: counts[r]})).sort((a,b) => b.count - a.count || b.rank - a.rank); 
         let type = 0, label = "", tb = [];
-        if (isStraight && isFlush) { type = 8; label = (ranks[0] === 14) ? "Royal Flush" : "Straight Flush"; tb = [ranks[0]]; } 
-        else if (groups[0].count === 4) { type = 7; label = "Four of a Kind"; tb = [groups[0].rank, groups[1].rank]; } 
-        else if (groups[0].count === 3 && groups[1].count === 2) { type = 6; label = "Full House"; tb = [groups[0].rank, groups[1].rank]; } 
-        else if (isFlush) { type = 5; label = "Flush"; tb = ranks; } 
-        else if (isStraight) { type = 4; label = "Straight"; tb = [ranks[0]]; } 
-        else if (groups[0].count === 3) { type = 3; label = "Three of a Kind"; tb = [groups[0].rank, groups[1].rank, groups[2].rank]; } 
-        else if (groups[0].count === 2 && groups[1].count === 2) { type = 2; label = "Two Pair"; tb = [groups[0].rank, groups[1].rank, groups[2].rank]; } 
-        else if (groups[0].count === 2) { type = 1; label = "One Pair"; tb = [groups[0].rank, groups[1].rank, groups[2].rank, groups[3].rank]; } 
-        else { type = 0; label = `High Card (${[...cards].sort((a,b) => VALUE_RANKS[b.val] - VALUE_RANKS[a.val])[0].val})`; tb = ranks; }
+        if (isStraight && isFlush) { type = 8; label = (ranks[0] === 14) ? "Royal Flush" : "Straight Flush"; tb = [ranks[0]]; } else if (groups[0].count === 4) { type = 7; label = "Four of a Kind"; tb = [groups[0].rank, groups[1].rank]; } else if (groups[0].count === 3 && groups[1].count === 2) { type = 6; label = "Full House"; tb = [groups[0].rank, groups[1].rank]; } else if (isFlush) { type = 5; label = "Flush"; tb = ranks; } else if (isStraight) { type = 4; label = "Straight"; tb = [ranks[0]]; } else if (groups[0].count === 3) { type = 3; label = "Three of a Kind"; tb = [groups[0].rank, groups[1].rank, groups[2].rank]; } else if (groups[0].count === 2 && groups[1].count === 2) { type = 2; label = "Two Pair"; tb = [groups[0].rank, groups[1].rank, groups[2].rank]; } else if (groups[0].count === 2) { type = 1; label = "One Pair"; tb = [groups[0].rank, groups[1].rank, groups[2].rank, groups[3].rank]; } else { type = 0; label = `High Card (${[...cards].sort((a,b) => VALUE_RANKS[b.val] - VALUE_RANKS[a.val])[0].val})`; tb = ranks; }
         let score = type * Math.pow(16, 5); for (let i = 0; i < tb.length; i++) score += tb[i] * Math.pow(16, 4 - i); return { score, label };
     }
+    
     function evaluateSevenCardHand(cards) { if (cards.length < 5) return {score:0, label:"Invalid"}; let combs = getCombinations(cards, 5), best = { score: -1, label: "" }; combs.forEach(c => { let res = evaluateFiveCards(c); if (res.score > best.score) best = res; }); return best; }
 
     function processShowdown() {
@@ -411,6 +339,7 @@
     }
 
     function playerAction(t) { if (announcementTimer > 0 || forceShowdownReveal) return; if (t === 'FOLD') executeAction(0, 'FOLD'); if (t === 'CHECK') executeAction(0, 'CHECK'); if (t === 'CALL') executeAction(0, 'CALL'); if (t === 'RAISE') executeAction(0, 'RAISE', parseInt(document.getElementById('betSlider').value)); }
+    
     function updateControls() {
         if (!gameState.players) return; let p = gameState.players[0];
         if (gameState.currentTurn !== 0 || gameState.round === 'SHOWDOWN' || p.isEliminated || announcementTimer > 0 || forceShowdownReveal) { ['btnFold', 'btnCheck', 'btnCall', 'btnBet'].forEach(id => document.getElementById(id).disabled = true); return; }
@@ -431,12 +360,10 @@
 
         ctx.strokeStyle = '#334155'; ctx.lineWidth = 14; ctx.beginPath(); ctx.ellipse(w/2, h/2, 422, 222, 0, 0, Math.PI * 2); ctx.stroke();
         ctx.strokeStyle = '#0284c7'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(w/2, h/2, 406, 206, 0, 0, Math.PI * 2); ctx.stroke();
-
         ctx.fillStyle = 'rgba(15, 23, 42, 0.8)'; ctx.beginPath(); ctx.roundRect(w/2 - 120, h/2 - 145, 240, 42, 10); ctx.fill();
         ctx.font = 'bold 15px monospace'; ctx.fillStyle = '#38bdf8'; ctx.textAlign = 'center'; ctx.fillText(`TOTAL POT: $${gameState.pot.toLocaleString()}`, w/2, h/2 - 119);
 
-        const seatCoords = getSeatCoords(w, h);
-        let dealOrder = 0; let commOrder = 0;
+        const seatCoords = getSeatCoords(w, h); let dealOrder = 0, commOrder = 0;
         let totalAnim = gameState.round === 'PREFLOP' ? gameState.players.filter(p=>!p.isEliminated).length * 2 : (gameState.round === 'FLOP' ? 3 : 1);
         let animStagger = 0.8 / Math.max(1, totalAnim);
 
@@ -468,46 +395,28 @@
             if (!p.isEliminated) {
                 p.cards.forEach((card, cIdx) => {
                     let hide = (p.type === 'bot' && !p.hasFolded && !forceShowdownReveal && !isSpectator());
-                    let finalX = idx === 0 ? coord.x + 10 + (cIdx * 38) : coord.x + 22 + (cIdx * 32);
-                    let finalY = idx === 0 ? coord.y - 12 : coord.y - 2;
-                    let width = idx === 0 ? 46 : 36, height = idx === 0 ? 64 : 50;
-                    let t = 1.0;
-                    if (gameState.round === 'PREFLOP') {
-                        let localT = (globalAnimationProgress - dealOrder * animStagger) * 5.0; // 0.2 duration
-                        t = Math.max(0, Math.min(1, localT));
-                        dealOrder++;
-                    }
+                    let finalX = idx === 0 ? coord.x + 10 + (cIdx * 38) : coord.x + 22 + (cIdx * 32); let finalY = idx === 0 ? coord.y - 12 : coord.y - 2;
+                    let width = idx === 0 ? 46 : 36, height = idx === 0 ? 64 : 50, t = 1.0;
+                    if (gameState.round === 'PREFLOP') { let localT = (globalAnimationProgress - dealOrder * animStagger) * 5.0; t = Math.max(0, Math.min(1, localT)); dealOrder++; }
                     let ease = 1 - Math.pow(1 - t, 3);
-                    let animX = (w / 2) + (finalX - (w / 2)) * ease; 
-                    
-                    // PATCH: Fixed the Y-axis typo (changed +120 to -120 to correctly calculate the distance)
-                    let animY = (h / 2 - 120) + (finalY - (h / 2 - 120)) * ease; 
-                    
-                    let rot = (1 - ease) * Math.PI * 4;
-                    drawUltraSharpCard(animX, animY, rot, card, hide, width, height);
+                    let animX = (w / 2) + (finalX - (w / 2)) * ease, animY = (h / 2 - 120) + (finalY - (h / 2 - 120)) * ease; 
+                    let rot = (1 - ease) * Math.PI * 4; drawUltraSharpCard(animX, animY, rot, card, hide, width, height);
                 });
             }
 
-            // TV Broadcast Win % Badge
             if (isSpectator() && p.equity !== undefined && p.equity !== null && !p.hasFolded && !p.isEliminated && p.type === 'bot') {
-                let bx = coord.x + 40, by = coord.y - 32;
-                ctx.fillStyle = 'rgba(15, 23, 42, 0.95)'; ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 1.5;
-                ctx.beginPath(); ctx.roundRect(bx, by, 46, 20, 6); ctx.fill(); ctx.stroke();
-                ctx.font = 'bold 11px sans-serif'; ctx.fillStyle = '#f8fafc'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-                ctx.fillText(p.equity.toFixed(1) + '%', bx + 23, by + 10);
+                let bx = coord.x + 40, by = coord.y - 32; ctx.fillStyle = 'rgba(15, 23, 42, 0.95)'; ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.roundRect(bx, by, 46, 20, 6); ctx.fill(); ctx.stroke();
+                ctx.font = 'bold 11px sans-serif'; ctx.fillStyle = '#f8fafc'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(p.equity.toFixed(1) + '%', bx + 23, by + 10);
             }
         });
 
         gameState.communityCards.forEach((card, idx) => {
-            let finalX = w / 2 - (5 * 26) + (idx * 52);
-            let t = 1.0, isNew = false;
+            let finalX = w / 2 - (5 * 26) + (idx * 52), t = 1.0, isNew = false;
             if (gameState.round === 'FLOP' && idx < 3) { isNew = true; t = Math.max(0, Math.min(1, (globalAnimationProgress - (commOrder++) * animStagger) * 5.0)); }
             if (gameState.round === 'TURN' && idx === 3) { isNew = true; t = Math.max(0, Math.min(1, (globalAnimationProgress) * 5.0)); }
             if (gameState.round === 'RIVER' && idx === 4) { isNew = true; t = Math.max(0, Math.min(1, (globalAnimationProgress) * 5.0)); }
-            let ease = 1 - Math.pow(1 - t, 3);
-            let animX = (w / 2) + (finalX - (w / 2)) * ease, animY = (h / 2 - 120) + ((h / 2 - 25) - (h / 2 - 120)) * ease;
-            let rot = isNew ? (1 - ease) * Math.PI * 2 : 0;
-            drawUltraSharpCard(animX, animY, rot, card, false, 40, 56);
+            let ease = 1 - Math.pow(1 - t, 3), animX = (w / 2) + (finalX - (w / 2)) * ease, animY = (h / 2 - 120) + ((h / 2 - 25) - (h / 2 - 120)) * ease;
+            let rot = isNew ? (1 - ease) * Math.PI * 2 : 0; drawUltraSharpCard(animX, animY, rot, card, false, 40, 56);
         });
 
         if (announcementTimer > 0 && !potAnimationState.active) {
@@ -517,49 +426,35 @@
         }
 
         let centerX = w / 2, centerY = h / 2 - 60;
-        if (potAnimationState.active) {
-            let ease = 1 - Math.pow(1 - potAnimationState.progress, 3);
-            potAnimationState.winners.forEach(wId => {
-                let dest = seatCoords[wId], destX = dest.x - 62, destY = dest.y - 12;
-                drawPhysicalChipStack(centerX + (destX - centerX) * ease, centerY + (destY - centerY) * ease, potAnimationState.amount, true);
-            });
-        } else if (gameState.pot > 0 && gameState.round !== 'PREFLOP') drawPhysicalChipStack(centerX, centerY, gameState.pot, true);
+        if (potAnimationState.active) { let ease = 1 - Math.pow(1 - potAnimationState.progress, 3); potAnimationState.winners.forEach(wId => { let dest = seatCoords[wId], destX = dest.x - 62, destY = dest.y - 12; drawPhysicalChipStack(centerX + (destX - centerX) * ease, centerY + (destY - centerY) * ease, potAnimationState.amount, true); }); } 
+        else if (gameState.pot > 0 && gameState.round !== 'PREFLOP') drawPhysicalChipStack(centerX, centerY, gameState.pot, true);
 
-        // Render Particles
-        particles.forEach(p => {
-            ctx.globalAlpha = Math.max(0, p.life); ctx.fillStyle = '#fbbf24';
-            ctx.beginPath(); ctx.arc(p.x, p.y, 2.5, 0, Math.PI*2); ctx.fill();
-        }); ctx.globalAlpha = 1.0;
+        particles.forEach(p => { ctx.globalAlpha = Math.max(0, p.life); ctx.fillStyle = '#fbbf24'; ctx.beginPath(); ctx.arc(p.x, p.y, 2.5, 0, Math.PI*2); ctx.fill(); }); ctx.globalAlpha = 1.0;
     }
 
     function drawUltraSharpCard(x, y, rot, card, isHidden, width, height) {
         ctx.save(); ctx.translate(x + width/2, y + height/2); ctx.rotate(rot); ctx.translate(-(x + width/2), -(y + height/2));
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.6)'; ctx.shadowBlur = 5; ctx.shadowOffsetY = 2;
-        ctx.fillStyle = isHidden ? '#0f172a' : '#ffffff'; ctx.strokeStyle = isHidden ? '#334155' : '#e2e8f0'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.roundRect(x, y, width, height, 5); ctx.fill(); ctx.stroke(); ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
-        if (isHidden) {
-            ctx.strokeStyle = 'rgba(56, 189, 248, 0.1)'; ctx.lineWidth = 1; ctx.beginPath();
-            for (let offset = 4; offset < width - 4; offset += 8) { ctx.moveTo(x + offset, y + 4); ctx.lineTo(x + offset + 2, y + height - 4); } ctx.stroke();
-            ctx.fillStyle = '#38bdf8'; ctx.beginPath(); ctx.arc(x + (width/2), y + (height/2), 2.5, 0, Math.PI*2); ctx.fill();
-        } else {
-            ctx.fillStyle = (card.suit === '♥' || card.suit === '♦') ? '#f43f5e' : '#020617';
-            ctx.font = `bold ${width > 42 ? '16px' : '13px'} -apple-system, sans-serif`; ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillText(card.val, x + 4, y + 4);
-            ctx.font = `${width > 42 ? '22px' : '18px'} Arial, sans-serif`; ctx.textAlign = 'right'; ctx.textBaseline = 'bottom'; ctx.fillText(card.suit, x + width - 4, y + height - 3);
-        } ctx.restore();
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.6)'; ctx.shadowBlur = 5; ctx.shadowOffsetY = 2; ctx.fillStyle = isHidden ? '#0f172a' : '#ffffff'; ctx.strokeStyle = isHidden ? '#334155' : '#e2e8f0'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.roundRect(x, y, width, height, 5); ctx.fill(); ctx.stroke(); ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+        if (isHidden) { ctx.strokeStyle = 'rgba(56, 189, 248, 0.1)'; ctx.lineWidth = 1; ctx.beginPath(); for (let offset = 4; offset < width - 4; offset += 8) { ctx.moveTo(x + offset, y + 4); ctx.lineTo(x + offset + 2, y + height - 4); } ctx.stroke(); ctx.fillStyle = '#38bdf8'; ctx.beginPath(); ctx.arc(x + (width/2), y + (height/2), 2.5, 0, Math.PI*2); ctx.fill(); } 
+        else { ctx.fillStyle = (card.suit === '♥' || card.suit === '♦') ? '#f43f5e' : '#020617'; ctx.font = `bold ${width > 42 ? '16px' : '13px'} -apple-system, sans-serif`; ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillText(card.val, x + 4, y + 4); ctx.font = `${width > 42 ? '22px' : '18px'} Arial, sans-serif`; ctx.textAlign = 'right'; ctx.textBaseline = 'bottom'; ctx.fillText(card.suit, x + width - 4, y + height - 3); } ctx.restore();
     }
 
     function drawPhysicalChipStack(startX, startY, amount, isCenterPot = false) {
         let stackHeight = isCenterPot ? Math.min(12, Math.max(3, Math.floor(amount / 30000))) : Math.min(5, Math.max(2, Math.floor(amount / 50000)));
         let colorTheme = amount >= 100000 ? '#0f172a' : '#0284c7', edgeColor = amount >= 100000 ? '#334155' : '#0369a1';
         if (isCenterPot && amount >= 500000) { colorTheme = '#f59e0b'; edgeColor = '#b45309'; }
-        for (let i = 0; i < stackHeight; i++) {
-            let currY = startY - (i * (isCenterPot ? 4 : 3));
-            ctx.fillStyle = colorTheme; ctx.beginPath(); ctx.ellipse(startX, currY, isCenterPot ? 14 : 10, isCenterPot ? 6 : 4, 0, 0, Math.PI * 2); ctx.fill();
-            ctx.strokeStyle = edgeColor; ctx.lineWidth = isCenterPot ? 1.2 : 0.75; ctx.beginPath(); ctx.ellipse(startX, currY, isCenterPot ? 14 : 10, isCenterPot ? 6 : 4, 0, 0, Math.PI * 2); ctx.stroke();
-        }
+        for (let i = 0; i < stackHeight; i++) { let currY = startY - (i * (isCenterPot ? 4 : 3)); ctx.fillStyle = colorTheme; ctx.beginPath(); ctx.ellipse(startX, currY, isCenterPot ? 14 : 10, isCenterPot ? 6 : 4, 0, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = edgeColor; ctx.lineWidth = isCenterPot ? 1.2 : 0.75; ctx.beginPath(); ctx.ellipse(startX, currY, isCenterPot ? 14 : 10, isCenterPot ? 6 : 4, 0, 0, Math.PI * 2); ctx.stroke(); }
     }
 
     function logMessage(msg, type) { let box = document.getElementById('logBox'); if (!box) return; box.innerHTML += `<div class="log-entry log-${type}">${msg}</div>`; box.scrollTop = box.scrollHeight; }
-    function saveToLocalStorage() { try { localStorage.setItem('vpro_champ_v3_0_save', JSON.stringify(gameState)); } catch(e) {} }
+    
+    function saveToLocalStorage() { 
+        try { 
+            localStorage.setItem('vpro_champ_v3_1_save', JSON.stringify(gameState)); 
+            // Sync Master Ledger
+            localStorage.setItem('vegas_pro_master_bankroll', gameState.players[0].chips);
+        } catch(e) {} 
+    }
 </script>
 
 </body>
