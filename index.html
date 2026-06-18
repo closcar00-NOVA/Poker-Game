@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>High-Stakes Texas Hold'em - Vegas Pro Championship v2.4</title>
+    <title>High-Stakes Texas Hold'em - Vegas Pro Championship v2.5</title>
     <style>
         :root {
             --bg-color: #05070f;
@@ -149,7 +149,8 @@
     ];
 
     window.onload = function() {
-        canvas = document.getElementById('pokerCanvas'); ctx = canvas.getContext('2d');
+        canvas = document.getElementById('pokerCanvas'); 
+        ctx = canvas.getContext('2d');
         try {
             let raw = localStorage.getItem('high_stakes_poker_7player_save');
             if (raw) {
@@ -158,12 +159,40 @@
                     gameState = parsed; updateControls();
                 } else throw new Error();
             } else initNewSession();
-        } catch(e) { localStorage.removeItem('high_stakes_poker_7player_save'); initNewSession(); }
+        } catch(e) { 
+            localStorage.removeItem('high_stakes_poker_7player_save'); 
+            initNewSession(); 
+        }
         refreshLeaderboardHUD();
         setInterval(tickEngine, 30);
     };
 
+    // --- RESTORED LOGGING & UI FUNCTIONS ---
+    function logMessage(msg, type) {
+        let box = document.getElementById('logBox');
+        if (!box) return;
+        let entry = document.createElement('div');
+        entry.className = `log-entry log-${type}`;
+        entry.innerText = msg;
+        box.appendChild(entry);
+        box.scrollTop = box.scrollHeight;
+    }
+
+    function refreshLeaderboardHUD() {
+        let box = document.getElementById('leaderboardBox');
+        if (!box || !gameState.players) return;
+        let sorted = [...gameState.players].sort((a, b) => b.chips - a.chips);
+        box.innerHTML = '';
+        sorted.forEach(p => {
+            let item = document.createElement('div');
+            item.className = `leaderboard-item ${p.isEliminated ? 'leaderboard-eliminated' : 'leaderboard-active'}`;
+            item.innerHTML = `<span class="leaderboard-name">${p.name}</span><span class="leaderboard-chips">${p.isEliminated ? 'OUT' : '$' + p.chips.toLocaleString()}</span>`;
+            box.appendChild(item);
+        });
+    }
+
     function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    
     function playSound(type) {
         try {
             initAudio(); if (!audioCtx) return;
@@ -195,6 +224,7 @@
                 { id: 6, name: "Maverick Max", chips: STARTING_STACK, cards: [], type: 'bot', archetype: 'maverick', lastAction: '', hasFolded: false, isAllIn: false, currentBet: 0, isEliminated: false, actedThisRound: false }
             ], dealerIndex: 0, pot: 0, communityCards: [], round: 'PREFLOP', deck: [], currentTurn: 0, highestBetThisRound: 0, handCount: 1
         };
+        logMessage("Vegas Pro Championship Table Initialized.", "system");
         startNewHand();
     }
 
@@ -220,11 +250,12 @@
 
         gameState.currentTurn = (bbIdx + 1) % 7; while(gameState.players[gameState.currentTurn].isEliminated) gameState.currentTurn = (gameState.currentTurn + 1) % 7;
         
+        logMessage(`--- Hand #${gameState.handCount} Started ---`, "system");
         playSound('slide'); saveToLocalStorage(); updateControls(); refreshLeaderboardHUD();
         if (gameState.players[gameState.currentTurn].type === 'bot') setTimeout(processBotTurn, 900);
     }
 
-    function postBlind(idx, amt) { let p = gameState.players[idx]; let act = Math.min(p.chips, amt); p.chips -= act; p.currentBet = act; gameState.pot += act; if(p.chips===0) p.isAllIn = true; p.actedThisRound = true; playSound('chip'); }
+    function postBlind(idx, amt) { let p = gameState.players[idx]; let act = Math.min(p.chips, amt); p.chips -= act; p.currentBet = act; gameState.pot += act; if(p.chips===0) p.isAllIn = true; p.actedThisRound = true; logMessage(`${p.name} posts blind $${act.toLocaleString()}`, "system"); playSound('chip'); }
 
     function queueAction(label, txt, cb) {
         announcementText = txt; announcementTimer = 55; globalAnimationProgress = 0;
@@ -240,22 +271,23 @@
 
     function nextRound() {
         if (checkHandEndCondition()) return;
-        if (gameState.round === 'PREFLOP') queueAction('FLOP', "DEALING FLOP...", () => gameState.communityCards.push(gameState.deck.pop(), gameState.deck.pop(), gameState.deck.pop()));
-        else if (gameState.round === 'FLOP') queueAction('TURN', "DEALING TURN...", () => gameState.communityCards.push(gameState.deck.pop()));
-        else if (gameState.round === 'TURN') queueAction('RIVER', "DEALING RIVER...", () => gameState.communityCards.push(gameState.deck.pop()));
+        if (gameState.round === 'PREFLOP') queueAction('FLOP', "DEALING FLOP...", () => { gameState.communityCards.push(gameState.deck.pop(), gameState.deck.pop(), gameState.deck.pop()); logMessage("--- The Flop Deal ---", "system"); });
+        else if (gameState.round === 'FLOP') queueAction('TURN', "DEALING TURN...", () => { gameState.communityCards.push(gameState.deck.pop()); logMessage("--- The Turn Deal ---", "system"); });
+        else if (gameState.round === 'TURN') queueAction('RIVER', "DEALING RIVER...", () => { gameState.communityCards.push(gameState.deck.pop()); logMessage("--- The River Deal ---", "system"); });
         else if (gameState.round === 'RIVER') { forceShowdownReveal = true; announcementText = "SHOWDOWN..."; announcementTimer = 100; playSound('slide'); setTimeout(processShowdown, 3000); }
     }
 
     function executeAction(idx, type, amt = 0) {
         let p = gameState.players[idx]; p.actedThisRound = true;
-        if (type === 'FOLD') { p.hasFolded = true; p.lastAction = 'Fold'; }
-        else if (type === 'CHECK') { p.lastAction = 'Check'; playSound('chip'); }
+        if (type === 'FOLD') { p.hasFolded = true; p.lastAction = 'Fold'; logMessage(`${p.name} folds`, idx===0?"player":"bot"); }
+        else if (type === 'CHECK') { p.lastAction = 'Check'; playSound('chip'); logMessage(`${p.name} checks`, idx===0?"player":"bot"); }
         else {
             let total = (gameState.highestBetThisRound - p.currentBet) + amt;
             if (total >= p.chips) { total = p.chips; p.isAllIn = true; p.lastAction = 'All-In'; }
             else p.lastAction = type === 'CALL' ? 'Call' : 'Raise';
             p.chips -= total; p.currentBet += total; gameState.pot += total; playSound('chip');
             if (p.currentBet > gameState.highestBetThisRound) { gameState.highestBetThisRound = p.currentBet; gameState.players.forEach(o => { if(o.id !== idx) o.actedThisRound = false; }); }
+            logMessage(`${p.name} ${p.lastAction==='All-In'?'pushes All-In':p.lastAction.toLowerCase()+'s'} to $${p.currentBet.toLocaleString()}`, idx===0?"player":"bot");
         }
         refreshLeaderboardHUD(); saveToLocalStorage();
         if (checkHandEndCondition()) return;
@@ -281,7 +313,6 @@
         return false;
     }
 
-    // --- NEW: FLAWLESS POKER EVALUATION MATH ---
     function evaluateSevenCardHand(cards) {
         let ranks = cards.map(c => VALUE_RANKS[c.val]).sort((a,b) => b-a);
         let suits = {}, counts = {};
@@ -328,7 +359,7 @@
         let share = Math.floor(gameState.pot / winners.length);
         let payouts = winners.map(w => ({ name: w.name, amount: share, desc: winners.length > 1 ? `Split Pot: ${w.handStrengthText}` : `Winning Hand: ${w.handStrengthText}` }));
         
-        // Trigger Kinetic Animation instead of instant popup
+        winners.forEach(w => logMessage(`${w.name} wins $${share.toLocaleString()} with ${w.handStrengthText}!`, "win"));
         potAnimation = { active: true, progress: 0, winners: winners, payouts: payouts };
     }
 
@@ -342,7 +373,6 @@
 
     function tickEngine() {
         glowPulseFrame += 0.08; if (globalAnimationProgress < 1.0) globalAnimationProgress += 0.05;
-        // Run pot collection animation loop
         if (potAnimation.active) {
             potAnimation.progress += 0.035;
             if (potAnimation.progress >= 1) {
@@ -401,15 +431,12 @@
             drawUltraSharpCard(ax, 295, card, false, 40, 56);
         });
 
-        // Kinetic Pot Collection Animation Render Math
         if (potAnimation.active && potAnimation.winners.length > 0) {
-            let cx = 500, cy = 196; // Pot center
+            let cx = 500, cy = 196; 
             potAnimation.winners.forEach(w => {
                 let sc = SEAT_COORDS[w.id];
-                // Ease in-out interpolation
                 let p = potAnimation.progress; let ease = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
-                let ax = cx + (sc.x - cx) * ease;
-                let ay = cy + ((sc.y+38) - cy) * ease;
+                let ax = cx + (sc.x - cx) * ease, ay = cy + ((sc.y+38) - cy) * ease;
                 drawPhysicalChipStack(ax, ay, gameState.pot / potAnimation.winners.length);
             });
         }
