@@ -455,13 +455,15 @@
             localStorage.setItem('vegas_pro_master_bankroll', gameState.players[0].chips);
         } catch(e) {} 
     }
-</script>
 
-</body>
-</html>
 window.addEventListener('storage', (e) => {
     if (e.key === 'vegas_pro_master_bankroll') {
         gameState.players[0].chips = parseInt(e.newValue);
         refreshLeaderboardHUD();
     }
 });
+
+</script>
+
+</body>
+</html>
