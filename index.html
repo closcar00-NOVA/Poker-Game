@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>High-Stakes Texas Hold'em - Vegas Pro Championship</title>
+    <title>High-Stakes Texas Hold'em - Vegas Pro Championship v2.6</title>
     <style>
         :root {
             --bg-color: #05070f; --panel-bg: rgba(20, 35, 30, 0.7); --border-accent: rgba(52, 211, 153, 0.25);
@@ -421,6 +421,40 @@
         else if (bot.archetype === 'maverick') { if (needed === 0) r > 0.6 ? act('RAISE', BB*(Math.floor(Math.random()*3)+1)) : act('CHECK'); else r > 0.7 ? act('RAISE', BB) : (r > 0.2 ? act('CALL') : act('FOLD')); }
     }
 
+    function updateControls() {
+        if (!gameState.players) return;
+        let p = gameState.players[0];
+        if (gameState.currentTurn !== 0 || gameState.round === 'SHOWDOWN' || p.isEliminated || announcementTimer > 0 || forceShowdownReveal || potAnimationState.active) {
+            document.getElementById('btnFold').disabled = true;
+            document.getElementById('btnCheck').disabled = true;
+            document.getElementById('btnCall').disabled = true;
+            document.getElementById('btnBet').disabled = true;
+            return;
+        }
+
+        let needed = gameState.highestBetThisRound - p.currentBet;
+        document.getElementById('btnFold').disabled = false;
+        document.getElementById('btnCheck').disabled = (needed > 0);
+        document.getElementById('btnCall').disabled = (p.chips < needed);
+        document.getElementById('btnCall').innerText = needed > 0 ? `Call $${needed.toLocaleString()}` : 'Check / Call';
+
+        let minRaise = BB;
+        let maxRaise = p.chips - needed;
+        
+        if (maxRaise <= minRaise) {
+            document.getElementById('btnBet').disabled = true;
+        } else {
+            document.getElementById('btnBet').disabled = false;
+            let slider = document.getElementById('betSlider');
+            slider.min = minRaise;
+            slider.max = maxRaise;
+            slider.step = BB;
+            slider.value = minRaise;
+            updateBetValue(minRaise);
+        }
+    }
+
+    function updateBetValue(val) { document.getElementById('betValue').innerText = `$${parseInt(val).toLocaleString()}`; }
     function playerAction(type) {
         if (announcementTimer > 0 || forceShowdownReveal) return; 
         if (type === 'FOLD') executeAction(0, 'FOLD');
@@ -428,26 +462,6 @@
         if (type === 'CALL') executeAction(0, 'CALL');
         if (type === 'RAISE') executeAction(0, 'RAISE', parseInt(document.getElementById('betSlider').value));
     }
-
-    function updateControls() {
-        if (!gameState.players) return;
-        let p = gameState.players[0];
-        if (gameState.currentTurn !== 0 || gameState.round === 'SHOWDOWN' || p.isEliminated || announcementTimer > 0 || forceShowdownReveal) {
-            ['btnFold', 'btnCheck', 'btnCall', 'btnBet'].forEach(id => document.getElementById(id).disabled = true); return;
-        }
-        let needed = gameState.highestBetThisRound - p.currentBet;
-        document.getElementById('btnFold').disabled = false; document.getElementById('btnCheck').disabled = (needed > 0);
-        document.getElementById('btnCall').disabled = (p.chips < needed); document.getElementById('btnCall').innerText = needed > 0 ? `Call $${needed.toLocaleString()}` : 'Check / Call';
-
-        let minRaise = BB, maxRaise = p.chips - needed;
-        if (maxRaise <= minRaise) document.getElementById('btnBet').disabled = true;
-        else {
-            document.getElementById('btnBet').disabled = false;
-            let s = document.getElementById('betSlider'); s.min = minRaise; s.max = maxRaise; s.step = BB; s.value = minRaise; updateBetValue(minRaise);
-        }
-    }
-
-    function updateBetValue(val) { document.getElementById('betValue').innerText = `$${parseInt(val).toLocaleString()}`; }
 
     function render() {
         if (!gameState.players) return;
