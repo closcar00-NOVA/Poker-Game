@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>High-Stakes Texas Hold'em - Urban Edition</title>
+    <title>High-Stakes Texas Hold'em - Urban Edition v2.9</title>
     <style>
         :root {
             --bg-color: #040609; --panel-bg: rgba(15, 20, 26, 0.75); --border-accent: rgba(56, 189, 248, 0.2);
@@ -426,7 +426,11 @@
                         dealOrder++;
                     }
                     let ease = 1 - Math.pow(1 - t, 3);
-                    let animX = (w / 2) + (finalX - (w / 2)) * ease; let animY = (h / 2 - 120) + (finalY - (h / 2 + 120)) * ease;
+                    let animX = (w / 2) + (finalX - (w / 2)) * ease; 
+                    
+                    // PATCH: Fixed the Y-axis typo (changed +120 to -120 to correctly calculate the distance)
+                    let animY = (h / 2 - 120) + (finalY - (h / 2 - 120)) * ease;
+                    
                     let rot = (1 - ease) * Math.PI * 4;
                     drawUltraSharpCard(animX, animY, rot, card, hide, width, height);
                 });
