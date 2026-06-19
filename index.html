@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>High-Stakes Texas Hold'em - Broadcast Edition v3.1</title>
+    <title>High-Stakes Texas Hold'em - Broadcast Edition v3.2</title>
     <style>
         :root { --bg-color: #040609; --panel-bg: rgba(15, 20, 26, 0.75); --border-accent: rgba(56, 189, 248, 0.2); --accent-color: #38bdf8; --accent-hover: #0284c7; --danger-color: #f43f5e; --text-color: #f8fafc; --text-muted: #94a3b8; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -102,23 +102,46 @@
     let victorySequenceTimer = 0, pendingPayoutBlueprint = [];
     let particles = [];
 
+    // --- Core Master Ledger Hooks ---
     window.onload = function() {
         canvas = document.getElementById('pokerCanvas'); ctx = canvas.getContext('2d');
         try {
-            let raw = localStorage.getItem('vpro_champ_v3_1_save');
+            let raw = localStorage.getItem('vpro_champ_v3_2_save'); // Bumped save key version
             if (raw) {
                 let parsed = JSON.parse(raw);
                 if (parsed && parsed.players && parsed.players.length === 7 && parsed.round) {
                     gameState = parsed; 
-                    // Master Ledger Hook
-                    let masterLedger = localStorage.getItem('vegas_pro_master_bankroll');
-                    if(masterLedger) gameState.players[0].chips = parseInt(masterLedger);
-                    logMessage("Urban Broadcast Edition restored with Unified Bankroll.", "system"); updateControls();
                 } else throw new Error("Invalid format.");
             } else initNewSession();
-        } catch(e) { localStorage.removeItem('vpro_champ_v3_1_save'); initNewSession(); }
+        } catch(e) { localStorage.removeItem('vpro_champ_v3_2_save'); initNewSession(); }
+
+        // Sync Master Ledger explicitly on load
+        let masterLedger = localStorage.getItem('vegas_pro_master_bankroll');
+        if(masterLedger && gameState.players[0]) {
+            gameState.players[0].chips = parseInt(masterLedger);
+            logMessage("Synced with Master Bankroll Ledger.", "system");
+        }
+        
+        updateControls();
         refreshLeaderboardHUD(); setInterval(tickEngine, 30);
     };
+
+    window.addEventListener('storage', (event) => {
+        if (event.key === 'vegas_pro_master_bankroll') {
+            if (gameState && gameState.players && gameState.players[0]) {
+                gameState.players[0].chips = parseInt(event.newValue);
+                refreshLeaderboardHUD();
+            }
+        }
+    });
+
+    function saveToLocalStorage() { 
+        try { 
+            localStorage.setItem('vpro_champ_v3_2_save', JSON.stringify(gameState)); 
+            // Sync Master Ledger on every action
+            localStorage.setItem('vegas_pro_master_bankroll', gameState.players[0].chips);
+        } catch(e) {} 
+    }
 
     document.addEventListener('click', function() { if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); }, { once: true });
 
@@ -141,7 +164,6 @@
             players: [ createPlayer(0, "C. Lo.", 'human', 'player'), createPlayer(1, "The Shark", 'bot', 'shark'), createPlayer(2, "The Whale", 'bot', 'whale'), createPlayer(3, "The Grinder", 'bot', 'grinder'), createPlayer(4, "Station Sam", 'bot', 'station'), createPlayer(5, "Rock Rocky", 'bot', 'rock'), createPlayer(6, "Maverick Max", 'bot', 'maverick') ],
             dealerIndex: 0, pot: 0, communityCards: [], round: 'PREFLOP', deck: [], currentTurn: 0, highestBetThisRound: 0, handCount: 1
         };
-        // Master Ledger Hook
         let masterLedger = localStorage.getItem('vegas_pro_master_bankroll');
         if(masterLedger) gameState.players[0].chips = parseInt(masterLedger);
         else localStorage.setItem('vegas_pro_master_bankroll', STARTING_STACK);
@@ -149,14 +171,14 @@
     }
 
     function resetEntireSession() {
-        if(confirm("Restore all bankrolls to $1,000,000 and clear local history?")) { localStorage.removeItem('vpro_champ_v3_1_save'); localStorage.setItem('vegas_pro_master_bankroll', STARTING_STACK); initNewSession(); refreshLeaderboardHUD(); }
+        if(confirm("Restore all bankrolls to $1,000,000 and clear local history?")) { localStorage.removeItem('vpro_champ_v3_2_save'); localStorage.setItem('vegas_pro_master_bankroll', STARTING_STACK); initNewSession(); refreshLeaderboardHUD(); }
     }
 
     function isSpectator() { return gameState.players[0].hasFolded || gameState.players[0].isEliminated; }
 
     function startNewHand() {
         forceShowdownReveal = false; globalAnimationProgress = 0; lastDealtSoundIndex = -1; potAnimationState.active = false; victorySequenceTimer = 0; particles = [];
-        // Resync human ledger before the hand begins in case slots altered it
+        
         let masterLedger = localStorage.getItem('vegas_pro_master_bankroll');
         if(masterLedger && gameState.players[0]) gameState.players[0].chips = parseInt(masterLedger);
 
@@ -292,6 +314,7 @@
         let active = gameState.players.filter(p => !p.hasFolded && !p.isEliminated);
         if (active.length === 1) {
             let winner = active[0]; winner.chips += gameState.pot;
+            saveToLocalStorage(); // Ensure the win is recorded immediately
             potAnimationState = { active: true, progress: 0, winners: [winner.id], amount: gameState.pot, payoutBlueprint: [{ name: winner.name, amount: gameState.pot, desc: "Everyone Folded" }] }; 
             playSoundEffect('slide'); return true;
         } return false;
@@ -318,6 +341,7 @@
         active.forEach(p => { let r = evaluateSevenCardHand([...p.cards, ...gameState.communityCards]); p.handStrengthText = r.label; p.handScore = r.score; if (r.score > bestScore) { bestScore = r.score; winners = [p]; } else if (r.score === bestScore) winners.push(p); });
         let share = Math.floor(gameState.pot / winners.length), payoutBlueprint = [];
         winners.forEach(w => { w.chips += share; payoutBlueprint.push({ name: w.name, amount: share, desc: winners.length > 1 ? `Split Pot: ${w.handStrengthText}` : `Won Pot: ${w.handStrengthText}` }); logMessage(`${w.name} wins $${share.toLocaleString()} with ${w.handStrengthText}!`, "win"); });
+        saveToLocalStorage(); // Ensure the win is recorded immediately
         potAnimationState = { active: true, progress: 0, winners: winners.map(w => w.id), amount: share, payoutBlueprint: payoutBlueprint }; playSoundEffect('slide');
     }
 
@@ -447,22 +471,6 @@
     }
 
     function logMessage(msg, type) { let box = document.getElementById('logBox'); if (!box) return; box.innerHTML += `<div class="log-entry log-${type}">${msg}</div>`; box.scrollTop = box.scrollHeight; }
-    
-    function saveToLocalStorage() { 
-        try { 
-            localStorage.setItem('vpro_champ_v3_1_save', JSON.stringify(gameState)); 
-            // Sync Master Ledger
-            localStorage.setItem('vegas_pro_master_bankroll', gameState.players[0].chips);
-        } catch(e) {} 
-    }
-
-window.addEventListener('storage', (e) => {
-    if (e.key === 'vegas_pro_master_bankroll') {
-        gameState.players[0].chips = parseInt(e.newValue);
-        refreshLeaderboardHUD();
-    }
-});
-
 </script>
 
 </body>
