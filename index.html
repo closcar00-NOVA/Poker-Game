@@ -5,17 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VEGAS PRO - High Roller Poker</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
-    <style>
+<style>
         :root { 
             --accent-cyan: #06b6d4; 
             --accent-magenta: #ff00ff; 
             --accent-gold: #fbbf24; 
         }
         
+        /* Universal Box Sizing (Fixes the border math) */
+        *, *::before, *::after { box-sizing: border-box; }
+        
         /* PHASE 1: The VIP Environment */
         body { 
             margin: 0; padding: 0; 
-            /* Pulls your background image, falls back to a dark radial gradient */
             background: radial-gradient(circle at center, #1e293b 0%, #020617 100%), url('poker_env.jpg') no-repeat center center fixed; 
             background-size: cover;
             color: white; font-family: 'Orbitron', sans-serif; 
@@ -28,7 +30,7 @@
             position: relative;
             width: 100%;
             max-width: 1100px;
-            aspect-ratio: 16 / 9;
+            height: 600px; /* Locked height so it doesn't squish */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -37,18 +39,16 @@
         /* The Physical Table Edge & Felt */
         .poker-table {
             position: relative;
-            width: 80%;
-            height: 60%;
-            /* Uses your uploaded table image, falls back to a CSS dark felt */
+            width: 800px; /* Locked width */
+            height: 400px; /* Locked height */
             background: #0f172a url('table_felt.png') no-repeat center center;
             background-size: cover;
-            border-radius: 200px; /* Creates the stadium oval shape */
-            /* The heavy leather rail */
+            border-radius: 200px; /* Creates the perfect stadium oval */
             border: 25px solid #020617;
             box-shadow: 
                 0 40px 80px rgba(0,0,0,0.9), 
-                inset 0 0 50px rgba(0,0,0,0.8), /* Shadow inside the rail */
-                inset 0 0 0 5px rgba(6, 182, 212, 0.3); /* Subtle neon cyan rim light */
+                inset 0 0 50px rgba(0,0,0,0.8), 
+                inset 0 0 0 5px rgba(6, 182, 212, 0.3); 
         }
 
         /* PHASE 2: The Player Seats */
@@ -58,17 +58,16 @@
             flex-direction: column;
             align-items: center;
             gap: 10px;
-            /* Centers the anchor point of the seat */
             transform: translate(-50%, -50%);
             z-index: 10;
         }
 
-        /* Mathematical placement of seats around the oval */
+        /* Mathematically locked to the exact edges of the rail */
         #seat-user     { top: 100%; left: 50%; }  /* Bottom Center */
-        #seat-shark    { top: 75%; left: 0%; }    /* Bottom Left */
-        #seat-rock     { top: 15%; left: 15%; }   /* Top Left */
-        #seat-wildcard { top: 15%; left: 85%; }   /* Top Right */
-        #seat-pro      { top: 75%; left: 100%; }  /* Bottom Right */
+        #seat-shark    { top: 50%;  left: 0%; }   /* Middle Left edge */
+        #seat-rock     { top: 0%;   left: 25%; }  /* Top Left curve */
+        #seat-wildcard { top: 0%;   left: 75%; }  /* Top Right curve */
+        #seat-pro      { top: 50%;  left: 100%; } /* Middle Right edge */
 
         /* Avatar Styling */
         .avatar {
@@ -82,7 +81,6 @@
             transition: all 0.3s ease;
         }
 
-        /* The Nameplate */
         .nameplate {
             background: rgba(2, 6, 23, 0.9);
             border: 1px solid #334155;
@@ -95,7 +93,7 @@
             backdrop-filter: blur(5px);
         }
 
-        /* Active Player State (Who's Turn It Is) */
+        /* Active Player State */
         .seat.active .avatar {
             border-color: var(--accent-cyan);
             box-shadow: 0 0 30px rgba(6, 182, 212, 0.6), inset 0 0 15px rgba(6, 182, 212, 0.3);
@@ -106,7 +104,6 @@
             color: var(--accent-cyan);
             text-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
         }
-
     </style>
 </head>
 <body>
