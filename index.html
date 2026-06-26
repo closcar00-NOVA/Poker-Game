@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VEGAS PRO - High Roller Poker</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
-<style>
+    <style>
         :root { 
             --accent-cyan: #06b6d4; 
             --accent-magenta: #ff00ff; 
@@ -18,7 +18,6 @@
         /* PHASE 1: The VIP Environment */
         body { 
             margin: 0; padding: 0; 
-            /* CHANGED .jpg to .png below! */
             background: radial-gradient(circle at center, #1e293b 0%, #020617 100%), url('poker_env.png') no-repeat center center fixed; 
             background-size: cover;
             color: white; font-family: 'Orbitron', sans-serif; 
@@ -105,9 +104,8 @@
             color: var(--accent-cyan);
             text-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
         }
-    /* PHASE 3: Cards and Chips */
-        
-        /* The Center of the Table (Flop & Pot) */
+
+        /* PHASE 3: Cards and Chips */
         .table-center {
             position: absolute;
             top: 50%;
@@ -139,7 +137,7 @@
         }
 
         .chip-stack-large {
-            height: 60px; /* Adjust based on your asset's padding */
+            height: 60px;
             object-fit: contain;
             filter: drop-shadow(0 10px 10px rgba(0,0,0,0.8));
         }
@@ -154,7 +152,6 @@
             height: 100px;
             border-radius: 5px;
             box-shadow: 2px 5px 10px rgba(0,0,0,0.6);
-            /* Adds a subtle white edge to simulate physical card stock */
             border: 1px solid rgba(255,255,255,0.1); 
         }
 
@@ -163,7 +160,6 @@
             position: absolute;
             display: flex;
             gap: 2px;
-            /* Positions the cards slightly offset behind the avatar */
             top: -40px; 
             left: 50px;
             transform: rotate(15deg);
@@ -181,7 +177,26 @@
     <div class="room-container">
         <div class="poker-table">
             
+            <div class="table-center">
+                <div class="main-pot">
+                    <img src="casino_chips_2.png" class="chip-stack-large" alt="Pot Chips">
+                    <div class="pot-amount">$25,500</div>
+                </div>
+                
+                <div class="community-cards">
+                    <img src="card_back.png" class="card" alt="Card">
+                    <img src="card_back.png" class="card" alt="Card">
+                    <img src="card_back.png" class="card" alt="Card">
+                    <img src="card_back.png" class="card" alt="Card">
+                    <img src="card_back.png" class="card" alt="Card">
+                </div>
+            </div>
+
             <div class="seat active" id="seat-user">
+                <div class="player-hand">
+                    <img src="card_back.png" class="card" alt="Card">
+                    <img src="card_back.png" class="card" alt="Card">
+                </div>
                 <img src="avatar_user.png" class="avatar" alt="You">
                 <div class="nameplate">YOU ($50k)</div>
             </div>
