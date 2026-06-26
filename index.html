@@ -9,49 +9,49 @@
         :root { 
             --accent-cyan: #06b6d4; 
             --accent-magenta: #ff00ff; 
-            --accent-gold: #fbbf24; 
+            --accent-gold: #FED101; /* CRXO Brand Gold */
+            --accent-green: #00985A; /* CRXO Brand Green */
         }
         
-        /* Universal Box Sizing (Fixes the border math) */
         *, *::before, *::after { box-sizing: border-box; }
         
-        /* PHASE 1: The VIP Environment */
         body { 
-            margin: 0; padding: 0; 
-            background: radial-gradient(circle at center, #1e293b 0%, #020617 100%), url('poker_env.png') no-repeat center center fixed; 
+            margin: 0; padding: 20px; 
+            background: radial-gradient(circle at center, #1e293b 0%, #000000 100%), url('poker_env.png') no-repeat center center fixed; 
             background-size: cover;
             color: white; font-family: 'Orbitron', sans-serif; 
             display: flex; align-items: center; justify-content: center; 
-            min-height: 100vh; overflow: hidden; user-select: none; 
+            min-height: 100vh; overflow-x: hidden; user-select: none; 
         }
 
-        /* The Table Area */
+        /* Contains Table + Controls */
         .room-container {
             position: relative;
             width: 100%;
             max-width: 1100px;
-            height: 600px; /* Locked height so it doesn't squish */
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
+            gap: 50px; /* Space between table and controls */
         }
 
         /* The Physical Table Edge & Felt */
         .poker-table {
             position: relative;
-            width: 800px; /* Locked width */
-            height: 400px; /* Locked height */
+            width: 100%;
+            max-width: 900px; 
+            height: 450px; 
             background: #0f172a url('table_felt.png') no-repeat center center;
             background-size: cover;
-            border-radius: 200px; /* Creates the perfect stadium oval */
-            border: 25px solid #020617;
+            border-radius: 225px; 
+            border: 25px solid #000000;
             box-shadow: 
                 0 40px 80px rgba(0,0,0,0.9), 
                 inset 0 0 50px rgba(0,0,0,0.8), 
                 inset 0 0 0 5px rgba(6, 182, 212, 0.3); 
         }
 
-        /* PHASE 2: The Player Seats */
+        /* Player Seats */
         .seat {
             position: absolute;
             display: flex;
@@ -62,14 +62,12 @@
             z-index: 10;
         }
 
-        /* Mathematically locked to the exact edges of the rail */
-        #seat-user     { top: 100%; left: 50%; }  /* Bottom Center */
-        #seat-shark    { top: 50%;  left: 0%; }   /* Middle Left edge */
-        #seat-rock     { top: 0%;   left: 25%; }  /* Top Left curve */
-        #seat-wildcard { top: 0%;   left: 75%; }  /* Top Right curve */
-        #seat-pro      { top: 50%;  left: 100%; } /* Middle Right edge */
+        #seat-user     { top: 100%; left: 50%; }  
+        #seat-shark    { top: 50%;  left: 0%; }   
+        #seat-rock     { top: 0%;   left: 25%; }  
+        #seat-wildcard { top: 0%;   left: 75%; }  
+        #seat-pro      { top: 50%;  left: 100%; } 
 
-        /* Avatar Styling */
         .avatar {
             width: 100px;
             height: 100px;
@@ -82,7 +80,7 @@
         }
 
         .nameplate {
-            background: rgba(2, 6, 23, 0.9);
+            background: rgba(0, 0, 0, 0.9);
             border: 1px solid #334155;
             padding: 5px 15px;
             border-radius: 15px;
@@ -93,7 +91,6 @@
             backdrop-filter: blur(5px);
         }
 
-        /* Active Player State */
         .seat.active .avatar {
             border-color: var(--accent-cyan);
             box-shadow: 0 0 30px rgba(6, 182, 212, 0.6), inset 0 0 15px rgba(6, 182, 212, 0.3);
@@ -105,7 +102,7 @@
             text-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
         }
 
-        /* PHASE 3: Cards and Chips */
+        /* Cards and Chips */
         .table-center {
             position: absolute;
             top: 50%;
@@ -125,7 +122,7 @@
             background: rgba(0, 0, 0, 0.6);
             padding: 5px 20px;
             border-radius: 30px;
-            border: 1px solid #fbbf24;
+            border: 1px solid var(--accent-gold);
             box-shadow: 0 5px 15px rgba(0,0,0,0.5);
         }
 
@@ -133,7 +130,7 @@
             font-size: 1.5rem;
             font-weight: 900;
             color: var(--accent-gold);
-            text-shadow: 0 0 10px rgba(251, 191, 36, 0.4);
+            text-shadow: 0 0 10px rgba(254, 209, 1, 0.4);
         }
 
         .chip-stack-large {
@@ -142,10 +139,7 @@
             filter: drop-shadow(0 10px 10px rgba(0,0,0,0.8));
         }
 
-        .community-cards {
-            display: flex;
-            gap: 10px;
-        }
+        .community-cards { display: flex; gap: 10px; }
 
         .card {
             width: 70px;
@@ -155,7 +149,6 @@
             border: 1px solid rgba(255,255,255,0.1); 
         }
 
-        /* Player Hole Cards */
         .player-hand {
             position: absolute;
             display: flex;
@@ -165,16 +158,51 @@
             transform: rotate(15deg);
             z-index: -1; 
         }
+        .player-hand .card { width: 45px; height: 65px; }
 
-        .player-hand .card {
-            width: 45px;
-            height: 65px;
+        /* THE NEW POKER CONTROL DECK */
+        #controls { 
+            display: flex; justify-content: space-between; align-items: center; 
+            background: linear-gradient(180deg, #1e293b, #000000); 
+            padding: 25px 30px; border-radius: 12px; border-top: 2px solid #475569; 
+            width: 100%; max-width: 900px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8); 
+        }
+        
+        .stat-box { display: flex; flex-direction: column; align-items: center; background: #020617; padding: 12px 24px; border-radius: 8px; border: 1px solid #334155; min-width: 160px; box-shadow: inset 0 5px 10px rgba(0,0,0,0.8); }
+        .stat-label { font-size: 0.8rem; color: #64748b; margin-bottom: 5px; letter-spacing: 2px; }
+        .stat-value { min-width: 120px; text-align: center; font-size: 1.6rem; font-weight: 700; color: var(--accent-gold); text-shadow: 0 0 10px rgba(254, 209, 1, 0.3); }
+        
+        .action-group { display: flex; gap: 15px; }
+        
+        .poker-btn { 
+            font-family: 'Orbitron', sans-serif; font-size: 1.4rem; font-weight: 900; 
+            padding: 15px 40px; border-radius: 8px; cursor: pointer; text-transform: uppercase; 
+            letter-spacing: 2px; color: white; transition: all 0.2s; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+        .poker-btn:hover { filter: brightness(1.2); transform: translateY(-2px); }
+        .poker-btn:active { transform: translateY(2px); }
+        
+        .btn-fold { background: linear-gradient(180deg, #ef4444, #7f1d1d); border: 2px solid #fca5a5; }
+        .btn-call { background: linear-gradient(180deg, #3b82f6, #1e3a8a); border: 2px solid #93c5fd; }
+        .btn-raise { background: linear-gradient(180deg, var(--accent-green), #004d2d); border: 2px solid #34d399; }
+
+        .bet-controls { display: flex; align-items: center; gap: 12px; }
+        .bet-btn { background: linear-gradient(180deg, #334155, #0f172a); border: 1px solid #475569; color: white; width: 36px; height: 36px; border-radius: 6px; font-size: 1.4rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; font-family: 'Orbitron', sans-serif; }
+        .bet-btn:hover { background: #475569; } .bet-btn:active { transform: translateY(2px); }
+
+        @media (max-width: 900px) {
+            .poker-table { width: 100%; height: 350px; border-width: 15px; }
+            #controls { flex-direction: column; gap: 20px; padding: 20px; }
+            .action-group { width: 100%; justify-content: center; }
+            .poker-btn { padding: 15px 20px; font-size: 1.2rem; }
         }
     </style>
 </head>
 <body>
 
     <div class="room-container">
+        
         <div class="poker-table">
             
             <div class="table-center">
@@ -222,6 +250,29 @@
             </div>
 
         </div>
+
+        <div id="controls">
+            <div class="stat-box">
+                <div class="stat-label">MASTER BANKROLL</div>
+                <div class="stat-value" id="balanceDisplay">$8,500,000</div>
+            </div>
+
+            <div class="action-group">
+                <button class="poker-btn btn-fold">FOLD</button>
+                <button class="poker-btn btn-call">CALL</button>
+                <button class="poker-btn btn-raise">RAISE</button>
+            </div>
+
+            <div class="stat-box">
+                <div class="stat-label">RAISE AMOUNT</div>
+                <div class="bet-controls">
+                    <button class="bet-btn" id="betMinus">-</button>
+                    <div class="stat-value" id="betDisplay">$5,000</div>
+                    <button class="bet-btn" id="betPlus">+</button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
 </body>
