@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VEGAS PRO - High Roller Poker</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pokersolver/2.1.4/pokersolver.min.js"></script>
     <style>
         :root { 
             --accent-gold: #FED101; 
@@ -24,185 +25,72 @@
             min-height: 100vh; overflow-x: hidden; user-select: none; 
         }
 
-        /* MASTER LAYOUT: Scales automatically */
         .master-layout {
-            display: flex;
-            gap: 50px;
-            width: 100%;
-            max-width: 1500px;
-            margin-top: 2vh;
-            align-items: stretch;
-            justify-content: center;
+            display: flex; gap: 50px; width: 100%; max-width: 1500px;
+            margin-top: 2vh; align-items: stretch; justify-content: center;
         }
 
-        /* LEFT COLUMN: Table + Controls */
         .main-game-area {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 80px; 
-            flex: 1;
-            max-width: 950px;
+            display: flex; flex-direction: column; align-items: center;
+            gap: 80px; flex: 1; max-width: 950px;
         }
 
-        /* The Physical Table Edge & Felt */
         .poker-table {
-            position: relative;
-            width: 100%;
-            height: 450px; 
-            background: var(--accent-black) url('table_felt.png') no-repeat center center;
-            background-size: cover;
-            border-radius: 225px; 
-            border: 25px solid var(--accent-black);
-            box-shadow: 
-                0 40px 80px rgba(0,0,0,0.9), 
-                inset 0 0 50px rgba(0,0,0,0.8), 
-                inset 0 0 0 5px rgba(0, 152, 90, 0.3); 
+            position: relative; width: 100%; height: 450px; 
+            background: var(--accent-black) url('table_felt.png') no-repeat center center; background-size: cover;
+            border-radius: 225px; border: 25px solid var(--accent-black);
+            box-shadow: 0 40px 80px rgba(0,0,0,0.9), inset 0 0 50px rgba(0,0,0,0.8), inset 0 0 0 5px rgba(0, 152, 90, 0.3); 
         }
 
-        /* Player Seats */
-        .seat {
-            position: absolute;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            transform: translate(-50%, -50%);
-            z-index: 10;
-        }
-
+        .seat { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 8px; transform: translate(-50%, -50%); z-index: 10; }
         #seat-user     { top: 100%; left: 50%; }  
         #seat-shark    { top: 50%;  left: 0%; }   
         #seat-rock     { top: 0%;   left: 25%; }  
         #seat-wildcard { top: 0%;   left: 75%; }  
         #seat-pro      { top: 50%;  left: 100%; } 
 
-        .avatar {
-            width: 85px; 
-            height: 85px;
-            border-radius: 50%;
-            background: #1e293b;
-            border: 3px solid #334155;
-            object-fit: cover;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.6);
-            transition: all 0.3s ease;
-        }
+        .avatar { width: 85px; height: 85px; border-radius: 50%; background: #1e293b; border: 3px solid #334155; object-fit: cover; box-shadow: 0 10px 20px rgba(0,0,0,0.6); transition: all 0.3s ease; }
+        .nameplate { background: rgba(0, 0, 0, 0.9); border: 1px solid #334155; padding: 5px 15px; border-radius: 15px; font-size: 0.8rem; letter-spacing: 1px; text-transform: uppercase; color: #94a3b8; backdrop-filter: blur(5px); white-space: nowrap; }
 
-        .nameplate {
-            background: rgba(0, 0, 0, 0.9);
-            border: 1px solid #334155;
-            padding: 5px 15px;
-            border-radius: 15px;
-            font-size: 0.8rem;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            color: #94a3b8;
-            backdrop-filter: blur(5px);
-            white-space: nowrap;
-        }
+        .seat.active .avatar { border-color: var(--accent-green); box-shadow: 0 0 30px rgba(0, 152, 90, 0.6), inset 0 0 15px rgba(0, 152, 90, 0.3); transform: scale(1.1); }
+        .seat.active .nameplate { border-color: var(--accent-green); color: var(--accent-green); text-shadow: 0 0 10px rgba(0, 152, 90, 0.5); }
 
-        /* Active State Branding */
-        .seat.active .avatar {
-            border-color: var(--accent-green);
-            box-shadow: 0 0 30px rgba(0, 152, 90, 0.6), inset 0 0 15px rgba(0, 152, 90, 0.3);
-            transform: scale(1.1);
-        }
-        .seat.active .nameplate {
-            border-color: var(--accent-green);
-            color: var(--accent-green);
-            text-shadow: 0 0 10px rgba(0, 152, 90, 0.5);
-        }
+        .table-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 15px; z-index: 5; }
+        .main-pot { display: flex; align-items: center; gap: 15px; background: rgba(0, 0, 0, 0.7); padding: 5px 20px; border-radius: 30px; border: 1px solid var(--accent-gold); box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        .pot-amount { font-size: 1.5rem; font-weight: 900; color: var(--accent-gold); text-shadow: 0 0 10px rgba(254, 209, 1, 0.4); }
+        .chip-stack-large { height: 50px; object-fit: contain; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.8)); }
 
-        /* Cards and Chips */
-        .table-center {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-            z-index: 5;
-        }
+        .community-cards { display: flex; gap: 8px; min-height: 95px; }
 
-        .main-pot {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 5px 20px;
-            border-radius: 30px;
-            border: 1px solid var(--accent-gold);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        /* DYNAMIC CSS CARDS */
+        .css-card {
+            width: 65px; height: 95px; background: var(--accent-black); 
+            border: 2px solid var(--accent-gold); border-radius: 6px; 
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.8), 2px 5px 10px rgba(0,0,0,0.6);
+            font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 1.2rem;
+            opacity: 0; transform: translateY(-20px); transition: all 0.4s ease-out;
         }
+        .css-card.dealt { opacity: 1; transform: translateY(0); }
+        .css-card.facedown { background: #0f172a url('card_back.png') center/cover; border-color: #334155; }
+        .suit-hearts, .suit-diamonds { color: var(--accent-gold); text-shadow: 0 0 8px rgba(254, 209, 1, 0.5); }
+        .suit-spades, .suit-clubs { color: var(--accent-green); text-shadow: 0 0 8px rgba(0, 152, 90, 0.5); }
+        .css-card .suit-icon { font-size: 1.8rem; line-height: 1; }
 
-        .pot-amount {
-            font-size: 1.5rem;
-            font-weight: 900;
-            color: var(--accent-gold);
-            text-shadow: 0 0 10px rgba(254, 209, 1, 0.4);
-        }
+        .player-hand { position: absolute; display: flex; gap: 2px; top: -30px; left: 45px; transform: rotate(15deg); z-index: -1; min-height: 60px; }
+        .player-hand .css-card { width: 40px; height: 60px; font-size: 0.9rem; }
+        .player-hand .css-card .suit-icon { font-size: 1.2rem; }
 
-        .chip-stack-large {
-            height: 50px;
-            object-fit: contain;
-            filter: drop-shadow(0 10px 10px rgba(0,0,0,0.8));
-        }
-
-        .community-cards { display: flex; gap: 8px; }
-
-        .card {
-            width: 65px;
-            height: 95px;
-            border-radius: 5px;
-            box-shadow: 2px 5px 10px rgba(0,0,0,0.6);
-            border: 1px solid rgba(255,255,255,0.1); 
-        }
-
-        .player-hand {
-            position: absolute;
-            display: flex;
-            gap: 2px;
-            top: -30px; 
-            left: 45px;
-            transform: rotate(15deg);
-            z-index: -1; 
-        }
-        .player-hand .card { width: 40px; height: 60px; }
-
-        /* THE POKER CONTROL DECK */
-        #controls { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: stretch; 
-            gap: 20px;
-            background: linear-gradient(180deg, #1e293b, var(--accent-black)); 
-            padding: 20px; 
-            border-radius: 12px; 
-            border-top: 2px solid #475569; 
-            width: 100%;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.8); 
-        }
-        
-        .stat-box { 
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            background: var(--accent-black); padding: 10px 15px; border-radius: 8px; 
-            border: 1px solid #334155; flex: 1; box-shadow: inset 0 5px 10px rgba(0,0,0,0.8); 
-        }
+        #controls { display: flex; justify-content: space-between; align-items: stretch; gap: 20px; background: linear-gradient(180deg, #1e293b, var(--accent-black)); padding: 20px; border-radius: 12px; border-top: 2px solid #475569; width: 100%; box-shadow: 0 20px 40px rgba(0,0,0,0.8); }
+        .stat-box { display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--accent-black); padding: 10px 15px; border-radius: 8px; border: 1px solid #334155; flex: 1; box-shadow: inset 0 5px 10px rgba(0,0,0,0.8); }
         .stat-label { font-size: 0.75rem; color: #64748b; margin-bottom: 5px; letter-spacing: 1px; white-space: nowrap; }
         .stat-value { text-align: center; font-size: 1.4rem; font-weight: 700; color: var(--accent-gold); text-shadow: 0 0 10px rgba(254, 209, 1, 0.3); }
         
         .action-group { display: flex; gap: 10px; flex: 2; }
-        
-        .poker-btn { 
-            flex: 1; 
-            font-family: 'Orbitron', sans-serif; font-size: 1.2rem; font-weight: 900; 
-            border-radius: 8px; cursor: pointer; text-transform: uppercase; 
-            letter-spacing: 2px; color: white; transition: all 0.2s; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-        }
-        .poker-btn:hover { filter: brightness(1.2); transform: translateY(-2px); }
-        .poker-btn:active { transform: translateY(2px); }
+        .poker-btn { flex: 1; font-family: 'Orbitron', sans-serif; font-size: 1.2rem; font-weight: 900; border-radius: 8px; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; color: white; transition: all 0.2s; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        .poker-btn:hover:not(:disabled) { filter: brightness(1.2); transform: translateY(-2px); }
+        .poker-btn:active:not(:disabled) { transform: translateY(2px); }
+        .poker-btn:disabled { filter: grayscale(1); opacity: 0.5; cursor: not-allowed; }
         
         .btn-fold { background: linear-gradient(180deg, #ef4444, #7f1d1d); border: 2px solid #fca5a5; }
         .btn-call { background: linear-gradient(180deg, #3b82f6, #1e3a8a); border: 2px solid #93c5fd; }
@@ -211,214 +99,310 @@
         .bet-controls { display: flex; align-items: center; gap: 8px; }
         .bet-btn { background: linear-gradient(180deg, #334155, var(--accent-black)); border: 1px solid #475569; color: white; width: 30px; height: 30px; border-radius: 6px; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
-        /* RIGHT COLUMN: SIDEBAR PANELS */
-        .sidebar {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            width: 300px; 
-            flex-shrink: 0;
-        }
+        .sidebar { display: flex; flex-direction: column; gap: 20px; width: 300px; flex-shrink: 0; }
+        .side-panel { background: rgba(0, 0, 0, 0.85); border: 1px solid #334155; border-radius: 12px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); backdrop-filter: blur(10px); }
+        .panel-header { color: var(--accent-gold); font-size: 1rem; font-weight: 900; margin: 0 0 15px 0; border-bottom: 1px solid #334155; padding-bottom: 10px; letter-spacing: 2px; text-transform: uppercase; }
 
-        .side-panel {
-            background: rgba(0, 0, 0, 0.85);
-            border: 1px solid #334155;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-            backdrop-filter: blur(10px);
-        }
-
-        .panel-header {
-            color: var(--accent-gold);
-            font-size: 1rem;
-            font-weight: 900;
-            margin: 0 0 15px 0;
-            border-bottom: 1px solid #334155;
-            padding-bottom: 10px;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
-        /* Leaderboard Specifics */
-        .leaderboard-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(51, 65, 85, 0.5);
-            font-size: 0.9rem;
-        }
+        .leaderboard-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(51, 65, 85, 0.5); font-size: 0.9rem; }
         .leaderboard-row:last-child { border-bottom: none; }
         .lb-name { font-weight: 700; color: white; }
         .lb-score { color: var(--accent-gold); }
 
-        /* Action Log */
-        .log-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; font-size: 0.85rem; }
+        .log-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; font-size: 0.85rem; max-height: 150px; overflow-y: auto; }
         .log-item { display: flex; justify-content: space-between; color: #94a3b8; }
         .log-item strong { color: white; }
         .log-action.raise { color: var(--accent-green); }
         .log-action.call { color: #3b82f6; }
         .log-action.fold { color: #ef4444; }
 
-        /* MODULE: Hand Strength */
         .hand-strength-display { display: flex; flex-direction: column; gap: 8px; }
-        .current-hand { font-size: 1.2rem; font-weight: 700; color: white; text-align: center; letter-spacing: 1px; text-transform: uppercase; }
+        .current-hand { font-size: 1.1rem; font-weight: 700; color: white; text-align: center; letter-spacing: 1px; text-transform: uppercase; min-height: 1.2rem; }
         .hand-bar-bg { width: 100%; height: 8px; background: #1e293b; border-radius: 4px; overflow: hidden; margin: 5px 0; }
-        .hand-bar-fill { width: 65%; height: 100%; background: var(--accent-green); box-shadow: 0 0 10px rgba(0, 152, 90, 0.6); }
+        .hand-bar-fill { width: 0%; height: 100%; background: var(--accent-green); box-shadow: 0 0 10px rgba(0, 152, 90, 0.6); transition: width 0.5s ease; }
         .hand-odds { font-size: 0.8rem; color: #94a3b8; text-align: center; text-transform: uppercase; letter-spacing: 1px; }
 
-        /* MODULE: Table Stats */
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .stat-item { display: flex; flex-direction: column; background: var(--accent-black); padding: 10px; border-radius: 8px; border: 1px solid #334155; align-items: center; box-shadow: inset 0 5px 10px rgba(0,0,0,0.8); }
         .stat-item .stat-title { font-size: 0.7rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
         .stat-item .stat-value { font-size: 1rem; font-weight: 700; color: var(--accent-gold); text-shadow: 0 0 10px rgba(254, 209, 1, 0.3); }
 
-        @media (max-width: 1200px) {
-            .master-layout { flex-direction: column; align-items: center; }
-            .sidebar { width: 100%; max-width: 950px; flex-direction: row; flex-wrap: wrap; }
-            .side-panel { flex: 1; min-width: 300px; }
-        }
+        @media (max-width: 1200px) { .master-layout { flex-direction: column; align-items: center; } .sidebar { width: 100%; max-width: 950px; flex-direction: row; flex-wrap: wrap; } .side-panel { flex: 1; min-width: 300px; } }
     </style>
 </head>
 <body>
 
     <div class="master-layout">
-        
-        <!-- LEFT COLUMN: GAME AREA -->
         <div class="main-game-area">
-            
             <div class="poker-table">
                 <div class="table-center">
                     <div class="main-pot">
-                        <img src="pot_chips.png" class="chip-stack-large" alt="Pot Chips">
-                        <div class="pot-amount">$25,500</div>
+                        <img src="pot_chips.png" class="chip-stack-large" alt="Pot Chips" onerror="this.style.display='none'">
+                        <div class="pot-amount" id="ui-pot">$0</div>
                     </div>
-                    
-                    <div class="community-cards">
-                        <img src="card_back.png" class="card" alt="Card">
-                        <img src="card_back.png" class="card" alt="Card">
-                        <img src="card_back.png" class="card" alt="Card">
-                        <img src="card_back.png" class="card" alt="Card">
-                        <img src="card_back.png" class="card" alt="Card">
-                    </div>
+                    <div class="community-cards" id="ui-community">
+                        </div>
                 </div>
 
                 <div class="seat active" id="seat-user">
-                    <div class="player-hand">
-                        <img src="card_back.png" class="card" alt="Card">
-                        <img src="card_back.png" class="card" alt="Card">
-                    </div>
-                    <img src="avatar_user.png" class="avatar" alt="You">
-                    <div class="nameplate">YOU ($50k)</div>
+                    <div class="player-hand" id="ui-user-hand"></div>
+                    <img src="avatar_user.png" class="avatar" alt="You" onerror="this.src='data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='">
+                    <div class="nameplate">YOU</div>
                 </div>
 
-                <div class="seat" id="seat-shark">
-                    <img src="avatar_shark.png" class="avatar" alt="Shark">
-                    <div class="nameplate">SHARK ($45k)</div>
-                </div>
-
-                <div class="seat" id="seat-rock">
-                    <img src="avatar_rock.png" class="avatar" alt="Rock">
-                    <div class="nameplate">ROCK ($12k)</div>
-                </div>
-
-                <div class="seat" id="seat-wildcard">
-                    <img src="avatar_wildcard.png" class="avatar" alt="Wildcard">
-                    <div class="nameplate">WILD ($80k)</div>
-                </div>
-
-                <div class="seat" id="seat-pro">
-                    <img src="avatar_pro.png" class="avatar" alt="Pro">
-                    <div class="nameplate">PRO ($150k)</div>
-                </div>
+                <div class="seat" id="seat-shark"><img src="avatar_shark.png" class="avatar" alt="Shark" onerror="this.style.display='none'"><div class="nameplate">SHARK</div></div>
+                <div class="seat" id="seat-rock"><img src="avatar_rock.png" class="avatar" alt="Rock" onerror="this.style.display='none'"><div class="nameplate">ROCK</div></div>
+                <div class="seat" id="seat-wildcard"><img src="avatar_wildcard.png" class="avatar" alt="Wildcard" onerror="this.style.display='none'"><div class="nameplate">WILD</div></div>
+                <div class="seat" id="seat-pro"><img src="avatar_pro.png" class="avatar" alt="Pro" onerror="this.style.display='none'"><div class="nameplate">PRO</div></div>
             </div>
 
-            <!-- THE CONTROL DECK -->
             <div id="controls">
                 <div class="stat-box">
-                    <div class="stat-label">BANKROLL</div>
-                    <div class="stat-value" id="balanceDisplay">$8.5M</div>
+                    <div class="stat-label">MASTER BANKROLL</div>
+                    <div class="stat-value" id="ui-bankroll">$8,500,000</div>
                 </div>
-
                 <div class="action-group">
-                    <button class="poker-btn btn-fold">FOLD</button>
-                    <button class="poker-btn btn-call">CALL</button>
-                    <button class="poker-btn btn-raise">RAISE</button>
+                    <button class="poker-btn btn-fold" id="btn-fold">FOLD</button>
+                    <button class="poker-btn btn-call" id="btn-call">CALL</button>
+                    <button class="poker-btn btn-raise" id="btn-raise">RAISE</button>
                 </div>
-
                 <div class="stat-box">
                     <div class="stat-label">RAISE AMT</div>
                     <div class="bet-controls">
-                        <button class="bet-btn" id="betMinus">-</button>
-                        <div class="stat-value" id="betDisplay">$5K</div>
-                        <button class="bet-btn" id="betPlus">+</button>
+                        <button class="bet-btn" id="btn-minus">-</button>
+                        <div class="stat-value" id="ui-raise-amt">$5,000</div>
+                        <button class="bet-btn" id="btn-plus">+</button>
                     </div>
                 </div>
             </div>
-
         </div>
 
-        <!-- RIGHT COLUMN: SIDEBAR -->
         <div class="sidebar">
-            
             <div class="side-panel">
                 <h2 class="panel-header">Table Leaders</h2>
+                <div class="leaderboard-row"><span class="lb-name">YOU</span><span class="lb-score" id="lb-user">$8,500,000</span></div>
                 <div class="leaderboard-row"><span class="lb-name">PRO</span><span class="lb-score">$150,000</span></div>
                 <div class="leaderboard-row"><span class="lb-name">WILD</span><span class="lb-score">$80,000</span></div>
-                <div class="leaderboard-row"><span class="lb-name">YOU</span><span class="lb-score">$50,000</span></div>
                 <div class="leaderboard-row"><span class="lb-name">SHARK</span><span class="lb-score">$45,000</span></div>
                 <div class="leaderboard-row"><span class="lb-name">ROCK</span><span class="lb-score">$12,000</span></div>
             </div>
 
             <div class="side-panel">
-                <h2 class="panel-header">Recent Plays</h2>
-                <ul class="log-list">
-                    <li class="log-item"><span><strong>PRO</strong> raises</span><span class="log-action raise">+$5,000</span></li>
-                    <li class="log-item"><span><strong>WILD</strong> calls</span><span class="log-action call">$5,000</span></li>
-                    <li class="log-item"><span><strong>ROCK</strong> folds</span><span class="log-action fold">--</span></li>
-                    <li class="log-item"><span><strong>SHARK</strong> calls</span><span class="log-action call">$5,000</span></li>
+                <h2 class="panel-header">Action Log</h2>
+                <ul class="log-list" id="ui-log">
+                    <li class="log-item"><span>Game Initialized.</span></li>
                 </ul>
             </div>
 
-            <!-- Hand Strength Module -->
             <div class="side-panel">
                 <h2 class="panel-header">Hand Strength</h2>
                 <div class="hand-strength-display">
-                    <div class="current-hand">Pair of Aces</div>
-                    <div class="hand-bar-bg">
-                        <div class="hand-bar-fill"></div>
-                    </div>
-                    <div class="hand-odds">Win Probability: 65%</div>
+                    <div class="current-hand" id="ui-hand-name">Awaiting Deal...</div>
+                    <div class="hand-bar-bg"><div class="hand-bar-fill" id="ui-hand-bar"></div></div>
                 </div>
             </div>
 
-            <!-- Table Stats Module -->
             <div class="side-panel">
                 <h2 class="panel-header">Table Stats</h2>
                 <div class="stats-grid">
-                    <div class="stat-item">
-                        <span class="stat-title">Blinds</span>
-                        <span class="stat-value">$500 / $1K</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-title">Pot Odds</span>
-                        <span class="stat-value">3.2 : 1</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-title">Round</span>
-                        <span class="stat-value">The Flop</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-title">Active</span>
-                        <span class="stat-value">3 Players</span>
-                    </div>
+                    <div class="stat-item"><span class="stat-title">Blinds</span><span class="stat-value">$1K / $2K</span></div>
+                    <div class="stat-item"><span class="stat-title">Current Bet</span><span class="stat-value" id="ui-stat-bet">$0</span></div>
+                    <div class="stat-item"><span class="stat-title">Round</span><span class="stat-value" id="ui-stat-round">Pre-Flop</span></div>
+                    <div class="stat-item"><span class="stat-title">Active</span><span class="stat-value">5 Players</span></div>
                 </div>
             </div>
-
         </div>
-
     </div>
 
+    <script>
+        // --- GAME STATE ---
+        let bankroll = 8500000; // Accurate Master Bankroll based on previous module
+        let pot = 0;
+        let currentCallAmount = 2000;
+        let customRaiseAmount = 5000;
+        let gamePhase = 0; // 0=Preflop, 1=Flop, 2=Turn, 3=River, 4=Showdown
+        let deck = [];
+        let userHand = [];
+        let communityCards = [];
+        
+        const SUITS = { 'H': '&hearts;', 'D': '&diams;', 'S': '&spades;', 'C': '&clubs;' };
+        const SUIT_COLORS = { 'H': 'suit-hearts', 'D': 'suit-diamonds', 'S': 'suit-spades', 'C': 'suit-clubs' };
+        const RANKS = ['2','3','4','5','6','7','8','9','T','J','Q','K','A'];
+
+        // --- DOM ELEMENTS ---
+        const uiPot = document.getElementById('ui-pot');
+        const uiBankroll = document.getElementById('ui-bankroll');
+        const uiRaiseAmt = document.getElementById('ui-raise-amt');
+        const uiUserHand = document.getElementById('ui-user-hand');
+        const uiCommunity = document.getElementById('ui-community');
+        const uiLog = document.getElementById('ui-log');
+        const uiStatRound = document.getElementById('ui-stat-round');
+        const uiStatBet = document.getElementById('ui-stat-bet');
+        const uiHandName = document.getElementById('ui-hand-name');
+        const uiHandBar = document.getElementById('ui-hand-bar');
+        const lbUser = document.getElementById('lb-user');
+
+        const btnCall = document.getElementById('btn-call');
+        const btnRaise = document.getElementById('btn-raise');
+        const btnFold = document.getElementById('btn-fold');
+
+        // --- CORE FUNCTIONS ---
+        function formatMoney(num) { return '$' + num.toLocaleString(); }
+        
+        function logAction(player, action, amount = 0) {
+            const li = document.createElement('li');
+            li.className = 'log-item';
+            let amtStr = amount > 0 ? `<span class="log-action ${action}">${action === 'raise' ? '+' : ''}${formatMoney(amount)}</span>` : `<span class="log-action fold">--</span>`;
+            li.innerHTML = `<span><strong>${player}</strong> ${action}s</span>${amtStr}`;
+            uiLog.prepend(li);
+        }
+
+        function createDeck() {
+            deck = [];
+            for (let r of RANKS) {
+                for (let s in SUITS) { deck.push({ rank: r, suit: s }); }
+            }
+            // Fisher-Yates Shuffle
+            for (let i = deck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [deck[i], deck[j]] = [deck[j], deck[i]];
+            }
+        }
+
+        function generateCardHTML(card, isFacedown = false) {
+            if (isFacedown) return `<div class="css-card facedown dealt"></div>`;
+            const displayRank = card.rank === 'T' ? '10' : card.rank;
+            return `
+                <div class="css-card dealt ${SUIT_COLORS[card.suit]}">
+                    <span>${displayRank}</span>
+                    <span class="suit-icon">${SUITS[card.suit]}</span>
+                </div>
+            `;
+        }
+
+        function evaluatePlayerHand() {
+            if (typeof Hand === 'undefined') return; // Wait for solver to load
+            
+            // Format cards for the solver (e.g., 'As', 'Kh')
+            let solverCards = userHand.map(c => c.rank + c.suit.toLowerCase());
+            let commCards = communityCards.map(c => c.rank + c.suit.toLowerCase());
+            
+            let hand = Hand.solve(solverCards.concat(commCards));
+            uiHandName.innerText = hand.name;
+            
+            // Calculate a rough strength bar (0-100%) based on rank
+            let strength = Math.min(100, (hand.rank / 9) * 100 + 10);
+            uiHandBar.style.width = `${strength}%`;
+        }
+
+        function updateUI() {
+            uiBankroll.innerText = formatMoney(bankroll);
+            lbUser.innerText = formatMoney(bankroll);
+            uiPot.innerText = formatMoney(pot);
+            uiRaiseAmt.innerText = formatMoney(customRaiseAmount);
+            uiStatBet.innerText = formatMoney(currentCallAmount);
+            
+            const rounds = ["Pre-Flop", "The Flop", "The Turn", "The River", "Showdown"];
+            uiStatRound.innerText = rounds[gamePhase];
+
+            btnCall.innerText = `CALL ${formatMoney(currentCallAmount)}`;
+        }
+
+        // --- GAME LOOP ---
+        function startNewHand() {
+            createDeck();
+            communityCards = [];
+            userHand = [deck.pop(), deck.pop()];
+            pot = 0;
+            currentCallAmount = 2000;
+            gamePhase = 0;
+            
+            uiCommunity.innerHTML = '';
+            uiUserHand.innerHTML = generateCardHTML(userHand[0]) + generateCardHTML(userHand[1]);
+            
+            uiHandName.innerText = "Evaluating...";
+            uiHandBar.style.width = "0%";
+            
+            logAction('Dealer', 'shuffle');
+            updateUI();
+            evaluatePlayerHand();
+        }
+
+        function advancePhase() {
+            gamePhase++;
+            
+            if (gamePhase === 1) { // FLOP
+                communityCards.push(deck.pop(), deck.pop(), deck.pop());
+            } else if (gamePhase === 2 || gamePhase === 3) { // TURN & RIVER
+                communityCards.push(deck.pop());
+            } else if (gamePhase >= 4) { // SHOWDOWN
+                logAction('Dealer', 'showdown');
+                setTimeout(startNewHand, 4000);
+                return;
+            }
+
+            // Render community cards
+            uiCommunity.innerHTML = communityCards.map(c => generateCardHTML(c)).join('');
+            
+            // Simulate AI Actions dynamically
+            setTimeout(() => {
+                const aiPlayers = ['PRO', 'WILD', 'SHARK'];
+                aiPlayers.forEach((ai, idx) => {
+                    setTimeout(() => {
+                        let action = Math.random() > 0.7 ? 'raise' : 'call';
+                        let amt = action === 'raise' ? currentCallAmount * 2 : currentCallAmount;
+                        pot += amt;
+                        if(action === 'raise') currentCallAmount = amt;
+                        logAction(ai, action, amt);
+                        updateUI();
+                    }, idx * 600);
+                });
+            }, 500);
+
+            evaluatePlayerHand();
+            updateUI();
+        }
+
+        // --- CONTROLS ---
+        btnCall.addEventListener('click', () => {
+            if (bankroll >= currentCallAmount) {
+                bankroll -= currentCallAmount;
+                pot += currentCallAmount;
+                logAction('YOU', 'call', currentCallAmount);
+                updateUI();
+                advancePhase();
+            }
+        });
+
+        btnRaise.addEventListener('click', () => {
+            let totalBet = currentCallAmount + customRaiseAmount;
+            if (bankroll >= totalBet) {
+                bankroll -= totalBet;
+                pot += totalBet;
+                currentCallAmount = totalBet; // Sets new bar for AI
+                logAction('YOU', 'raise', totalBet);
+                updateUI();
+                advancePhase();
+            }
+        });
+
+        btnFold.addEventListener('click', () => {
+            logAction('YOU', 'fold');
+            startNewHand();
+        });
+
+        document.getElementById('btn-plus').addEventListener('click', () => {
+            if (customRaiseAmount < 50000) customRaiseAmount += 1000;
+            updateUI();
+        });
+
+        document.getElementById('btn-minus').addEventListener('click', () => {
+            if (customRaiseAmount > 1000) customRaiseAmount -= 1000;
+            updateUI();
+        });
+
+        // Init the game after the external solver script loads
+        window.onload = () => { setTimeout(startNewHand, 500); };
+
+    </script>
 </body>
 </html>
