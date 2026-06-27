@@ -7,30 +7,31 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root { 
-            --accent-cyan: #06b6d4; 
-            --accent-magenta: #ff00ff; 
             --accent-gold: #FED101; 
             --accent-green: #00985A; 
+            --accent-black: #000000;
         }
         
         *, *::before, *::after { box-sizing: border-box; }
         
         body { 
             margin: 0; padding: 20px; 
-            background: radial-gradient(circle at center, #1e293b 0%, #000000 100%), url('poker_env.png') no-repeat center center fixed; 
+            /* FIX: Made the gradient translucent (rgba) so the image shows through! */
+            background: radial-gradient(circle at center, rgba(30, 41, 59, 0.6) 0%, rgba(0, 0, 0, 0.95) 100%), url('poker_env.png') no-repeat center center fixed; 
             background-size: cover;
             color: white; font-family: 'Orbitron', sans-serif; 
-            display: flex; align-items: center; justify-content: center; 
+            display: flex; align-items: flex-start; justify-content: center; 
             min-height: 100vh; overflow-x: hidden; user-select: none; 
         }
 
-        /* MASTER LAYOUT: Left (Game) + Right (Sidebar) */
+        /* MASTER LAYOUT: Scales automatically */
         .master-layout {
             display: flex;
-            gap: 40px;
+            gap: 50px;
             width: 100%;
-            max-width: 1400px;
-            align-items: flex-start;
+            max-width: 1500px;
+            margin-top: 2vh;
+            align-items: stretch;
             justify-content: center;
         }
 
@@ -39,25 +40,24 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 50px; 
+            gap: 80px; /* Increased gap to stop the avatar from overlapping the deck */
             flex: 1;
-            max-width: 900px;
+            max-width: 950px;
         }
 
         /* The Physical Table Edge & Felt */
         .poker-table {
             position: relative;
             width: 100%;
-            max-width: 900px; 
             height: 450px; 
-            background: #0f172a url('table_felt.png') no-repeat center center;
+            background: var(--accent-black) url('table_felt.png') no-repeat center center;
             background-size: cover;
             border-radius: 225px; 
-            border: 25px solid #000000;
+            border: 25px solid var(--accent-black);
             box-shadow: 
                 0 40px 80px rgba(0,0,0,0.9), 
                 inset 0 0 50px rgba(0,0,0,0.8), 
-                inset 0 0 0 5px rgba(6, 182, 212, 0.3); 
+                inset 0 0 0 5px rgba(0, 152, 90, 0.3); /* Subtle green rim light */
         }
 
         /* Player Seats */
@@ -66,7 +66,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             transform: translate(-50%, -50%);
             z-index: 10;
         }
@@ -78,8 +78,8 @@
         #seat-pro      { top: 50%;  left: 100%; } 
 
         .avatar {
-            width: 100px;
-            height: 100px;
+            width: 85px; /* Shrunk slightly to reduce cramping */
+            height: 85px;
             border-radius: 50%;
             background: #1e293b;
             border: 3px solid #334155;
@@ -94,21 +94,23 @@
             padding: 5px 15px;
             border-radius: 15px;
             font-size: 0.8rem;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
             text-transform: uppercase;
             color: #94a3b8;
             backdrop-filter: blur(5px);
+            white-space: nowrap;
         }
 
+        /* Applied custom branding to the active state */
         .seat.active .avatar {
-            border-color: var(--accent-cyan);
-            box-shadow: 0 0 30px rgba(6, 182, 212, 0.6), inset 0 0 15px rgba(6, 182, 212, 0.3);
+            border-color: var(--accent-green);
+            box-shadow: 0 0 30px rgba(0, 152, 90, 0.6), inset 0 0 15px rgba(0, 152, 90, 0.3);
             transform: scale(1.1);
         }
         .seat.active .nameplate {
-            border-color: var(--accent-cyan);
-            color: var(--accent-cyan);
-            text-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+            text-shadow: 0 0 10px rgba(0, 152, 90, 0.5);
         }
 
         /* Cards and Chips */
@@ -120,7 +122,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 20px;
+            gap: 15px;
             z-index: 5;
         }
 
@@ -128,7 +130,7 @@
             display: flex;
             align-items: center;
             gap: 15px;
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.7);
             padding: 5px 20px;
             border-radius: 30px;
             border: 1px solid var(--accent-gold);
@@ -143,16 +145,16 @@
         }
 
         .chip-stack-large {
-            height: 60px;
+            height: 50px;
             object-fit: contain;
             filter: drop-shadow(0 10px 10px rgba(0,0,0,0.8));
         }
 
-        .community-cards { display: flex; gap: 10px; }
+        .community-cards { display: flex; gap: 8px; }
 
         .card {
-            width: 70px;
-            height: 100px;
+            width: 65px;
+            height: 95px;
             border-radius: 5px;
             box-shadow: 2px 5px 10px rgba(0,0,0,0.6);
             border: 1px solid rgba(255,255,255,0.1); 
@@ -162,31 +164,41 @@
             position: absolute;
             display: flex;
             gap: 2px;
-            top: -40px; 
-            left: 50px;
+            top: -30px; 
+            left: 45px;
             transform: rotate(15deg);
             z-index: -1; 
         }
-        .player-hand .card { width: 45px; height: 65px; }
+        .player-hand .card { width: 40px; height: 60px; }
 
-        /* THE POKER CONTROL DECK */
+        /* THE POKER CONTROL DECK - Reproportioned */
         #controls { 
-            display: flex; justify-content: space-between; align-items: center; 
-            background: linear-gradient(180deg, #1e293b, #000000); 
-            padding: 25px 30px; border-radius: 12px; border-top: 2px solid #475569; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: stretch; /* Forces equal height */
+            gap: 20px;
+            background: linear-gradient(180deg, #1e293b, var(--accent-black)); 
+            padding: 20px; 
+            border-radius: 12px; 
+            border-top: 2px solid #475569; 
             width: 100%;
             box-shadow: 0 20px 40px rgba(0,0,0,0.8); 
         }
         
-        .stat-box { display: flex; flex-direction: column; align-items: center; background: #000000; padding: 12px 24px; border-radius: 8px; border: 1px solid #334155; min-width: 160px; box-shadow: inset 0 5px 10px rgba(0,0,0,0.8); }
-        .stat-label { font-size: 0.8rem; color: #64748b; margin-bottom: 5px; letter-spacing: 2px; }
-        .stat-value { min-width: 120px; text-align: center; font-size: 1.6rem; font-weight: 700; color: var(--accent-gold); text-shadow: 0 0 10px rgba(254, 209, 1, 0.3); }
+        .stat-box { 
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: var(--accent-black); padding: 10px 15px; border-radius: 8px; 
+            border: 1px solid #334155; flex: 1; box-shadow: inset 0 5px 10px rgba(0,0,0,0.8); 
+        }
+        .stat-label { font-size: 0.75rem; color: #64748b; margin-bottom: 5px; letter-spacing: 1px; white-space: nowrap; }
+        .stat-value { text-align: center; font-size: 1.4rem; font-weight: 700; color: var(--accent-gold); text-shadow: 0 0 10px rgba(254, 209, 1, 0.3); }
         
-        .action-group { display: flex; gap: 15px; }
+        .action-group { display: flex; gap: 10px; flex: 2; }
         
         .poker-btn { 
-            font-family: 'Orbitron', sans-serif; font-size: 1.4rem; font-weight: 900; 
-            padding: 15px 40px; border-radius: 8px; cursor: pointer; text-transform: uppercase; 
+            flex: 1; /* Automatically equalizes button widths */
+            font-family: 'Orbitron', sans-serif; font-size: 1.2rem; font-weight: 900; 
+            border-radius: 8px; cursor: pointer; text-transform: uppercase; 
             letter-spacing: 2px; color: white; transition: all 0.2s; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
         }
         .poker-btn:hover { filter: brightness(1.2); transform: translateY(-2px); }
@@ -196,16 +208,15 @@
         .btn-call { background: linear-gradient(180deg, #3b82f6, #1e3a8a); border: 2px solid #93c5fd; }
         .btn-raise { background: linear-gradient(180deg, var(--accent-green), #004d2d); border: 2px solid #34d399; }
 
-        .bet-controls { display: flex; align-items: center; gap: 12px; }
-        .bet-btn { background: linear-gradient(180deg, #334155, #000000); border: 1px solid #475569; color: white; width: 36px; height: 36px; border-radius: 6px; font-size: 1.4rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; font-family: 'Orbitron', sans-serif; }
-        .bet-btn:hover { background: #475569; } .bet-btn:active { transform: translateY(2px); }
+        .bet-controls { display: flex; align-items: center; gap: 8px; }
+        .bet-btn { background: linear-gradient(180deg, #334155, var(--accent-black)); border: 1px solid #475569; color: white; width: 30px; height: 30px; border-radius: 6px; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
         /* RIGHT COLUMN: SIDEBAR PANELS */
         .sidebar {
             display: flex;
             flex-direction: column;
             gap: 20px;
-            width: 320px;
+            width: 300px; /* Reduced width slightly */
             flex-shrink: 0;
         }
 
@@ -220,7 +231,7 @@
 
         .panel-header {
             color: var(--accent-gold);
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 900;
             margin: 0 0 15px 0;
             border-bottom: 1px solid #334155;
@@ -229,27 +240,6 @@
             text-transform: uppercase;
         }
 
-        .log-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            font-size: 0.9rem;
-        }
-
-        .log-item {
-            display: flex;
-            justify-content: space-between;
-            color: #94a3b8;
-        }
-
-        .log-item strong { color: white; }
-        .log-action.raise { color: var(--accent-green); }
-        .log-action.call { color: #3b82f6; }
-        .log-action.fold { color: #ef4444; }
-
         /* Leaderboard Specifics */
         .leaderboard-row {
             display: flex;
@@ -257,21 +247,24 @@
             align-items: center;
             padding: 8px 0;
             border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+            font-size: 0.9rem;
         }
         .leaderboard-row:last-child { border-bottom: none; }
         .lb-name { font-weight: 700; color: white; }
         .lb-score { color: var(--accent-gold); }
 
+        /* Action Log */
+        .log-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; font-size: 0.85rem; }
+        .log-item { display: flex; justify-content: space-between; color: #94a3b8; }
+        .log-item strong { color: white; }
+        .log-action.raise { color: var(--accent-green); }
+        .log-action.call { color: #3b82f6; }
+        .log-action.fold { color: #ef4444; }
+
         @media (max-width: 1200px) {
             .master-layout { flex-direction: column; align-items: center; }
-            .sidebar { width: 100%; max-width: 900px; flex-direction: row; }
-            .side-panel { flex: 1; }
-        }
-        @media (max-width: 900px) {
-            .poker-table { height: 350px; border-width: 15px; }
-            #controls { flex-direction: column; gap: 20px; padding: 20px; }
-            .action-group { width: 100%; justify-content: center; }
-            .sidebar { flex-direction: column; }
+            .sidebar { width: 100%; max-width: 950px; flex-direction: row; flex-wrap: wrap; }
+            .side-panel { flex: 1; min-width: 300px; }
         }
     </style>
 </head>
@@ -279,6 +272,7 @@
 
     <div class="master-layout">
         
+        <!-- LEFT COLUMN: GAME AREA -->
         <div class="main-game-area">
             
             <div class="poker-table">
@@ -327,10 +321,11 @@
                 </div>
             </div>
 
+            <!-- THE CONTROL DECK -->
             <div id="controls">
                 <div class="stat-box">
-                    <div class="stat-label">MASTER BANKROLL</div>
-                    <div class="stat-value" id="balanceDisplay">$8,500,000</div>
+                    <div class="stat-label">BANKROLL</div>
+                    <div class="stat-value" id="balanceDisplay">$8.5M</div>
                 </div>
 
                 <div class="action-group">
@@ -340,62 +335,57 @@
                 </div>
 
                 <div class="stat-box">
-                    <div class="stat-label">RAISE AMOUNT</div>
+                    <div class="stat-label">RAISE AMT</div>
                     <div class="bet-controls">
                         <button class="bet-btn" id="betMinus">-</button>
-                        <div class="stat-value" id="betDisplay">$5,000</div>
+                        <div class="stat-value" id="betDisplay">$5K</div>
                         <button class="bet-btn" id="betPlus">+</button>
                     </div>
                 </div>
             </div>
 
-        </div> <div class="sidebar">
+        </div>
+
+        <!-- RIGHT COLUMN: SIDEBAR -->
+        <div class="sidebar">
             
             <div class="side-panel">
                 <h2 class="panel-header">Table Leaders</h2>
-                <div class="leaderboard-row">
-                    <span class="lb-name">PRO</span>
-                    <span class="lb-score">$150,000</span>
-                </div>
-                <div class="leaderboard-row">
-                    <span class="lb-name">WILD</span>
-                    <span class="lb-score">$80,000</span>
-                </div>
-                <div class="leaderboard-row">
-                    <span class="lb-name">YOU</span>
-                    <span class="lb-score">$50,000</span>
-                </div>
-                <div class="leaderboard-row">
-                    <span class="lb-name">SHARK</span>
-                    <span class="lb-score">$45,000</span>
-                </div>
-                <div class="leaderboard-row">
-                    <span class="lb-name">ROCK</span>
-                    <span class="lb-score">$12,000</span>
-                </div>
+                <div class="leaderboard-row"><span class="lb-name">PRO</span><span class="lb-score">$150,000</span></div>
+                <div class="leaderboard-row"><span class="lb-name">WILD</span><span class="lb-score">$80,000</span></div>
+                <div class="leaderboard-row"><span class="lb-name">YOU</span><span class="lb-score">$50,000</span></div>
+                <div class="leaderboard-row"><span class="lb-name">SHARK</span><span class="lb-score">$45,000</span></div>
+                <div class="leaderboard-row"><span class="lb-name">ROCK</span><span class="lb-score">$12,000</span></div>
             </div>
 
             <div class="side-panel">
                 <h2 class="panel-header">Recent Plays</h2>
                 <ul class="log-list">
-                    <li class="log-item">
-                        <span><strong>PRO</strong> raises</span>
-                        <span class="log-action raise">+$5,000</span>
-                    </li>
-                    <li class="log-item">
-                        <span><strong>WILD</strong> calls</span>
-                        <span class="log-action call">$5,000</span>
-                    </li>
-                    <li class="log-item">
-                        <span><strong>ROCK</strong> folds</span>
-                        <span class="log-action fold">--</span>
-                    </li>
-                    <li class="log-item">
-                        <span><strong>SHARK</strong> calls</span>
-                        <span class="log-action call">$5,000</span>
-                    </li>
+                    <li class="log-item"><span><strong>PRO</strong> raises</span><span class="log-action raise">+$5,000</span></li>
+                    <li class="log-item"><span><strong>WILD</strong> calls</span><span class="log-action call">$5,000</span></li>
+                    <li class="log-item"><span><strong>ROCK</strong> folds</span><span class="log-action fold">--</span></li>
+                    <li class="log-item"><span><strong>SHARK</strong> calls</span><span class="log-action call">$5,000</span></li>
                 </ul>
             </div>
 
-        </div> </div> </body>
+            <!-- Placeholder for Missing Modules -->
+            <div class="side-panel">
+                <h2 class="panel-header">Hand Strength</h2>
+                <div style="color: #94a3b8; font-size: 0.85rem; text-align: center; padding: 10px;">
+                    Awaiting Logic Connection...
+                </div>
+            </div>
+
+            <div class="side-panel">
+                <h2 class="panel-header">Table Stats</h2>
+                <div style="color: #94a3b8; font-size: 0.85rem; text-align: center; padding: 10px;">
+                    Awaiting Logic Connection...
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
 </html>
