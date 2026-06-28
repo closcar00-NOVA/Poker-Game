@@ -41,7 +41,7 @@
             box-shadow: 0 40px 80px rgba(0,0,0,0.9), inset 0 0 50px rgba(0,0,0,0.8), inset 0 0 0 5px rgba(0, 152, 90, 0.3); 
         }
 
-        /* Revised 7-Player Mathematical Seating */
+        /* 7-Player Mathematical Seating */
         .seat { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 8px; transform: translate(-50%, -50%); z-index: 10; }
         
         #seat-user     { top: 100%; left: 50%; }  
@@ -65,7 +65,7 @@
             align-items: center; justify-content: center; font-size: 14px;
             box-shadow: 2px 5px 10px rgba(0,0,0,0.6), inset 0 0 5px rgba(0,0,0,0.3);
             border: 2px solid #e2e8f0; z-index: 15;
-            top: -15px; right: -25px; /* Offset from avatar */
+            top: -15px; right: -25px; 
         }
 
         .table-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 15px; z-index: 5; }
@@ -75,7 +75,7 @@
 
         .community-cards { display: flex; gap: 8px; min-height: 95px; }
 
-        /* DYNAMIC CSS CARDS - Updated to Classic Readability */
+        /* DYNAMIC CSS CARDS */
         .css-card {
             width: 65px; height: 95px; background: #ffffff; color: #0f172a;
             border: 3px solid #e2e8f0; border-radius: 6px; 
@@ -86,16 +86,17 @@
         }
         .css-card.dealt { opacity: 1; transform: translateY(0); }
         .css-card.facedown { background: #0f172a url('card_back.png') center/cover; border-color: #1e293b; }
-        .suit-hearts, .suit-diamonds { color: #dc2626; } /* Classic Red */
-        .suit-spades, .suit-clubs { color: #000000; } /* Classic Black */
+        .suit-hearts, .suit-diamonds { color: #dc2626; } 
+        .suit-spades, .suit-clubs { color: #000000; } 
         .css-card .suit-icon { font-size: 2rem; line-height: 1; }
 
-        /* Opponent Hand Layout */
-        .opp-hand { position: absolute; display: flex; gap: -30px; top: 20px; left: 60px; z-index: 5; }
-        .opp-hand .css-card { width: 35px; height: 50px; margin-left: -15px; box-shadow: 2px 2px 5px rgba(0,0,0,0.8); }
+        /* Opponent Hand Layout - FIX: Tucked behind avatar using negative z-index */
+        .opp-hand { position: absolute; display: flex; top: 15px; left: 65px; z-index: -1; }
+        .opp-hand .css-card { width: 35px; height: 50px; box-shadow: 2px 2px 5px rgba(0,0,0,0.8); }
+        .opp-hand .css-card:nth-child(2) { margin-left: -15px; } /* Creates the overlapping card look */
 
-        /* User Hand Layout (Pulled forward and out) */
-        .player-hand { position: absolute; display: flex; gap: 5px; top: -55px; left: 55px; transform: rotate(10deg); z-index: 20; min-height: 60px; }
+        /* User Hand Layout - FIX: Removed rotation, centered horizontally */
+        .player-hand { position: absolute; display: flex; gap: 5px; top: -75px; left: 50%; transform: translateX(-50%); z-index: 20; min-height: 60px; }
         .player-hand .css-card { width: 50px; height: 75px; font-size: 1.1rem; border-width: 2px; }
         .player-hand .css-card .suit-icon { font-size: 1.5rem; }
 
@@ -116,7 +117,7 @@
         .btn-raise { background: linear-gradient(180deg, var(--accent-green), #004d2d); border: 2px solid #34d399; }
 
         .bet-controls { display: flex; align-items: center; gap: 8px; }
-        .bet-btn { background: linear-gradient(180deg, #334155, var(--accent-black)); border: 1px solid #475569; color: white; width: 30px; height: 30px; border-radius: 6px; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .bet-btn { background: linear-gradient(180deg, #334155, var(--accent-black)); border: 1px solid #475569; color: white; width: 30px; height: 30px; border-radius: 6px; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; user-select: none; }
 
         /* Sidebar & Typography Fixes */
         .sidebar { display: flex; flex-direction: column; gap: 20px; width: 300px; flex-shrink: 0; }
@@ -211,7 +212,7 @@
             <div id="controls">
                 <div class="stat-box">
                     <div class="stat-label">MASTER BANKROLL</div>
-                    <div class="stat-value" id="ui-bankroll">$8,500,000</div>
+                    <div class="stat-value" id="ui-bankroll">$8,486,000</div>
                 </div>
                 <div class="action-group">
                     <button class="poker-btn btn-fold" id="btn-fold">FOLD</button>
@@ -232,7 +233,7 @@
         <div class="sidebar">
             <div class="side-panel">
                 <h2 class="panel-header">Table Leaders</h2>
-                <div class="leaderboard-row"><span class="lb-name">YOU</span><span class="lb-score" id="lb-user">$8,500,000</span></div>
+                <div class="leaderboard-row"><span class="lb-name">YOU</span><span class="lb-score" id="lb-user">$8,486,000</span></div>
                 <div class="leaderboard-row"><span class="lb-name">PRO</span><span class="lb-score">$150,000</span></div>
                 <div class="leaderboard-row"><span class="lb-name">HUSTLER</span><span class="lb-score">$125,000</span></div>
                 <div class="leaderboard-row"><span class="lb-name">GAMBIT</span><span class="lb-score">$95,000</span></div>
@@ -270,11 +271,11 @@
 
     <script>
         // --- GAME STATE ---
-        let bankroll = 8486000; // Synced with screenshot
+        let bankroll = 8486000; 
         let pot = 0;
         let currentCallAmount = 2000;
         let customRaiseAmount = 5000;
-        let gamePhase = 0; // 0=Preflop, 1=Flop, 2=Turn, 3=River, 4=Showdown
+        let gamePhase = 0; 
         let deck = [];
         let userHand = [];
         let communityCards = [];
@@ -299,6 +300,8 @@
         const btnCall = document.getElementById('btn-call');
         const btnRaise = document.getElementById('btn-raise');
         const btnFold = document.getElementById('btn-fold');
+        const btnPlus = document.getElementById('btn-plus');
+        const btnMinus = document.getElementById('btn-minus');
 
         // --- CORE FUNCTIONS ---
         function formatMoney(num) { return '$' + num.toLocaleString(); }
@@ -394,7 +397,6 @@
 
             uiCommunity.innerHTML = communityCards.map(c => generateCardHTML(c)).join('');
             
-            // Cycle active player visual
             document.querySelectorAll('.seat').forEach(s => s.classList.remove('active'));
             
             setTimeout(() => {
@@ -444,15 +446,44 @@
             startNewHand();
         });
 
-        document.getElementById('btn-plus').addEventListener('click', () => {
-            if (customRaiseAmount < 50000) customRaiseAmount += 1000;
-            updateUI();
-        });
+        // --- FIX: HOLD TO SCALE RAISE LOGIC ---
+        let holdTimer;
+        let holdInterval;
 
-        document.getElementById('btn-minus').addEventListener('click', () => {
-            if (customRaiseAmount > 1000) customRaiseAmount -= 1000;
+        function updateRaiseAmount(direction) {
+            let step = customRaiseAmount >= 10000 ? 5000 : 1000; 
+            if (direction === 'up' && customRaiseAmount < 500000) { 
+                customRaiseAmount += step; 
+            } else if (direction === 'down' && customRaiseAmount > 1000) { 
+                if (customRaiseAmount === 10000) step = 1000;
+                customRaiseAmount -= step; 
+            }
             updateUI();
-        });
+        }
+
+        function startRaiseChange(direction) { 
+            updateRaiseAmount(direction); 
+            holdTimer = setTimeout(() => { 
+                holdInterval = setInterval(() => updateRaiseAmount(direction), 100); 
+            }, 400); 
+        }
+
+        function stopRaiseChange() { 
+            clearTimeout(holdTimer); 
+            clearInterval(holdInterval); 
+        }
+
+        btnPlus.addEventListener('mousedown', () => startRaiseChange('up')); 
+        btnPlus.addEventListener('mouseup', stopRaiseChange); 
+        btnPlus.addEventListener('mouseleave', stopRaiseChange);
+        btnPlus.addEventListener('touchstart', (e) => { e.preventDefault(); startRaiseChange('up'); }); 
+        btnPlus.addEventListener('touchend', stopRaiseChange);
+
+        btnMinus.addEventListener('mousedown', () => startRaiseChange('down')); 
+        btnMinus.addEventListener('mouseup', stopRaiseChange); 
+        btnMinus.addEventListener('mouseleave', stopRaiseChange);
+        btnMinus.addEventListener('touchstart', (e) => { e.preventDefault(); startRaiseChange('down'); }); 
+        btnMinus.addEventListener('touchend', stopRaiseChange);
 
         window.onload = () => { setTimeout(startNewHand, 500); };
 
