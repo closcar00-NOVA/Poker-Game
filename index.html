@@ -11,7 +11,6 @@
             --accent-gold: #FED101; 
             --accent-green: #00985A; 
             --accent-black: #000000;
-            --accent-cyan: #06b6d4; 
         }
         
         *, *::before, *::after { box-sizing: border-box; }
@@ -42,18 +41,32 @@
             box-shadow: 0 40px 80px rgba(0,0,0,0.9), inset 0 0 50px rgba(0,0,0,0.8), inset 0 0 0 5px rgba(0, 152, 90, 0.3); 
         }
 
+        /* Revised 7-Player Mathematical Seating */
         .seat { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 8px; transform: translate(-50%, -50%); z-index: 10; }
+        
         #seat-user     { top: 100%; left: 50%; }  
-        #seat-shark    { top: 50%;  left: 0%; }   
-        #seat-rock     { top: 0%;   left: 25%; }  
-        #seat-wildcard { top: 0%;   left: 75%; }  
-        #seat-pro      { top: 50%;  left: 100%; } 
+        #seat-hustler  { top: 85%;  left: 10%; }
+        #seat-shark    { top: 30%;  left: 5%; }   
+        #seat-rock     { top: 0%;   left: 30%; }
+        #seat-gambit   { top: 0%;   left: 70%; }
+        #seat-wildcard { top: 30%;  left: 95%; }  
+        #seat-pro      { top: 85%;  left: 90%; } 
 
         .avatar { width: 85px; height: 85px; border-radius: 50%; background: #1e293b; border: 3px solid #334155; object-fit: cover; box-shadow: 0 10px 20px rgba(0,0,0,0.6); transition: all 0.3s ease; }
         .nameplate { background: rgba(0, 0, 0, 0.9); border: 1px solid #334155; padding: 5px 15px; border-radius: 15px; font-size: 0.8rem; letter-spacing: 1px; text-transform: uppercase; color: #94a3b8; backdrop-filter: blur(5px); white-space: nowrap; }
 
-        .seat.active .avatar { border-color: var(--accent-green); box-shadow: 0 0 30px rgba(0, 152, 90, 0.6), inset 0 0 15px rgba(0, 152, 90, 0.3); transform: scale(1.1); }
+        .seat.active .avatar { border-color: var(--accent-green); box-shadow: 0 0 30px rgba(0, 152, 90, 0.8), inset 0 0 15px rgba(0, 152, 90, 0.5); transform: scale(1.1); }
         .seat.active .nameplate { border-color: var(--accent-green); color: var(--accent-green); text-shadow: 0 0 10px rgba(0, 152, 90, 0.5); }
+
+        /* The Dealer Button */
+        .dealer-button {
+            position: absolute; width: 30px; height: 30px; border-radius: 50%;
+            background: #ffffff; color: #000; font-weight: 900; display: flex;
+            align-items: center; justify-content: center; font-size: 14px;
+            box-shadow: 2px 5px 10px rgba(0,0,0,0.6), inset 0 0 5px rgba(0,0,0,0.3);
+            border: 2px solid #e2e8f0; z-index: 15;
+            top: -15px; right: -25px; /* Offset from avatar */
+        }
 
         .table-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 15px; z-index: 5; }
         .main-pot { display: flex; align-items: center; gap: 15px; background: rgba(0, 0, 0, 0.7); padding: 5px 20px; border-radius: 30px; border: 1px solid var(--accent-gold); box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
@@ -62,25 +75,31 @@
 
         .community-cards { display: flex; gap: 8px; min-height: 95px; }
 
-        /* DYNAMIC CSS CARDS */
+        /* DYNAMIC CSS CARDS - Updated to Classic Readability */
         .css-card {
-            width: 65px; height: 95px; background: var(--accent-black); 
-            border: 2px solid var(--accent-gold); border-radius: 6px; 
+            width: 65px; height: 95px; background: #ffffff; color: #0f172a;
+            border: 3px solid #e2e8f0; border-radius: 6px; 
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            box-shadow: inset 0 0 15px rgba(0,0,0,0.8), 2px 5px 10px rgba(0,0,0,0.6);
-            font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 1.2rem;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1), 2px 5px 10px rgba(0,0,0,0.6);
+            font-family: 'Inter', sans-serif; font-weight: 900; font-size: 1.4rem;
             opacity: 0; transform: translateY(-20px); transition: all 0.4s ease-out;
         }
         .css-card.dealt { opacity: 1; transform: translateY(0); }
-        .css-card.facedown { background: #0f172a url('card_back.png') center/cover; border-color: #334155; }
-        .suit-hearts, .suit-diamonds { color: var(--accent-gold); text-shadow: 0 0 8px rgba(254, 209, 1, 0.5); }
-        .suit-spades, .suit-clubs { color: var(--accent-green); text-shadow: 0 0 8px rgba(0, 152, 90, 0.5); }
-        .css-card .suit-icon { font-size: 1.8rem; line-height: 1; }
+        .css-card.facedown { background: #0f172a url('card_back.png') center/cover; border-color: #1e293b; }
+        .suit-hearts, .suit-diamonds { color: #dc2626; } /* Classic Red */
+        .suit-spades, .suit-clubs { color: #000000; } /* Classic Black */
+        .css-card .suit-icon { font-size: 2rem; line-height: 1; }
 
-        .player-hand { position: absolute; display: flex; gap: 2px; top: -30px; left: 45px; transform: rotate(15deg); z-index: -1; min-height: 60px; }
-        .player-hand .css-card { width: 40px; height: 60px; font-size: 0.9rem; }
-        .player-hand .css-card .suit-icon { font-size: 1.2rem; }
+        /* Opponent Hand Layout */
+        .opp-hand { position: absolute; display: flex; gap: -30px; top: 20px; left: 60px; z-index: 5; }
+        .opp-hand .css-card { width: 35px; height: 50px; margin-left: -15px; box-shadow: 2px 2px 5px rgba(0,0,0,0.8); }
 
+        /* User Hand Layout (Pulled forward and out) */
+        .player-hand { position: absolute; display: flex; gap: 5px; top: -55px; left: 55px; transform: rotate(10deg); z-index: 20; min-height: 60px; }
+        .player-hand .css-card { width: 50px; height: 75px; font-size: 1.1rem; border-width: 2px; }
+        .player-hand .css-card .suit-icon { font-size: 1.5rem; }
+
+        /* Controls */
         #controls { display: flex; justify-content: space-between; align-items: stretch; gap: 20px; background: linear-gradient(180deg, #1e293b, var(--accent-black)); padding: 20px; border-radius: 12px; border-top: 2px solid #475569; width: 100%; box-shadow: 0 20px 40px rgba(0,0,0,0.8); }
         .stat-box { display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--accent-black); padding: 10px 15px; border-radius: 8px; border: 1px solid #334155; flex: 1; box-shadow: inset 0 5px 10px rgba(0,0,0,0.8); }
         .stat-label { font-size: 0.75rem; color: #64748b; margin-bottom: 5px; letter-spacing: 1px; white-space: nowrap; }
@@ -99,32 +118,34 @@
         .bet-controls { display: flex; align-items: center; gap: 8px; }
         .bet-btn { background: linear-gradient(180deg, #334155, var(--accent-black)); border: 1px solid #475569; color: white; width: 30px; height: 30px; border-radius: 6px; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
+        /* Sidebar & Typography Fixes */
         .sidebar { display: flex; flex-direction: column; gap: 20px; width: 300px; flex-shrink: 0; }
         .side-panel { background: rgba(0, 0, 0, 0.85); border: 1px solid #334155; border-radius: 12px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); backdrop-filter: blur(10px); }
         .panel-header { color: var(--accent-gold); font-size: 1rem; font-weight: 900; margin: 0 0 15px 0; border-bottom: 1px solid #334155; padding-bottom: 10px; letter-spacing: 2px; text-transform: uppercase; }
 
-        .leaderboard-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(51, 65, 85, 0.5); font-size: 0.9rem; }
-        .leaderboard-row:last-child { border-bottom: none; }
-        .lb-name { font-weight: 700; color: white; }
-        .lb-score { color: var(--accent-gold); }
+        .leaderboard-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(51, 65, 85, 0.5); font-family: sans-serif; font-size: 0.95rem; }
+        .leaderboard-row:last-child { border-bottom: none; padding-bottom: 0; }
+        .lb-name { font-weight: 700; color: #f8fafc; letter-spacing: 0.5px; }
+        .lb-score { color: var(--accent-gold); font-weight: 700; }
 
-        .log-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; font-size: 0.85rem; max-height: 150px; overflow-y: auto; }
-        .log-item { display: flex; justify-content: space-between; color: #94a3b8; }
-        .log-item strong { color: white; }
-        .log-action.raise { color: var(--accent-green); }
-        .log-action.call { color: #3b82f6; }
-        .log-action.fold { color: #ef4444; }
+        .log-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; font-family: sans-serif; font-size: 0.9rem; max-height: 180px; overflow-y: auto; }
+        .log-item { display: flex; justify-content: space-between; color: #cbd5e1; line-height: 1.4; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 6px; }
+        .log-item:last-child { border-bottom: none; }
+        .log-item strong { color: white; font-weight: 700; letter-spacing: 0.5px; }
+        .log-action.raise { color: var(--accent-green); font-weight: 700; }
+        .log-action.call { color: #60a5fa; font-weight: 700; }
+        .log-action.fold { color: #f87171; font-weight: 700; }
 
         .hand-strength-display { display: flex; flex-direction: column; gap: 8px; }
         .current-hand { font-size: 1.1rem; font-weight: 700; color: white; text-align: center; letter-spacing: 1px; text-transform: uppercase; min-height: 1.2rem; }
         .hand-bar-bg { width: 100%; height: 8px; background: #1e293b; border-radius: 4px; overflow: hidden; margin: 5px 0; }
         .hand-bar-fill { width: 0%; height: 100%; background: var(--accent-green); box-shadow: 0 0 10px rgba(0, 152, 90, 0.6); transition: width 0.5s ease; }
-        .hand-odds { font-size: 0.8rem; color: #94a3b8; text-align: center; text-transform: uppercase; letter-spacing: 1px; }
+        .hand-odds { font-size: 0.8rem; color: #94a3b8; text-align: center; text-transform: uppercase; letter-spacing: 1px; font-family: sans-serif; }
 
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .stat-item { display: flex; flex-direction: column; background: var(--accent-black); padding: 10px; border-radius: 8px; border: 1px solid #334155; align-items: center; box-shadow: inset 0 5px 10px rgba(0,0,0,0.8); }
-        .stat-item .stat-title { font-size: 0.7rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
-        .stat-item .stat-value { font-size: 1rem; font-weight: 700; color: var(--accent-gold); text-shadow: 0 0 10px rgba(254, 209, 1, 0.3); }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-family: sans-serif; }
+        .stat-item { display: flex; flex-direction: column; background: var(--accent-black); padding: 12px 10px; border-radius: 8px; border: 1px solid #334155; align-items: center; box-shadow: inset 0 5px 10px rgba(0,0,0,0.8); }
+        .stat-item .stat-title { font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+        .stat-item .stat-value { font-size: 1.1rem; font-weight: 700; color: var(--accent-gold); text-shadow: 0 0 10px rgba(254, 209, 1, 0.3); font-family: 'Orbitron', sans-serif;}
 
         @media (max-width: 1200px) { .master-layout { flex-direction: column; align-items: center; } .sidebar { width: 100%; max-width: 950px; flex-direction: row; flex-wrap: wrap; } .side-panel { flex: 1; min-width: 300px; } }
     </style>
@@ -144,15 +165,47 @@
                 </div>
 
                 <div class="seat active" id="seat-user">
+                    <div class="dealer-button" id="dlr-user" style="display:none;">D</div>
                     <div class="player-hand" id="ui-user-hand"></div>
                     <img src="avatar_user.png" class="avatar" alt="You" onerror="this.src='data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='">
                     <div class="nameplate">YOU</div>
                 </div>
 
-                <div class="seat" id="seat-shark"><img src="avatar_shark.png" class="avatar" alt="Shark" onerror="this.style.display='none'"><div class="nameplate">SHARK</div></div>
-                <div class="seat" id="seat-rock"><img src="avatar_rock.png" class="avatar" alt="Rock" onerror="this.style.display='none'"><div class="nameplate">ROCK</div></div>
-                <div class="seat" id="seat-wildcard"><img src="avatar_wildcard.png" class="avatar" alt="Wildcard" onerror="this.style.display='none'"><div class="nameplate">WILD</div></div>
-                <div class="seat" id="seat-pro"><img src="avatar_pro.png" class="avatar" alt="Pro" onerror="this.style.display='none'"><div class="nameplate">PRO</div></div>
+                <div class="seat" id="seat-hustler">
+                    <div class="dealer-button" id="dlr-hustler" style="display:none;">D</div>
+                    <div class="opp-hand"><div class="css-card facedown dealt"></div><div class="css-card facedown dealt"></div></div>
+                    <img src="avatar_hustler.png" class="avatar" alt="Hustler" onerror="this.style.display='none'"><div class="nameplate">HUSTLER</div>
+                </div>
+
+                <div class="seat" id="seat-shark">
+                    <div class="dealer-button" id="dlr-shark" style="display:none;">D</div>
+                    <div class="opp-hand"><div class="css-card facedown dealt"></div><div class="css-card facedown dealt"></div></div>
+                    <img src="avatar_shark.png" class="avatar" alt="Shark" onerror="this.style.display='none'"><div class="nameplate">SHARK</div>
+                </div>
+
+                <div class="seat" id="seat-rock">
+                    <div class="dealer-button" id="dlr-rock" style="display:block;">D</div>
+                    <div class="opp-hand"><div class="css-card facedown dealt"></div><div class="css-card facedown dealt"></div></div>
+                    <img src="avatar_rock.png" class="avatar" alt="Rock" onerror="this.style.display='none'"><div class="nameplate">ROCK</div>
+                </div>
+
+                <div class="seat" id="seat-gambit">
+                    <div class="dealer-button" id="dlr-gambit" style="display:none;">D</div>
+                    <div class="opp-hand"><div class="css-card facedown dealt"></div><div class="css-card facedown dealt"></div></div>
+                    <img src="avatar_gambit.png" class="avatar" alt="Gambit" onerror="this.style.display='none'"><div class="nameplate">GAMBIT</div>
+                </div>
+
+                <div class="seat" id="seat-wildcard">
+                    <div class="dealer-button" id="dlr-wildcard" style="display:none;">D</div>
+                    <div class="opp-hand"><div class="css-card facedown dealt"></div><div class="css-card facedown dealt"></div></div>
+                    <img src="avatar_wildcard.png" class="avatar" alt="Wildcard" onerror="this.style.display='none'"><div class="nameplate">WILD</div>
+                </div>
+
+                <div class="seat" id="seat-pro">
+                    <div class="dealer-button" id="dlr-pro" style="display:none;">D</div>
+                    <div class="opp-hand"><div class="css-card facedown dealt"></div><div class="css-card facedown dealt"></div></div>
+                    <img src="avatar_pro.png" class="avatar" alt="Pro" onerror="this.style.display='none'"><div class="nameplate">PRO</div>
+                </div>
             </div>
 
             <div id="controls">
@@ -181,6 +234,8 @@
                 <h2 class="panel-header">Table Leaders</h2>
                 <div class="leaderboard-row"><span class="lb-name">YOU</span><span class="lb-score" id="lb-user">$8,500,000</span></div>
                 <div class="leaderboard-row"><span class="lb-name">PRO</span><span class="lb-score">$150,000</span></div>
+                <div class="leaderboard-row"><span class="lb-name">HUSTLER</span><span class="lb-score">$125,000</span></div>
+                <div class="leaderboard-row"><span class="lb-name">GAMBIT</span><span class="lb-score">$95,000</span></div>
                 <div class="leaderboard-row"><span class="lb-name">WILD</span><span class="lb-score">$80,000</span></div>
                 <div class="leaderboard-row"><span class="lb-name">SHARK</span><span class="lb-score">$45,000</span></div>
                 <div class="leaderboard-row"><span class="lb-name">ROCK</span><span class="lb-score">$12,000</span></div>
@@ -189,7 +244,7 @@
             <div class="side-panel">
                 <h2 class="panel-header">Action Log</h2>
                 <ul class="log-list" id="ui-log">
-                    <li class="log-item"><span>Game Initialized.</span></li>
+                    <li class="log-item"><span><strong>Dealer</strong> shuffles deck</span><span class="log-action">--</span></li>
                 </ul>
             </div>
 
@@ -207,7 +262,7 @@
                     <div class="stat-item"><span class="stat-title">Blinds</span><span class="stat-value">$1K / $2K</span></div>
                     <div class="stat-item"><span class="stat-title">Current Bet</span><span class="stat-value" id="ui-stat-bet">$0</span></div>
                     <div class="stat-item"><span class="stat-title">Round</span><span class="stat-value" id="ui-stat-round">Pre-Flop</span></div>
-                    <div class="stat-item"><span class="stat-title">Active</span><span class="stat-value">5 Players</span></div>
+                    <div class="stat-item"><span class="stat-title">Active</span><span class="stat-value">7 Players</span></div>
                 </div>
             </div>
         </div>
@@ -215,7 +270,7 @@
 
     <script>
         // --- GAME STATE ---
-        let bankroll = 8500000; // Accurate Master Bankroll based on previous module
+        let bankroll = 8486000; // Synced with screenshot
         let pot = 0;
         let currentCallAmount = 2000;
         let customRaiseAmount = 5000;
@@ -261,7 +316,6 @@
             for (let r of RANKS) {
                 for (let s in SUITS) { deck.push({ rank: r, suit: s }); }
             }
-            // Fisher-Yates Shuffle
             for (let i = deck.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [deck[i], deck[j]] = [deck[j], deck[i]];
@@ -280,16 +334,14 @@
         }
 
         function evaluatePlayerHand() {
-            if (typeof Hand === 'undefined') return; // Wait for solver to load
+            if (typeof Hand === 'undefined') return; 
             
-            // Format cards for the solver (e.g., 'As', 'Kh')
             let solverCards = userHand.map(c => c.rank + c.suit.toLowerCase());
             let commCards = communityCards.map(c => c.rank + c.suit.toLowerCase());
             
             let hand = Hand.solve(solverCards.concat(commCards));
             uiHandName.innerText = hand.name;
             
-            // Calculate a rough strength bar (0-100%) based on rank
             let strength = Math.min(100, (hand.rank / 9) * 100 + 10);
             uiHandBar.style.width = `${strength}%`;
         }
@@ -330,22 +382,23 @@
         function advancePhase() {
             gamePhase++;
             
-            if (gamePhase === 1) { // FLOP
+            if (gamePhase === 1) { 
                 communityCards.push(deck.pop(), deck.pop(), deck.pop());
-            } else if (gamePhase === 2 || gamePhase === 3) { // TURN & RIVER
+            } else if (gamePhase === 2 || gamePhase === 3) { 
                 communityCards.push(deck.pop());
-            } else if (gamePhase >= 4) { // SHOWDOWN
+            } else if (gamePhase >= 4) { 
                 logAction('Dealer', 'showdown');
                 setTimeout(startNewHand, 4000);
                 return;
             }
 
-            // Render community cards
             uiCommunity.innerHTML = communityCards.map(c => generateCardHTML(c)).join('');
             
-            // Simulate AI Actions dynamically
+            // Cycle active player visual
+            document.querySelectorAll('.seat').forEach(s => s.classList.remove('active'));
+            
             setTimeout(() => {
-                const aiPlayers = ['PRO', 'WILD', 'SHARK'];
+                const aiPlayers = ['PRO', 'HUSTLER', 'GAMBIT', 'WILD', 'SHARK'];
                 aiPlayers.forEach((ai, idx) => {
                     setTimeout(() => {
                         let action = Math.random() > 0.7 ? 'raise' : 'call';
@@ -354,8 +407,9 @@
                         if(action === 'raise') currentCallAmount = amt;
                         logAction(ai, action, amt);
                         updateUI();
-                    }, idx * 600);
+                    }, idx * 800);
                 });
+                setTimeout(() => { document.getElementById('seat-user').classList.add('active'); }, aiPlayers.length * 800);
             }, 500);
 
             evaluatePlayerHand();
@@ -378,7 +432,7 @@
             if (bankroll >= totalBet) {
                 bankroll -= totalBet;
                 pot += totalBet;
-                currentCallAmount = totalBet; // Sets new bar for AI
+                currentCallAmount = totalBet; 
                 logAction('YOU', 'raise', totalBet);
                 updateUI();
                 advancePhase();
@@ -400,7 +454,6 @@
             updateUI();
         });
 
-        // Init the game after the external solver script loads
         window.onload = () => { setTimeout(startNewHand, 500); };
 
     </script>
