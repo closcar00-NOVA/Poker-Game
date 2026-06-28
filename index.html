@@ -43,13 +43,12 @@
         #seat-shark    { top: 30%;  left: 5%; }   
         #seat-rock     { top: 0%;   left: 30%; }
         #seat-gambit   { top: 0%;   left: 70%; }
-        #seat-wildcard { top: 30%;  left: 95%; }  
+        #seat-wild     { top: 30%;  left: 95%; }  
         #seat-pro      { top: 85%;  left: 90%; } 
 
         .avatar { width: 85px; height: 85px; border-radius: 50%; background: #1e293b; border: 3px solid #334155; object-fit: cover; box-shadow: 0 10px 20px rgba(0,0,0,0.6); transition: all 0.3s ease; }
         .nameplate { background: rgba(0, 0, 0, 0.9); border: 1px solid #334155; padding: 4px 12px; border-radius: 12px; font-size: 0.8rem; letter-spacing: 1px; text-transform: uppercase; color: #94a3b8; backdrop-filter: blur(5px); white-space: nowrap; margin-top: 4px;}
         
-        /* NEW: Action Text under Nameplate */
         .player-action-text { min-height: 20px; font-family: sans-serif; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; background: rgba(0,0,0,0.8); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(51, 65, 85, 0.5); display: flex; align-items: center; justify-content: center; white-space: nowrap;}
         
         .seat.active .avatar { border-color: var(--accent-green); box-shadow: 0 0 30px rgba(0, 152, 90, 0.8), inset 0 0 15px rgba(0, 152, 90, 0.5); transform: scale(1.1); }
@@ -77,7 +76,6 @@
         .opp-hand .css-card { width: 35px; height: 50px; box-shadow: 2px 2px 5px rgba(0,0,0,0.8); }
         .opp-hand .css-card:nth-child(2) { margin-left: -15px; } 
 
-        /* FIX: User hand aligned right and straightened */
         .player-hand { position: absolute; display: flex; gap: 5px; top: -10px; left: 65px; z-index: 20; min-height: 60px; }
         .player-hand .css-card { width: 50px; height: 75px; font-size: 1.1rem; border-width: 2px; }
         .player-hand .css-card .suit-icon { font-size: 1.5rem; }
@@ -100,6 +98,7 @@
 
         .bet-controls { display: flex; align-items: center; gap: 8px; }
         .bet-btn { background: linear-gradient(180deg, #334155, var(--accent-black)); border: 1px solid #475569; color: white; width: 30px; height: 30px; border-radius: 6px; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; user-select: none; }
+        .bet-btn:disabled { filter: grayscale(1); opacity: 0.5; cursor: not-allowed; }
 
         /* SIDEBAR */
         .sidebar { display: flex; flex-direction: column; gap: 20px; width: 300px; flex-shrink: 0; }
@@ -173,7 +172,7 @@
 
                 <div class="seat" id="seat-hustler">
                     <div class="dealer-button" id="dlr-hustler" style="display:none;">D</div>
-                    <div class="opp-hand"><div class="css-card facedown dealt"></div><div class="css-card facedown dealt"></div></div>
+                    <div class="opp-hand" id="hand-hustler"><div class="css-card facedown dealt"></div><div class="css-card facedown dealt"></div></div>
                     <img src="avatar_hustler.png" class="avatar" alt="Hustler" onerror="this.style.display='none'">
                     <div class="nameplate">HUSTLER</div>
                     <div class="player-action-text" id="action-HUSTLER"></div>
@@ -181,7 +180,7 @@
 
                 <div class="seat" id="seat-shark">
                     <div class="dealer-button" id="dlr-shark" style="display:none;">D</div>
-                    <div class="opp-hand"><div class="css-card facedown dealt"></div><div class="css-card facedown dealt"></div></div>
+                    <div class="opp-hand" id="hand-shark"><div class="css-card facedown dealt"></div><div class="css-card facedown dealt"></div></div>
                     <img src="avatar_shark.png" class="avatar" alt="Shark" onerror="this.style.display='none'">
                     <div class="nameplate">SHARK</div>
                     <div class="player-action-text" id="action-SHARK"></div>
@@ -189,7 +188,7 @@
 
                 <div class="seat" id="seat-rock">
                     <div class="dealer-button" id="dlr-rock" style="display:block;">D</div>
-                    <div class="opp-hand"><div class="css-card facedown dealt"></div><div class="css-card facedown dealt"></div></div>
+                    <div class="opp-hand" id="hand-rock"><div class="css-card facedown dealt"></div><div class="css-card facedown dealt"></div></div>
                     <img src="avatar_rock.png" class="avatar" alt="Rock" onerror="this.style.display='none'">
                     <div class="nameplate">ROCK</div>
                     <div class="player-action-text" id="action-ROCK"></div>
@@ -197,23 +196,23 @@
 
                 <div class="seat" id="seat-gambit">
                     <div class="dealer-button" id="dlr-gambit" style="display:none;">D</div>
-                    <div class="opp-hand"><div class="css-card facedown dealt"></div><div class="css-card facedown dealt"></div></div>
+                    <div class="opp-hand" id="hand-gambit"><div class="css-card facedown dealt"></div><div class="css-card facedown dealt"></div></div>
                     <img src="avatar_gambit.png" class="avatar" alt="Gambit" onerror="this.style.display='none'">
                     <div class="nameplate">GAMBIT</div>
                     <div class="player-action-text" id="action-GAMBIT"></div>
                 </div>
 
-                <div class="seat" id="seat-wildcard">
-                    <div class="dealer-button" id="dlr-wildcard" style="display:none;">D</div>
-                    <div class="opp-hand"><div class="css-card facedown dealt"></div><div class="css-card facedown dealt"></div></div>
-                    <img src="avatar_wildcard.png" class="avatar" alt="Wildcard" onerror="this.style.display='none'">
+                <div class="seat" id="seat-wild">
+                    <div class="dealer-button" id="dlr-wild" style="display:none;">D</div>
+                    <div class="opp-hand" id="hand-wild"><div class="css-card facedown dealt"></div><div class="css-card facedown dealt"></div></div>
+                    <img src="avatar_wildcard.png" class="avatar" alt="Wild" onerror="this.style.display='none'">
                     <div class="nameplate">WILD</div>
                     <div class="player-action-text" id="action-WILD"></div>
                 </div>
 
                 <div class="seat" id="seat-pro">
                     <div class="dealer-button" id="dlr-pro" style="display:none;">D</div>
-                    <div class="opp-hand"><div class="css-card facedown dealt"></div><div class="css-card facedown dealt"></div></div>
+                    <div class="opp-hand" id="hand-pro"><div class="css-card facedown dealt"></div><div class="css-card facedown dealt"></div></div>
                     <img src="avatar_pro.png" class="avatar" alt="Pro" onerror="this.style.display='none'">
                     <div class="nameplate">PRO</div>
                     <div class="player-action-text" id="action-PRO"></div>
@@ -300,8 +299,9 @@
         let deck = [];
         let userHand = [];
         let communityCards = [];
+        let isProcessing = false;
+
         const AI_PLAYERS = ['PRO', 'HUSTLER', 'GAMBIT', 'WILD', 'SHARK', 'ROCK'];
-        
         const SUITS = { 'H': '&hearts;', 'D': '&diams;', 'S': '&spades;', 'C': '&clubs;' };
         const SUIT_COLORS = { 'H': 'suit-hearts', 'D': 'suit-diamonds', 'S': 'suit-spades', 'C': 'suit-clubs' };
         const RANKS = ['2','3','4','5','6','7','8','9','T','J','Q','K','A'];
@@ -326,12 +326,20 @@
 
         function formatMoney(num) { return '$' + num.toLocaleString(); }
         
+        function setButtonsEnabled(enabled) {
+            btnCall.disabled = !enabled;
+            btnRaise.disabled = !enabled;
+            btnFold.disabled = !enabled;
+            btnPlus.disabled = !enabled;
+            btnMinus.disabled = !enabled;
+        }
+
         function setOnTableAction(player, action, amount = 0) {
             let el = document.getElementById('action-' + player);
             if(!el) return;
             if(action === 'fold') { el.innerHTML = `<span style="color:#ef4444">FOLDED</span>`; }
             else if(action === 'raise') { el.innerHTML = `<span style="color:var(--accent-green)">RAISED +${formatMoney(amount)}</span>`; }
-            else if(action === 'call') { el.innerHTML = `<span style="color:#3b82f6">CALLED ${formatMoney(amount)}</span>`; }
+            else if(action === 'call') { el.innerHTML = `<span style="color:#60a5fa">CALLED ${formatMoney(amount)}</span>`; }
             else if(action === 'check') { el.innerHTML = `<span style="color:#94a3b8">CHECKED</span>`; }
             else { el.innerHTML = ''; }
         }
@@ -344,10 +352,15 @@
         function logAction(player, action, amount = 0) {
             const li = document.createElement('li');
             li.className = 'log-item';
-            let amtStr = amount > 0 ? `<span class="log-action ${action}">${action === 'raise' ? '+' : ''}${formatMoney(amount)}</span>` : `<span class="log-action fold">--</span>`;
-            li.innerHTML = `<span><strong>${player}</strong> ${action}s</span>${amtStr}`;
+            
+            if (player === 'Dealer') {
+                li.innerHTML = `<span><strong>Dealer</strong> ${action}</span><span class="log-action">--</span>`;
+            } else {
+                let amtStr = amount > 0 ? `<span class="log-action ${action}">${action === 'raise' ? '+' : ''}${formatMoney(amount)}</span>` : `<span class="log-action fold">--</span>`;
+                li.innerHTML = `<span><strong>${player}</strong> ${action}s</span>${amtStr}`;
+                setOnTableAction(player, action, amount);
+            }
             uiLog.prepend(li);
-            if (player !== 'Dealer') setOnTableAction(player, action, amount);
         }
 
         function createDeck() {
@@ -376,6 +389,7 @@
             if (typeof Hand === 'undefined') return; 
             let solverCards = userHand.map(c => c.rank + c.suit.toLowerCase());
             let commCards = communityCards.map(c => c.rank + c.suit.toLowerCase());
+            
             let hand = Hand.solve(solverCards.concat(commCards));
             uiHandName.innerText = hand.name;
             let strength = Math.min(100, (hand.rank / 9) * 100 + 10);
@@ -395,6 +409,8 @@
         }
 
         function startNewHand() {
+            isProcessing = false;
+            setButtonsEnabled(true);
             clearAllOnTableActions();
             createDeck();
             communityCards = [];
@@ -405,35 +421,47 @@
             
             uiCommunity.innerHTML = '';
             uiUserHand.innerHTML = generateCardHTML(userHand[0]) + generateCardHTML(userHand[1]);
+            
+            // Reset AI hand visuals to facedown
+            AI_PLAYERS.forEach(ai => {
+                let handDiv = document.getElementById('hand-' + ai.toLowerCase());
+                if(handDiv) handDiv.innerHTML = `<div class="css-card facedown dealt"></div><div class="css-card facedown dealt"></div>`;
+            });
+
             uiHandName.innerText = "Evaluating...";
             uiHandBar.style.width = "0%";
             
-            logAction('Dealer', 'shuffle');
+            logAction('Dealer', 'shuffles deck');
             updateUI();
             evaluatePlayerHand();
+            document.getElementById('seat-user').classList.add('active');
         }
 
         function executeShowdown() {
-            logAction('Dealer', 'showdown');
+            logAction('Dealer', 'announces showdown');
             
-            // Build mock hands to test against solver
             let playersData = [{ id: 'YOU', hand: userHand }];
-            AI_PLAYERS.forEach(ai => { playersData.push({ id: ai, hand: [deck.pop(), deck.pop()] }); });
+            
+            // Reveal AI cards
+            AI_PLAYERS.forEach(ai => { 
+                let card1 = deck.pop(); let card2 = deck.pop();
+                playersData.push({ id: ai, hand: [card1, card2] }); 
+                let handDiv = document.getElementById('hand-' + ai.toLowerCase());
+                if(handDiv) handDiv.innerHTML = generateCardHTML(card1) + generateCardHTML(card2);
+            });
 
             let commCardsStr = communityCards.map(c => c.rank + c.suit.toLowerCase());
             
             playersData.forEach(p => {
                 let pCardsStr = p.hand.map(c => c.rank + c.suit.toLowerCase());
-                p.solved = Hand.solve(pCardsStr.concat(commCardsStr));
+                try { p.solved = Hand.solve(pCardsStr.concat(commCardsStr)); } catch(e) {}
             });
 
-            // Find true math winner
-            let solvedHands = playersData.map(p => p.solved);
+            let solvedHands = playersData.map(p => p.solved).filter(h => h);
             let winningHands = Hand.winners(solvedHands);
             let winningHand = winningHands[0]; 
             let winner = playersData.find(p => p.solved === winningHand);
 
-            // Populate Payout Modal
             document.getElementById('recap-winner').innerText = `${winner.id} WINS!`;
             document.getElementById('recap-hand').innerText = winningHand.name;
             document.getElementById('recap-amount').innerText = `+${formatMoney(pot)}`;
@@ -446,64 +474,77 @@
             }
             
             updateUI();
-            document.getElementById('payout-modal').style.display = 'flex';
+            setTimeout(() => { document.getElementById('payout-modal').style.display = 'flex'; }, 1500);
         }
 
-        function advancePhase() {
+        async function advancePhase() {
+            if (isProcessing) return;
+            isProcessing = true;
+            setButtonsEnabled(false);
+            
             gamePhase++;
             clearAllOnTableActions();
+            document.querySelectorAll('.seat').forEach(s => s.classList.remove('active'));
+
+            if (gamePhase >= 4) { executeShowdown(); return; }
+
+            let phaseName = gamePhase === 1 ? 'the Flop' : (gamePhase === 2 ? 'the Turn' : 'the River');
+            logAction('Dealer', `deals ${phaseName}`);
             
+            await new Promise(r => setTimeout(r, 1200)); 
+
             if (gamePhase === 1) { communityCards.push(deck.pop(), deck.pop(), deck.pop()); } 
             else if (gamePhase === 2 || gamePhase === 3) { communityCards.push(deck.pop()); } 
-            else if (gamePhase >= 4) { executeShowdown(); return; }
 
             uiCommunity.innerHTML = communityCards.map(c => generateCardHTML(c)).join('');
-            document.querySelectorAll('.seat').forEach(s => s.classList.remove('active'));
-            
-            setTimeout(() => {
-                AI_PLAYERS.forEach((ai, idx) => {
-                    setTimeout(() => {
-                        let action = Math.random() > 0.7 ? 'raise' : 'call';
-                        let amt = action === 'raise' ? currentCallAmount * 2 : currentCallAmount;
-                        pot += amt;
-                        if(action === 'raise') currentCallAmount = amt;
-                        logAction(ai, action, amt);
-                        updateUI();
-                    }, idx * 600);
-                });
-                setTimeout(() => { document.getElementById('seat-user').classList.add('active'); }, AI_PLAYERS.length * 600);
-            }, 500);
-
             evaluatePlayerHand();
             updateUI();
+
+            await new Promise(r => setTimeout(r, 800)); 
+
+            for (let i = 0; i < AI_PLAYERS.length; i++) {
+                let ai = AI_PLAYERS[i];
+                let seatEl = document.getElementById('seat-' + ai.toLowerCase());
+                
+                seatEl.classList.add('active'); 
+                await new Promise(r => setTimeout(r, 1200 + Math.random() * 800)); 
+
+                let action = Math.random() > 0.7 ? 'raise' : 'call';
+                let amt = action === 'raise' ? currentCallAmount * 2 : currentCallAmount;
+                pot += amt;
+                if(action === 'raise') currentCallAmount = amt;
+                
+                logAction(ai, action, amt);
+                updateUI();
+                
+                seatEl.classList.remove('active');
+                await new Promise(r => setTimeout(r, 400)); 
+            }
+
+            document.getElementById('seat-user').classList.add('active');
+            isProcessing = false;
+            setButtonsEnabled(true);
         }
 
-        // --- CONTROLS ---
         btnCall.addEventListener('click', () => {
-            if (bankroll >= currentCallAmount) {
-                bankroll -= currentCallAmount;
-                pot += currentCallAmount;
+            if (bankroll >= currentCallAmount && !isProcessing) {
+                bankroll -= currentCallAmount; pot += currentCallAmount;
                 logAction('YOU', 'call', currentCallAmount);
-                updateUI();
-                advancePhase();
+                updateUI(); advancePhase();
             }
         });
 
         btnRaise.addEventListener('click', () => {
             let totalBet = currentCallAmount + customRaiseAmount;
-            if (bankroll >= totalBet) {
-                bankroll -= totalBet;
-                pot += totalBet;
-                currentCallAmount = totalBet; 
+            if (bankroll >= totalBet && !isProcessing) {
+                bankroll -= totalBet; pot += totalBet; currentCallAmount = totalBet; 
                 logAction('YOU', 'raise', totalBet);
-                updateUI();
-                advancePhase();
+                updateUI(); advancePhase();
             }
         });
 
         btnFold.addEventListener('click', () => {
-            logAction('YOU', 'fold');
-            startNewHand();
+            if(!isProcessing) { logAction('YOU', 'fold'); startNewHand(); }
         });
 
         document.getElementById('btn-next-hand').addEventListener('click', () => {
@@ -511,7 +552,7 @@
             startNewHand();
         });
 
-        // FIX: Ramp up raise amounts dynamically
+        // Rapid Raise Scaling Logic
         let holdTimer; let holdInterval;
         function updateRaiseAmount(direction) {
             let step = customRaiseAmount >= 50000 ? 10000 : (customRaiseAmount >= 10000 ? 5000 : 1000); 
