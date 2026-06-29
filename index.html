@@ -36,7 +36,7 @@
         }
 
         .seat { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 4px; transform: translate(-50%, -50%); z-index: 10; transition: opacity 0.5s ease; }
-        .seat.folded { opacity: 0.4; } /* Grays out folded players */
+        .seat.folded { opacity: 0.4; } 
         
         #seat-user     { top: 100%; left: 50%; }  
         #seat-hustler  { top: 85%;  left: 10%; }
@@ -61,7 +61,6 @@
         .chip-stack-large { height: 50px; object-fit: contain; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.8)); }
         .community-cards { display: flex; gap: 8px; min-height: 95px; }
 
-        /* DYNAMIC CARDS - Animation Setup */
         .css-card { width: 65px; height: 95px; background: #ffffff; color: #0f172a; border: 3px solid #e2e8f0; border-radius: 6px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: inset 0 0 10px rgba(0,0,0,0.1), 2px 5px 10px rgba(0,0,0,0.6); font-family: 'Inter', sans-serif; font-weight: 900; font-size: 1.4rem; opacity: 0; transform: translateY(-30px); transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .css-card.dealt { opacity: 1; transform: translateY(0); }
         .css-card.facedown { background: #0f172a url('card_back.png') center/cover; border-color: #1e293b; }
@@ -77,7 +76,6 @@
         .player-hand .css-card { width: 50px; height: 75px; font-size: 1.1rem; border-width: 2px; }
         .player-hand .css-card .suit-icon { font-size: 1.5rem; }
 
-        /* CONTROLS & SIDEBAR STYLING */
         #controls { display: flex; justify-content: space-between; align-items: stretch; gap: 20px; background: linear-gradient(180deg, #1e293b, var(--accent-black)); padding: 20px; border-radius: 12px; border-top: 2px solid #475569; width: 100%; box-shadow: 0 20px 40px rgba(0,0,0,0.8); }
         .stat-box { display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--accent-black); padding: 10px 15px; border-radius: 8px; border: 1px solid #334155; flex: 1; box-shadow: inset 0 5px 10px rgba(0,0,0,0.8); }
         .stat-label { font-size: 0.75rem; color: #64748b; margin-bottom: 5px; letter-spacing: 1px; white-space: nowrap; }
@@ -117,7 +115,6 @@
         .stat-item .stat-title { font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
         .stat-item .stat-value { font-size: 1.1rem; font-weight: 700; color: var(--accent-gold); text-shadow: 0 0 10px rgba(254, 209, 1, 0.3); font-family: 'Orbitron', sans-serif;}
 
-        /* PAYOUT MODAL */
         #payout-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(2, 6, 23, 0.95); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(15px); }
         .modal-box { background: linear-gradient(180deg, #1e293b, var(--accent-black)); border: 2px solid var(--accent-gold); border-radius: 20px; padding: 50px 80px; text-align: center; display: flex; flex-direction: column; align-items: center; box-shadow: 0 20px 50px rgba(0,0,0,0.9), inset 0 0 20px rgba(254, 209, 1, 0.2); }
         .modal-title { font-size: 1.5rem; color: #94a3b8; letter-spacing: 4px; margin-bottom: 10px; text-transform: uppercase; }
@@ -262,6 +259,27 @@
     </div>
 
     <script>
+        // --- AUDIO ENGINE ---
+        const sfx = {
+            shuffle: new Audio('snd_shuffle.mp3'),
+            deal: new Audio('snd_deal.mp3'),
+            turn: new Audio('snd_turn.mp3'),
+            chip: new Audio('snd_chip.mp3'),
+            fold: new Audio('snd_fold.mp3'),
+            win: new Audio('snd_win.mp3')
+        };
+        // Soften volume to avoid ear fatigue
+        Object.values(sfx).forEach(s => s.volume = 0.5);
+
+        function playSound(soundName) {
+            try {
+                let s = sfx[soundName].cloneNode(); // Allows overlapping sounds
+                s.volume = sfx[soundName].volume;
+                s.play().catch(e => {}); // Catches browser autoplay blocks silently
+            } catch(e) {}
+        }
+
+        // --- GAME STATE ---
         let bankroll = 5122000; 
         let pot = 0;
         let currentCallAmount = 2000;
@@ -271,7 +289,6 @@
         let communityCards = [];
         let isProcessing = false;
 
-        // TRUE STATE TRACKING
         let playerStates = {};
         const AI_PLAYERS = ['PRO', 'HUSTLER', 'GAMBIT', 'WILD', 'SHARK', 'ROCK'];
         const ALL_SEATS = ['YOU', ...AI_PLAYERS];
@@ -356,7 +373,6 @@
             }
         }
 
-        // Returns string HTML. The CSS handles opacity:0 and translateY to hide it initially
         function generateCardHTML(card, isFacedown = false) {
             if (isFacedown) return `<div class="css-card facedown"></div>`;
             const displayRank = card.rank === 'T' ? '10' : card.rank;
@@ -368,13 +384,13 @@
             `;
         }
 
-        // Animate newly added cards in a container
         async function animateCardsIn(containerElement) {
             let cards = containerElement.querySelectorAll('.css-card:not(.dealt)');
             for (let i = 0; i < cards.length; i++) {
-                void cards[i].offsetWidth; // Force reflow so transition works
+                void cards[i].offsetWidth; 
                 cards[i].classList.add('dealt');
-                await new Promise(r => setTimeout(r, 250)); // Stagger delay
+                playSound('deal');
+                await new Promise(r => setTimeout(r, 250)); 
             }
         }
 
@@ -425,8 +441,8 @@
             setButtonsEnabled(true);
             clearAllOnTableActions();
             createDeck();
+            playSound('shuffle');
             
-            // Reset player state tracking & UI
             ALL_SEATS.forEach(p => {
                 playerStates[p] = { isActive: true, hand: [] };
                 let seat = document.getElementById('seat-' + p.toLowerCase());
@@ -439,16 +455,13 @@
             gamePhase = 0;
             uiCommunity.innerHTML = '';
 
-            // True Deal: Give every active player 2 cards from the deck
             ALL_SEATS.forEach(p => {
                 playerStates[p].hand = [deck.pop(), deck.pop()];
             });
             
-            // Render User Cards
             uiUserHand.innerHTML = generateCardHTML(playerStates['YOU'].hand[0]) + generateCardHTML(playerStates['YOU'].hand[1]);
             animateCardsIn(uiUserHand);
             
-            // Render AI Cards (Facedown)
             AI_PLAYERS.forEach(ai => {
                 let handDiv = document.getElementById('hand-' + ai.toLowerCase());
                 if(handDiv) {
@@ -472,7 +485,6 @@
             let commCardsStr = communityCards.map(c => c.rank + c.suit.toLowerCase());
             let activePlayers = ALL_SEATS.filter(p => playerStates[p].isActive);
             
-            // Flip surviving AI cards face up
             activePlayers.forEach(p => {
                 if(p !== 'YOU') {
                     let handDiv = document.getElementById('hand-' + p.toLowerCase());
@@ -481,7 +493,6 @@
                 }
             });
 
-            // Calculate Math safely
             try {
                 activePlayers.forEach(p => {
                     let pCardsStr = playerStates[p].hand.map(c => c.rank + c.suit.toLowerCase());
@@ -500,6 +511,7 @@
                 if(winnerID === 'YOU') {
                     bankroll += pot;
                     document.getElementById('recap-winner').style.color = 'var(--accent-green)';
+                    playSound('win');
                 } else {
                     document.getElementById('recap-winner').style.color = 'var(--accent-gold)';
                 }
@@ -508,7 +520,6 @@
                 setTimeout(() => { document.getElementById('payout-modal').style.display = 'flex'; }, 2000);
 
             } catch (error) {
-                console.error("Math Engine Error on Showdown", error);
                 document.getElementById('recap-winner').innerText = `POT SPLIT!`;
                 document.getElementById('recap-hand').innerText = "ENGINE OVERRIDE";
                 document.getElementById('recap-amount').innerText = `+${formatMoney(0)}`;
@@ -519,8 +530,6 @@
         async function dealCommunityCardsAnimation(cardsToDeal) {
             let htmlStr = "";
             cardsToDeal.forEach(c => htmlStr += generateCardHTML(c));
-            
-            // Append new cards to existing community HTML
             uiCommunity.insertAdjacentHTML('beforeend', htmlStr);
             await animateCardsIn(uiCommunity);
         }
@@ -553,15 +562,14 @@
             
             await new Promise(r => setTimeout(r, 800)); 
 
-            // AI Action Loop with extended pacing and fold logic
             for (let i = 0; i < AI_PLAYERS.length; i++) {
                 let ai = AI_PLAYERS[i];
-                if (!playerStates[ai].isActive) continue; // Skip folded players
+                if (!playerStates[ai].isActive) continue; 
 
                 let seatEl = document.getElementById('seat-' + ai.toLowerCase());
                 seatEl.classList.add('active'); 
+                playSound('turn');
                 
-                // Slowed down pacing for realistic thought
                 await new Promise(r => setTimeout(r, 1500 + Math.random() * 1500)); 
 
                 let rand = Math.random();
@@ -572,11 +580,13 @@
                 if (action === 'fold') {
                     foldPlayer(ai);
                     logAction(ai, 'fold');
+                    playSound('fold');
                 } else {
                     let amt = action === 'raise' ? currentCallAmount * 2 : currentCallAmount;
                     pot += amt;
                     if(action === 'raise') currentCallAmount = amt;
                     logAction(ai, action, amt);
+                    playSound('chip');
                 }
                 
                 updateUI();
@@ -584,14 +594,14 @@
                 await new Promise(r => setTimeout(r, 500)); 
             }
 
-            // Safety net logic
             let activeCount = Object.values(playerStates).filter(p => p.isActive).length;
             if (activeCount === 1) {
-                executeShowdown(); // Everyone else folded
+                executeShowdown(); 
             } else if (!playerStates['YOU'].isActive || bankroll <= 0) {
-                setTimeout(advancePhase, 1500); // Auto-advance for user
+                setTimeout(advancePhase, 1500); 
             } else {
                 document.getElementById('seat-user').classList.add('active');
+                playSound('turn');
                 isProcessing = false;
                 setButtonsEnabled(true);
             }
@@ -607,6 +617,7 @@
                 } else {
                     logAction('YOU', 'call', callAmt);
                 }
+                playSound('chip');
                 updateUI(); advancePhase();
             }
         });
@@ -616,6 +627,7 @@
             if (bankroll >= totalBet && !isProcessing) {
                 bankroll -= totalBet; pot += totalBet; currentCallAmount = totalBet; 
                 logAction('YOU', 'raise', totalBet);
+                playSound('chip');
                 updateUI(); advancePhase();
             }
         });
@@ -624,10 +636,10 @@
             if(!isProcessing) { 
                 logAction('YOU', 'fold'); 
                 foldPlayer('YOU');
-                
+                playSound('fold');
                 isProcessing = true;
                 setButtonsEnabled(false);
-                setTimeout(advancePhase, 1000); // fast forward
+                setTimeout(advancePhase, 1000); 
             }
         });
 
@@ -639,11 +651,11 @@
         let holdTimer; let holdInterval;
         function updateRaiseAmount(direction) {
             let step = customRaiseAmount >= 50000 ? 10000 : (customRaiseAmount >= 10000 ? 5000 : 1000); 
-            if (direction === 'up' && customRaiseAmount < bankroll) { customRaiseAmount += step; } 
+            if (direction === 'up' && customRaiseAmount < bankroll) { customRaiseAmount += step; playSound('chip'); } 
             else if (direction === 'down' && customRaiseAmount > 1000) { 
                 if (customRaiseAmount === 10000) step = 1000;
                 else if (customRaiseAmount === 50000) step = 5000;
-                customRaiseAmount -= step; 
+                customRaiseAmount -= step; playSound('chip');
             }
             updateUI();
         }
