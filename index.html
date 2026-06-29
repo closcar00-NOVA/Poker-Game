@@ -222,7 +222,7 @@
             <div id="controls">
                 <div class="stat-box">
                     <div class="stat-label">MASTER BANKROLL</div>
-                    <div class="stat-value" id="ui-bankroll">$8,486,000</div>
+                    <div class="stat-value" id="ui-bankroll">$5,122,000</div>
                 </div>
                 <div class="action-group">
                     <button class="poker-btn btn-fold" id="btn-fold">FOLD</button>
@@ -254,7 +254,7 @@
 
             <div class="side-panel">
                 <h2 class="panel-header">Table Leaders</h2>
-                <div class="leaderboard-row"><span class="lb-name">YOU</span><span class="lb-score" id="lb-user">$8,486,000</span></div>
+                <div class="leaderboard-row"><span class="lb-name">YOU</span><span class="lb-score" id="lb-user">$5,122,000</span></div>
                 <div class="leaderboard-row"><span class="lb-name">PRO</span><span class="lb-score">$150,000</span></div>
                 <div class="leaderboard-row"><span class="lb-name">HUSTLER</span><span class="lb-score">$125,000</span></div>
                 <div class="leaderboard-row"><span class="lb-name">GAMBIT</span><span class="lb-score">$95,000</span></div>
@@ -291,7 +291,7 @@
     </div>
 
     <script>
-        let bankroll = 8486000; 
+        let bankroll = 5122000; 
         let pot = 0;
         let currentCallAmount = 2000;
         let customRaiseAmount = 5000;
@@ -300,6 +300,7 @@
         let userHand = [];
         let communityCards = [];
         let isProcessing = false;
+        let userFolded = false; // Tracks if user forfeited the pot
 
         const AI_PLAYERS = ['PRO', 'HUSTLER', 'GAMBIT', 'WILD', 'SHARK', 'ROCK'];
         const SUITS = { 'H': '&hearts;', 'D': '&diams;', 'S': '&spades;', 'C': '&clubs;' };
@@ -327,11 +328,20 @@
         function formatMoney(num) { return '$' + num.toLocaleString(); }
         
         function setButtonsEnabled(enabled) {
-            btnCall.disabled = !enabled;
-            btnRaise.disabled = !enabled;
             btnFold.disabled = !enabled;
-            btnPlus.disabled = !enabled;
-            btnMinus.disabled = !enabled;
+            if (enabled) {
+                // If bankroll is less than call, disable raising and incrementers
+                let canRaise = bankroll > currentCallAmount;
+                btnRaise.disabled = !canRaise;
+                btnPlus.disabled = !canRaise;
+                btnMinus.disabled = !canRaise;
+                btnCall.disabled = false;
+            } else {
+                btnCall.disabled = true;
+                btnRaise.disabled = true;
+                btnPlus.disabled = true;
+                btnMinus.disabled = true;
+            }
         }
 
         function setOnTableAction(player, action, amount = 0) {
@@ -339,7 +349,7 @@
             if(!el) return;
             if(action === 'fold') { el.innerHTML = `<span style="color:#ef4444">FOLDED</span>`; }
             else if(action === 'raise') { el.innerHTML = `<span style="color:var(--accent-green)">RAISED +${formatMoney(amount)}</span>`; }
-            else if(action === 'call') { el.innerHTML = `<span style="color:#60a5fa">CALLED ${formatMoney(amount)}</span>`; }
+            else if(action === 'call' || action === 'all in') { el.innerHTML = `<span style="color:#60a5fa">CALLED ${formatMoney(amount)}</span>`; }
             else if(action === 'check') { el.innerHTML = `<span style="color:#94a3b8">CHECKED</span>`; }
             else { el.innerHTML = ''; }
         }
@@ -386,14 +396,16 @@
         }
 
         function evaluatePlayerHand() {
-            if (typeof Hand === 'undefined') return; 
+            if (typeof Hand === 'undefined' || userFolded) return; 
             let solverCards = userHand.map(c => c.rank + c.suit.toLowerCase());
             let commCards = communityCards.map(c => c.rank + c.suit.toLowerCase());
             
-            let hand = Hand.solve(solverCards.concat(commCards));
-            uiHandName.innerText = hand.name;
-            let strength = Math.min(100, (hand.rank / 9) * 100 + 10);
-            uiHandBar.style.width = `${strength}%`;
+            try {
+                let hand = Hand.solve(solverCards.concat(commCards));
+                uiHandName.innerText = hand.name;
+                let strength = Math.min(100, (hand.rank / 9) * 100 + 10);
+                uiHandBar.style.width = `${strength}%`;
+            } catch(e) {}
         }
 
         function updateUI() {
@@ -405,11 +417,18 @@
             
             const rounds = ["Pre-Flop", "The Flop", "The Turn", "The River", "Showdown"];
             uiStatRound.innerText = rounds[gamePhase];
-            btnCall.innerText = `CALL ${formatMoney(currentCallAmount)}`;
+
+            // Dynamic ALL-IN safety net
+            if (bankroll <= currentCallAmount) {
+                btnCall.innerText = `ALL IN ${formatMoney(bankroll)}`;
+            } else {
+                btnCall.innerText = `CALL ${formatMoney(currentCallAmount)}`;
+            }
         }
 
         function startNewHand() {
             isProcessing = false;
+            userFolded = false;
             setButtonsEnabled(true);
             clearAllOnTableActions();
             createDeck();
@@ -422,7 +441,6 @@
             uiCommunity.innerHTML = '';
             uiUserHand.innerHTML = generateCardHTML(userHand[0]) + generateCardHTML(userHand[1]);
             
-            // Reset AI hand visuals to facedown
             AI_PLAYERS.forEach(ai => {
                 let handDiv = document.getElementById('hand-' + ai.toLowerCase());
                 if(handDiv) handDiv.innerHTML = `<div class="css-card facedown dealt"></div><div class="css-card facedown dealt"></div>`;
@@ -440,7 +458,10 @@
         function executeShowdown() {
             logAction('Dealer', 'announces showdown');
             
-            let playersData = [{ id: 'YOU', hand: userHand }];
+            let playersData = [];
+            if (!userFolded) {
+                playersData.push({ id: 'YOU', hand: userHand });
+            }
             
             // Reveal AI cards
             AI_PLAYERS.forEach(ai => { 
@@ -521,16 +542,30 @@
                 await new Promise(r => setTimeout(r, 400)); 
             }
 
-            document.getElementById('seat-user').classList.add('active');
-            isProcessing = false;
-            setButtonsEnabled(true);
+            // If user has no money left, auto-advance for them to build tension
+            if (bankroll <= 0) {
+                setTimeout(advancePhase, 1500);
+            } else {
+                document.getElementById('seat-user').classList.add('active');
+                isProcessing = false;
+                setButtonsEnabled(true);
+            }
         }
 
         btnCall.addEventListener('click', () => {
-            if (bankroll >= currentCallAmount && !isProcessing) {
-                bankroll -= currentCallAmount; pot += currentCallAmount;
-                logAction('YOU', 'call', currentCallAmount);
-                updateUI(); advancePhase();
+            if (!isProcessing) {
+                let callAmt = Math.min(bankroll, currentCallAmount);
+                bankroll -= callAmt; 
+                pot += callAmt;
+                
+                if (callAmt < currentCallAmount || bankroll === 0) {
+                    logAction('YOU', 'all in', callAmt);
+                } else {
+                    logAction('YOU', 'call', callAmt);
+                }
+                
+                updateUI(); 
+                advancePhase();
             }
         });
 
@@ -544,7 +579,20 @@
         });
 
         btnFold.addEventListener('click', () => {
-            if(!isProcessing) { logAction('YOU', 'fold'); startNewHand(); }
+            if(!isProcessing) { 
+                logAction('YOU', 'fold'); 
+                userFolded = true;
+                isProcessing = true;
+                setButtonsEnabled(false);
+                
+                // Fast-forward remaining community cards
+                while(communityCards.length < 5) {
+                    communityCards.push(deck.pop());
+                }
+                uiCommunity.innerHTML = communityCards.map(c => generateCardHTML(c)).join('');
+                
+                setTimeout(executeShowdown, 1000);
+            }
         });
 
         document.getElementById('btn-next-hand').addEventListener('click', () => {
@@ -552,7 +600,6 @@
             startNewHand();
         });
 
-        // Rapid Raise Scaling Logic
         let holdTimer; let holdInterval;
         function updateRaiseAmount(direction) {
             let step = customRaiseAmount >= 50000 ? 10000 : (customRaiseAmount >= 10000 ? 5000 : 1000); 
