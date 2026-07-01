@@ -28,11 +28,13 @@
         .master-layout { display: flex; gap: 50px; width: 100%; max-width: 1500px; margin-top: 2vh; align-items: stretch; justify-content: center; }
         .main-game-area { display: flex; flex-direction: column; align-items: center; gap: 80px; flex: 1; max-width: 950px; }
 
+        /* THE TABLE - FIX: Added margin-top to prevent top avatars from clipping */
         .poker-table {
             position: relative; width: 100%; height: 450px; 
             background: var(--accent-black) url('table_felt.png') no-repeat center center; background-size: cover;
             border-radius: 225px; border: 25px solid var(--accent-black);
             box-shadow: 0 40px 80px rgba(0,0,0,0.9), inset 0 0 50px rgba(0,0,0,0.8), inset 0 0 0 5px rgba(0, 152, 90, 0.3); 
+            margin-top: 50px; 
         }
 
         .seat { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 4px; transform: translate(-50%, -50%); z-index: 10; transition: opacity 0.5s ease; }
@@ -191,7 +193,7 @@
             <div id="controls">
                 <div class="stat-box">
                     <div class="stat-label">MASTER BANKROLL</div>
-                    <div class="stat-value" id="ui-bankroll">$5,122,000</div>
+                    <div class="stat-value" id="ui-bankroll">$5,104,000</div>
                 </div>
                 <div class="action-group">
                     <button class="poker-btn btn-fold" id="btn-fold">FOLD</button>
@@ -210,6 +212,14 @@
         </div>
 
         <div class="sidebar">
+            
+            <div class="side-panel">
+                <h2 class="panel-header">Action Log</h2>
+                <ul class="log-list" id="ui-log">
+                    <li class="log-item"><span><strong>Dealer</strong> shuffles deck</span><span class="log-action">--</span></li>
+                </ul>
+            </div>
+
             <div class="side-panel">
                 <h2 class="panel-header">Table Stats</h2>
                 <div class="stats-grid">
@@ -221,8 +231,16 @@
             </div>
 
             <div class="side-panel">
+                <h2 class="panel-header">Hand Strength</h2>
+                <div class="hand-strength-display">
+                    <div class="current-hand" id="ui-hand-name">Awaiting Deal...</div>
+                    <div class="hand-bar-bg"><div class="hand-bar-fill" id="ui-hand-bar"></div></div>
+                </div>
+            </div>
+
+            <div class="side-panel">
                 <h2 class="panel-header">Table Leaders</h2>
-                <div class="leaderboard-row"><span class="lb-name">YOU</span><span class="lb-score" id="lb-user">$5,122,000</span></div>
+                <div class="leaderboard-row"><span class="lb-name">YOU</span><span class="lb-score" id="lb-user">$5,104,000</span></div>
                 <div class="leaderboard-row"><span class="lb-name">PRO</span><span class="lb-score">$150,000</span></div>
                 <div class="leaderboard-row"><span class="lb-name">HUSTLER</span><span class="lb-score">$125,000</span></div>
                 <div class="leaderboard-row"><span class="lb-name">GAMBIT</span><span class="lb-score">$95,000</span></div>
@@ -231,20 +249,6 @@
                 <div class="leaderboard-row"><span class="lb-name">ROCK</span><span class="lb-score">$12,000</span></div>
             </div>
 
-            <div class="side-panel">
-                <h2 class="panel-header">Action Log</h2>
-                <ul class="log-list" id="ui-log">
-                    <li class="log-item"><span><strong>Dealer</strong> shuffles deck</span><span class="log-action">--</span></li>
-                </ul>
-            </div>
-
-            <div class="side-panel">
-                <h2 class="panel-header">Hand Strength</h2>
-                <div class="hand-strength-display">
-                    <div class="current-hand" id="ui-hand-name">Awaiting Deal...</div>
-                    <div class="hand-bar-bg"><div class="hand-bar-fill" id="ui-hand-bar"></div></div>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -268,19 +272,18 @@
             fold: new Audio('snd_fold.mp3'),
             win: new Audio('snd_win.mp3')
         };
-        // Soften volume to avoid ear fatigue
         Object.values(sfx).forEach(s => s.volume = 0.5);
 
         function playSound(soundName) {
             try {
-                let s = sfx[soundName].cloneNode(); // Allows overlapping sounds
+                let s = sfx[soundName].cloneNode(); 
                 s.volume = sfx[soundName].volume;
-                s.play().catch(e => {}); // Catches browser autoplay blocks silently
+                s.play().catch(e => {}); 
             } catch(e) {}
         }
 
         // --- GAME STATE ---
-        let bankroll = 5122000; 
+        let bankroll = 5104000; 
         let pot = 0;
         let currentCallAmount = 2000;
         let customRaiseAmount = 5000;
