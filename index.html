@@ -89,7 +89,6 @@
         .btn-fold { background: linear-gradient(180deg, #ef4444, #7f1d1d); border: 2px solid #fca5a5; }
         .btn-call { background: linear-gradient(180deg, #3b82f6, #1e3a8a); border: 2px solid #93c5fd; }
         .btn-raise { background: linear-gradient(180deg, var(--accent-green), #004d2d); border: 2px solid #34d399; }
-        
         .bet-controls { display: flex; align-items: center; gap: 8px; }
         .bet-btn { background: linear-gradient(180deg, #334155, var(--accent-black)); border: 1px solid #475569; color: white; width: 30px; height: 30px; border-radius: 6px; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; user-select: none; }
         .bet-btn:disabled { filter: grayscale(1); opacity: 0.5; cursor: not-allowed; }
@@ -130,13 +129,37 @@
         .stat-item .stat-title { font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
         .stat-item .stat-value { font-size: 1.1rem; font-weight: 700; color: var(--accent-gold); text-shadow: 0 0 10px rgba(254, 209, 1, 0.3); font-family: 'Orbitron', sans-serif;}
 
-        /* PAYOUT MODAL WITH DOUBLE UP FEATURE */
+        /* --- THE BONUS ROULETTE MODAL --- */
         #payout-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(2, 6, 23, 0.95); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(15px); }
-        .modal-box { background: linear-gradient(180deg, #1e293b, var(--accent-black)); border: 2px solid var(--accent-gold); border-radius: 20px; padding: 50px 80px; width: 600px; text-align: center; display: flex; flex-direction: column; align-items: center; box-shadow: 0 20px 50px rgba(0,0,0,0.9), inset 0 0 20px rgba(254, 209, 1, 0.2); }
+        .modal-box { background: linear-gradient(180deg, #1e293b, var(--accent-black)); border: 2px solid var(--accent-gold); border-radius: 20px; padding: 50px 80px; width: 700px; text-align: center; display: flex; flex-direction: column; align-items: center; box-shadow: 0 20px 50px rgba(0,0,0,0.9), inset 0 0 20px rgba(254, 209, 1, 0.2); }
         .modal-title { font-size: 1.5rem; color: #94a3b8; letter-spacing: 4px; margin-bottom: 10px; text-transform: uppercase; }
         .modal-winner { font-size: 3.5rem; color: white; font-weight: 900; margin-bottom: 5px; text-shadow: 0 0 20px rgba(255,255,255,0.3); }
         .modal-hand { font-size: 1.2rem; color: var(--accent-cyan); margin-bottom: 25px; text-transform: uppercase; letter-spacing: 2px;}
         .modal-amount { font-size: 4rem; color: var(--accent-gold); font-weight: 900; text-shadow: 0 0 30px rgba(254, 209, 1, 0.5); margin-bottom: 40px; }
+
+        /* Pure CSS High Stakes Roulette Wheel */
+        .roulette-container { position: relative; width: 260px; height: 260px; margin: 20px 0 40px 0; }
+        .roulette-wheel {
+            width: 100%; height: 100%; border-radius: 50%;
+            /* 10 Slices (36 deg each). 4 Red, 4 Black, 2 Green */
+            background: conic-gradient(
+                #00985A 0deg 36deg,     /* 0: Green */
+                #dc2626 36deg 72deg,    /* 1: Red */
+                #0f172a 72deg 108deg,   /* 2: Black */
+                #dc2626 108deg 144deg,  /* 3: Red */
+                #0f172a 144deg 180deg,  /* 4: Black */
+                #00985A 180deg 216deg,  /* 5: Green */
+                #0f172a 216deg 252deg,  /* 6: Black */
+                #dc2626 252deg 288deg,  /* 7: Red */
+                #0f172a 288deg 324deg,  /* 8: Black */
+                #dc2626 324deg 360deg   /* 9: Red */
+            );
+            border: 12px solid var(--accent-gold);
+            box-shadow: 0 0 30px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.8);
+            transition: transform 3.5s cubic-bezier(0.25, 1, 0.2, 1); /* Physics-based spin */
+        }
+        .roulette-pointer { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 18px solid transparent; border-right: 18px solid transparent; border-top: 35px solid white; z-index: 10; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.8)); }
+        .roulette-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 50px; height: 50px; background: var(--accent-gold); border-radius: 50%; border: 6px solid #1e293b; box-shadow: 0 0 15px rgba(0,0,0,0.8); z-index: 5; }
 
         @media (max-width: 1200px) { .master-layout { flex-direction: column; align-items: center; } .sidebar { width: 100%; max-width: 950px; flex-direction: row; flex-wrap: wrap; } .side-panel { flex: 1; min-width: 300px; } }
     </style>
@@ -226,7 +249,6 @@
         </div>
 
         <div class="sidebar">
-            
             <div class="side-panel">
                 <h2 class="panel-header">Action Log</h2>
                 <ul class="log-list" id="ui-log">
@@ -239,7 +261,6 @@
                 <div class="status-list" id="ui-player-status"></div>
             </div>
 
-            <!-- REORDERED: Table Stats is now below Player Status -->
             <div class="side-panel">
                 <h2 class="panel-header">Table Stats</h2>
                 <div class="stats-grid">
@@ -263,7 +284,7 @@
         </div>
     </div>
 
-    <!-- DOUBLE OR NOTHING MODAL -->
+    <!-- DOUBLE OR NOTHING ROULETTE MODAL -->
     <div id="payout-modal">
         <div class="modal-box">
             
@@ -275,22 +296,27 @@
                 <div class="modal-amount" id="recap-amount">+$125,000</div>
             </div>
 
-            <!-- Bonus Double Up View -->
+            <!-- Bonus Roulette Spin View -->
             <div id="double-view" style="display: none; flex-direction: column; align-items: center; width: 100%;">
-                <div class="modal-title">DOUBLE OR NOTHING</div>
-                <div class="modal-hand">GUESS THE CARD COLOR</div>
-                <div id="double-card-display" style="margin: 30px 0; transform: scale(1.5);">
-                    <div class="css-card facedown"></div>
+                <div class="modal-title">HIGH ROLLER ROULETTE</div>
+                <div class="modal-hand">RISK YOUR WINNINGS</div>
+                
+                <div class="roulette-container">
+                    <div class="roulette-pointer"></div>
+                    <div class="roulette-center"></div>
+                    <div class="roulette-wheel" id="roulette-wheel-inner"></div>
                 </div>
+
                 <div style="display: flex; gap: 15px; width: 100%; margin-bottom: 20px;" id="double-choice-btns">
-                    <button id="btn-guess-red" class="poker-btn btn-fold" style="padding: 15px; flex: 1; border-color:#fca5a5;">RED</button>
-                    <button id="btn-guess-black" class="poker-btn btn-call" style="padding: 15px; flex: 1; background: linear-gradient(180deg, #475569, #0f172a); border-color: #334155;">BLACK</button>
+                    <button id="btn-guess-red" class="poker-btn btn-fold" style="padding: 15px; flex: 1; border-color:#fca5a5;">RED (2X)</button>
+                    <button id="btn-guess-green" class="poker-btn btn-raise" style="padding: 15px; flex: 1; box-shadow: 0 0 20px rgba(0, 152, 90, 0.6);">GREEN (5X)</button>
+                    <button id="btn-guess-black" class="poker-btn btn-call" style="padding: 15px; flex: 1; background: linear-gradient(180deg, #475569, #0f172a); border-color: #334155;">BLACK (2X)</button>
                 </div>
             </div>
 
             <!-- Action Buttons -->
             <div style="display: flex; gap: 15px; width: 100%; margin-top: 10px;" id="modal-action-btns">
-                <button id="btn-double" class="poker-btn btn-raise" style="display: none; padding: 20px; font-size: 1.2rem; flex: 1; box-shadow: 0 0 20px rgba(0, 152, 90, 0.6);">DOUBLE UP</button>
+                <button id="btn-double" class="poker-btn btn-raise" style="display: none; padding: 20px; font-size: 1.2rem; flex: 1; box-shadow: 0 0 20px rgba(0, 152, 90, 0.6);">HIGH ROLLER SPIN</button>
                 <button id="btn-next-hand" class="poker-btn btn-call" style="padding: 20px; font-size: 1.2rem; flex: 1;">START NEXT HAND</button>
             </div>
 
@@ -310,11 +336,7 @@
         Object.values(sfx).forEach(s => s.volume = 0.5);
 
         function playSound(soundName) {
-            try {
-                let s = sfx[soundName].cloneNode(); 
-                s.volume = sfx[soundName].volume;
-                s.play().catch(e => {}); 
-            } catch(e) {}
+            try { let s = sfx[soundName].cloneNode(); s.volume = sfx[soundName].volume; s.play().catch(e => {}); } catch(e) {}
         }
 
         let bankroll = 3258000; 
@@ -325,14 +347,11 @@
         let deck = [];
         let communityCards = [];
         let isProcessing = false;
-        
-        // Double or Nothing Tracking
-        let currentWinAmount = 0;
+        let currentWinAmount = 0; // Roulette Tracking
 
         let playerStates = {};
         const AI_PLAYERS = ['PRO', 'HUSTLER', 'GAMBIT', 'WILD', 'SHARK', 'ROCK'];
         const ALL_SEATS = ['YOU', ...AI_PLAYERS];
-
         ALL_SEATS.forEach(p => playerStates[p] = { isActive: true, hand: [], lastAction: 'WAITING' });
 
         const SUITS = { 'H': '&hearts;', 'D': '&diams;', 'S': '&spades;', 'C': '&clubs;' };
@@ -367,10 +386,7 @@
                 btnMinus.disabled = !canRaise;
                 btnCall.disabled = false;
             } else {
-                btnCall.disabled = true;
-                btnRaise.disabled = true;
-                btnPlus.disabled = true;
-                btnMinus.disabled = true;
+                btnCall.disabled = true; btnRaise.disabled = true; btnPlus.disabled = true; btnMinus.disabled = true;
             }
         }
 
@@ -384,9 +400,7 @@
             else { el.innerHTML = ''; }
         }
 
-        function clearAllOnTableActions() {
-            ALL_SEATS.forEach(p => setOnTableAction(p, ''));
-        }
+        function clearAllOnTableActions() { ALL_SEATS.forEach(p => setOnTableAction(p, '')); }
 
         function updatePlayerStatuses() {
             const container = document.getElementById('ui-player-status');
@@ -395,17 +409,12 @@
             ALL_SEATS.forEach(p => {
                 let state = playerStates[p] ? playerStates[p].lastAction : 'WAITING';
                 if(!playerStates[p]?.isActive) state = 'FOLDED';
-
                 let stateClass = 'state-waiting';
                 if(state === 'FOLDED') stateClass = 'state-folded';
                 else if(state === 'RAISED' || state === 'RAISE') stateClass = 'state-raised';
                 else if(state === 'CALLED' || state === 'CALL' || state === 'ALL IN') stateClass = 'state-called';
                 else if(state === 'WINNER') stateClass = 'state-winner';
-
-                html += `<div class="status-row">
-                    <span class="status-name">${p}</span>
-                    <span class="status-state ${stateClass}">${state}</span>
-                </div>`;
+                html += `<div class="status-row"><span class="status-name">${p}</span><span class="status-state ${stateClass}">${state}</span></div>`;
             });
             container.innerHTML = html;
         }
@@ -413,16 +422,13 @@
         function logAction(player, action, amount = 0) {
             const li = document.createElement('li');
             li.className = 'log-item';
-            
             if (player === 'Dealer') {
                 li.innerHTML = `<span><strong>Dealer</strong> ${action}</span><span class="log-action">--</span>`;
             } else {
                 let amtStr = amount > 0 ? `<span class="log-action ${action}">${action === 'raise' ? '+' : ''}${formatMoney(amount)}</span>` : `<span class="log-action fold">--</span>`;
                 li.innerHTML = `<span><strong>${player}</strong> ${action}s</span>${amtStr}`;
                 setOnTableAction(player, action, amount);
-                if (playerStates[player]) {
-                    playerStates[player].lastAction = action.toUpperCase();
-                }
+                if (playerStates[player]) playerStates[player].lastAction = action.toUpperCase();
             }
             uiLog.prepend(li);
             updatePlayerStatuses();
@@ -430,75 +436,47 @@
 
         function createDeck() {
             deck = [];
-            for (let r of RANKS) {
-                for (let s in SUITS) { deck.push({ rank: r, suit: s }); }
-            }
-            for (let i = deck.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [deck[i], deck[j]] = [deck[j], deck[i]];
-            }
+            for (let r of RANKS) { for (let s in SUITS) { deck.push({ rank: r, suit: s }); } }
+            for (let i = deck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [deck[i], deck[j]] = [deck[j], deck[i]]; }
         }
 
         function generateCardHTML(card, isFacedown = false) {
             if (isFacedown || !card) return `<div class="css-card facedown"></div>`;
             const displayRank = card.rank === 'T' ? '10' : card.rank;
-            return `
-                <div class="css-card ${SUIT_COLORS[card.suit]}">
-                    <span>${displayRank}</span>
-                    <span class="suit-icon">${SUITS[card.suit]}</span>
-                </div>
-            `;
+            return `<div class="css-card ${SUIT_COLORS[card.suit]}"><span>${displayRank}</span><span class="suit-icon">${SUITS[card.suit]}</span></div>`;
         }
 
         async function animateCardsIn(containerElement) {
             let cards = containerElement.querySelectorAll('.css-card:not(.dealt)');
             for (let i = 0; i < cards.length; i++) {
-                void cards[i].offsetWidth; 
-                cards[i].classList.add('dealt');
-                playSound('deal');
+                void cards[i].offsetWidth; cards[i].classList.add('dealt'); playSound('deal');
                 await new Promise(r => setTimeout(r, 250)); 
             }
         }
 
         function updateUI() {
-            uiBankroll.innerText = formatMoney(bankroll);
-            lbUser.innerText = formatMoney(bankroll);
-            uiPot.innerText = formatMoney(pot);
-            uiRaiseAmt.innerText = formatMoney(customRaiseAmount);
+            uiBankroll.innerText = formatMoney(bankroll); lbUser.innerText = formatMoney(bankroll);
+            uiPot.innerText = formatMoney(pot); uiRaiseAmt.innerText = formatMoney(customRaiseAmount);
             uiStatBet.innerText = formatMoney(currentCallAmount);
-            
             let activeCount = Object.values(playerStates).filter(p => p.isActive).length;
             uiStatActive.innerText = `${activeCount} Players`;
-
             const rounds = ["Pre-Flop", "The Flop", "The Turn", "The River", "Showdown"];
             uiStatRound.innerText = rounds[gamePhase];
-
-            if (bankroll <= currentCallAmount) {
-                btnCall.innerText = `ALL IN ${formatMoney(bankroll)}`;
-            } else {
-                btnCall.innerText = `CALL ${formatMoney(currentCallAmount)}`;
-            }
+            if (bankroll <= currentCallAmount) { btnCall.innerText = `ALL IN ${formatMoney(bankroll)}`; } else { btnCall.innerText = `CALL ${formatMoney(currentCallAmount)}`; }
             updatePlayerStatuses();
         }
 
         function foldPlayer(playerID) {
-            playerStates[playerID].isActive = false;
-            playerStates[playerID].lastAction = 'FOLDED';
+            playerStates[playerID].isActive = false; playerStates[playerID].lastAction = 'FOLDED';
             let seat = document.getElementById('seat-' + playerID.toLowerCase());
             if(seat) seat.classList.add('folded');
-            
             let handContainer = playerID === 'YOU' ? uiUserHand : document.getElementById('hand-' + playerID.toLowerCase());
             if(handContainer) handContainer.innerHTML = '';
         }
 
         async function startNewHand() {
-            isProcessing = false;
-            setButtonsEnabled(true);
-            clearAllOnTableActions();
-            createDeck();
-            playSound('shuffle');
+            isProcessing = false; setButtonsEnabled(true); clearAllOnTableActions(); createDeck(); playSound('shuffle');
             
-            // Modal Reset for Next Hand
             document.getElementById('recap-view').style.display = 'flex';
             document.getElementById('double-view').style.display = 'none';
             document.getElementById('modal-action-btns').style.display = 'flex';
@@ -513,110 +491,65 @@
                 if(seat) seat.classList.remove('folded', 'active');
             });
             
-            communityCards = [];
-            pot = 0;
-            currentCallAmount = 2000;
-            customRaiseAmount = 5000; 
-            gamePhase = 0;
-            uiCommunity.innerHTML = '';
-
-            ALL_SEATS.forEach(p => {
-                playerStates[p].hand = [deck.pop(), deck.pop()];
-            });
+            communityCards = []; pot = 0; currentCallAmount = 2000; customRaiseAmount = 5000; gamePhase = 0; uiCommunity.innerHTML = '';
+            ALL_SEATS.forEach(p => { playerStates[p].hand = [deck.pop(), deck.pop()]; });
             
-            uiUserHand.innerHTML = generateCardHTML(playerStates['YOU'].hand[0]) + generateCardHTML(playerStates['YOU'].hand[1]);
-            animateCardsIn(uiUserHand);
+            uiUserHand.innerHTML = generateCardHTML(playerStates['YOU'].hand[0]) + generateCardHTML(playerStates['YOU'].hand[1]); animateCardsIn(uiUserHand);
             
             AI_PLAYERS.forEach(ai => {
                 let handDiv = document.getElementById('hand-' + ai.toLowerCase());
-                if(handDiv) {
-                    handDiv.innerHTML = generateCardHTML(null, true) + generateCardHTML(null, true);
-                    animateCardsIn(handDiv);
-                }
+                if(handDiv) { handDiv.innerHTML = generateCardHTML(null, true) + generateCardHTML(null, true); animateCardsIn(handDiv); }
             });
             
-            logAction('Dealer', 'shuffles deck');
-            updateUI();
-            document.getElementById('seat-user').classList.add('active');
+            logAction('Dealer', 'shuffles deck'); updateUI(); document.getElementById('seat-user').classList.add('active');
         }
 
         function triggerPayoutModal(winnerID, handName, amount, isSplit = false) {
             if (isSplit) {
-                document.getElementById('recap-winner').innerText = `POT SPLIT!`;
-                document.getElementById('recap-hand').innerText = handName;
-                document.getElementById('recap-amount').innerText = `+${formatMoney(amount)} EACH`;
-                document.getElementById('recap-winner').style.color = 'var(--accent-cyan)';
+                document.getElementById('recap-winner').innerText = `POT SPLIT!`; document.getElementById('recap-hand').innerText = handName;
+                document.getElementById('recap-amount').innerText = `+${formatMoney(amount)} EACH`; document.getElementById('recap-winner').style.color = 'var(--accent-cyan)';
             } else {
-                document.getElementById('recap-winner').innerText = `${winnerID} WINS!`;
-                document.getElementById('recap-hand').innerText = handName;
+                document.getElementById('recap-winner').innerText = `${winnerID} WINS!`; document.getElementById('recap-hand').innerText = handName;
                 document.getElementById('recap-amount').innerText = `+${formatMoney(amount)}`;
-                if(winnerID === 'YOU') {
-                    document.getElementById('recap-winner').style.color = 'var(--accent-green)';
-                } else {
-                    document.getElementById('recap-winner').style.color = 'var(--accent-gold)';
-                }
+                document.getElementById('recap-winner').style.color = (winnerID === 'YOU') ? 'var(--accent-green)' : 'var(--accent-gold)';
             }
 
-            // Double Up Engine Logic
             if (currentWinAmount > 0) {
-                document.getElementById('btn-double').style.display = 'block';
-                document.getElementById('btn-next-hand').innerText = 'COLLECT';
+                document.getElementById('btn-double').style.display = 'block'; document.getElementById('btn-next-hand').innerText = 'COLLECT';
             } else {
-                document.getElementById('btn-double').style.display = 'none';
-                document.getElementById('btn-next-hand').innerText = 'START NEXT HAND';
+                document.getElementById('btn-double').style.display = 'none'; document.getElementById('btn-next-hand').innerText = 'START NEXT HAND';
             }
-
-            updateUI();
-            setTimeout(() => { document.getElementById('payout-modal').style.display = 'flex'; }, 2000);
+            updateUI(); setTimeout(() => { document.getElementById('payout-modal').style.display = 'flex'; }, 2000);
         }
 
         function executeShowdown() {
             logAction('Dealer', 'announces showdown');
             let activePlayers = ALL_SEATS.filter(p => playerStates[p].isActive);
             
-            // Bypass math if everyone folded
             if (activePlayers.length === 1) {
-                let winnerID = activePlayers[0];
-                playerStates[winnerID].lastAction = 'WINNER';
-                
-                if (winnerID === 'YOU') {
-                    currentWinAmount = pot;
-                    bankroll += currentWinAmount;
-                    playSound('win');
-                } else {
-                    currentWinAmount = 0;
-                }
-                triggerPayoutModal(winnerID, "OPPONENTS FOLDED", pot, false);
-                return;
+                let winnerID = activePlayers[0]; playerStates[winnerID].lastAction = 'WINNER';
+                if (winnerID === 'YOU') { currentWinAmount = pot; bankroll += currentWinAmount; playSound('win'); } else { currentWinAmount = 0; }
+                triggerPayoutModal(winnerID, "OPPONENTS FOLDED", pot, false); return;
             }
 
-            while (communityCards.length < 5 && deck.length > 0) {
-                let c = deck.pop();
-                if(c) communityCards.push(c);
-            }
-            uiCommunity.innerHTML = communityCards.map(c => generateCardHTML(c)).join('');
-            animateCardsIn(uiCommunity);
-
+            while (communityCards.length < 5 && deck.length > 0) { let c = deck.pop(); if(c) communityCards.push(c); }
+            uiCommunity.innerHTML = communityCards.map(c => generateCardHTML(c)).join(''); animateCardsIn(uiCommunity);
             let commCardsStr = communityCards.filter(c => c).map(c => c.rank + c.suit.toLowerCase());
             
             activePlayers.forEach(p => {
                 if(p !== 'YOU') {
                     let handDiv = document.getElementById('hand-' + p.toLowerCase());
                     if(handDiv && playerStates[p].hand[0] && playerStates[p].hand[1]) {
-                        handDiv.innerHTML = generateCardHTML(playerStates[p].hand[0]) + generateCardHTML(playerStates[p].hand[1]);
-                        animateCardsIn(handDiv);
+                        handDiv.innerHTML = generateCardHTML(playerStates[p].hand[0]) + generateCardHTML(playerStates[p].hand[1]); animateCardsIn(handDiv);
                     }
                 }
             });
 
             try {
                 let validCommCardsStr = communityCards.slice(0, 5).filter(c => c && c.rank && c.suit).map(c => c.rank + c.suit.toLowerCase());
-                
                 activePlayers.forEach(p => {
                     let pCardsStr = playerStates[p].hand.slice(0, 2).filter(c => c && c.rank && c.suit).map(c => c.rank + c.suit.toLowerCase());
-                    if (pCardsStr.length === 2 && validCommCardsStr.length === 5) {
-                        playerStates[p].solved = Hand.solve(pCardsStr.concat(validCommCardsStr));
-                    } else { throw new Error("Missing Card Data"); }
+                    if (pCardsStr.length === 2 && validCommCardsStr.length === 5) { playerStates[p].solved = Hand.solve(pCardsStr.concat(validCommCardsStr)); } else { throw new Error("Missing Card Data"); }
                 });
                 
                 let solvedHands = activePlayers.map(p => playerStates[p].solved).filter(h => h !== undefined);
@@ -624,144 +557,72 @@
 
                 let winningHands = Hand.winners(solvedHands);
                 let winners = activePlayers.filter(p => playerStates[p].solved && winningHands.some(wh => wh.name === playerStates[p].solved.name && wh.descr === playerStates[p].solved.descr));
-                
                 winners.forEach(w => playerStates[w].lastAction = 'WINNER');
                 
                 if (winners.length > 1) {
                     let splitAmount = Math.floor(pot / winners.length);
-                    if (winners.includes('YOU')) {
-                        currentWinAmount = splitAmount;
-                        bankroll += currentWinAmount;
-                        playSound('win');
-                    } else {
-                        currentWinAmount = 0;
-                    }
+                    if (winners.includes('YOU')) { currentWinAmount = splitAmount; bankroll += currentWinAmount; playSound('win'); } else { currentWinAmount = 0; }
                     triggerPayoutModal('SPLIT', winningHands[0].name, splitAmount, true);
                 } else {
                     let winnerID = winners[0];
-                    if (winnerID === 'YOU') {
-                        currentWinAmount = pot;
-                        bankroll += currentWinAmount;
-                        playSound('win');
-                    } else {
-                        currentWinAmount = 0;
-                    }
+                    if (winnerID === 'YOU') { currentWinAmount = pot; bankroll += currentWinAmount; playSound('win'); } else { currentWinAmount = 0; }
                     triggerPayoutModal(winnerID, winningHands[0].name, pot, false);
                 }
-
             } catch (error) {
-                console.error("Solver Error Caught:", error);
-                currentWinAmount = 0;
-                triggerPayoutModal('ERROR', "ENGINE OVERRIDE", 0, true);
+                console.error("Solver Error Caught:", error); currentWinAmount = 0; triggerPayoutModal('ERROR', "ENGINE OVERRIDE", 0, true);
             }
         }
 
         async function dealCommunityCardsAnimation(cardsToDeal) {
-            let htmlStr = "";
-            cardsToDeal.forEach(c => htmlStr += generateCardHTML(c));
-            uiCommunity.insertAdjacentHTML('beforeend', htmlStr);
-            await animateCardsIn(uiCommunity);
+            let htmlStr = ""; cardsToDeal.forEach(c => htmlStr += generateCardHTML(c)); uiCommunity.insertAdjacentHTML('beforeend', htmlStr); await animateCardsIn(uiCommunity);
         }
 
         async function advancePhase() {
-            if (isProcessing) return;
-            isProcessing = true;
-            setButtonsEnabled(false);
+            if (isProcessing) return; isProcessing = true; setButtonsEnabled(false);
             
-            gamePhase++;
-            clearAllOnTableActions();
-            document.querySelectorAll('.seat').forEach(s => s.classList.remove('active'));
-
-            ALL_SEATS.forEach(p => {
-                if (playerStates[p] && playerStates[p].isActive) {
-                    playerStates[p].lastAction = 'WAITING';
-                }
-            });
+            gamePhase++; clearAllOnTableActions(); document.querySelectorAll('.seat').forEach(s => s.classList.remove('active'));
+            ALL_SEATS.forEach(p => { if (playerStates[p] && playerStates[p].isActive) { playerStates[p].lastAction = 'WAITING'; } });
             updatePlayerStatuses();
 
             if (gamePhase >= 4) { executeShowdown(); return; }
 
-            let phaseName = gamePhase === 1 ? 'the Flop' : (gamePhase === 2 ? 'the Turn' : 'the River');
-            logAction('Dealer', `deals ${phaseName}`);
-            
+            let phaseName = gamePhase === 1 ? 'the Flop' : (gamePhase === 2 ? 'the Turn' : 'the River'); logAction('Dealer', `deals ${phaseName}`);
             await new Promise(r => setTimeout(r, 1000)); 
 
             let cardsToDeal = [];
-            if (gamePhase === 1) { cardsToDeal = [deck.pop(), deck.pop(), deck.pop()]; } 
-            else if (gamePhase === 2 || gamePhase === 3) { cardsToDeal = [deck.pop()]; } 
-
-            cardsToDeal = cardsToDeal.filter(c => c !== undefined);
-            communityCards.push(...cardsToDeal);
-            await dealCommunityCardsAnimation(cardsToDeal);
-            
-            updateUI();
-            await new Promise(r => setTimeout(r, 800)); 
+            if (gamePhase === 1) { cardsToDeal = [deck.pop(), deck.pop(), deck.pop()]; } else if (gamePhase === 2 || gamePhase === 3) { cardsToDeal = [deck.pop()]; } 
+            cardsToDeal = cardsToDeal.filter(c => c !== undefined); communityCards.push(...cardsToDeal);
+            await dealCommunityCardsAnimation(cardsToDeal); updateUI(); await new Promise(r => setTimeout(r, 800)); 
 
             let activeCount = Object.values(playerStates).filter(p => p.isActive).length;
-
             if (activeCount > 1) {
                 for (let i = 0; i < AI_PLAYERS.length; i++) {
-                    let currentActive = Object.values(playerStates).filter(p => p.isActive).length;
-                    if (currentActive === 1) break; 
-                    
-                    let ai = AI_PLAYERS[i];
-                    if (!playerStates[ai].isActive) continue; 
+                    let currentActive = Object.values(playerStates).filter(p => p.isActive).length; if (currentActive === 1) break; 
+                    let ai = AI_PLAYERS[i]; if (!playerStates[ai].isActive) continue; 
 
-                    let seatEl = document.getElementById('seat-' + ai.toLowerCase());
-                    seatEl.classList.add('active'); 
-                    playSound('turn');
-                    
+                    let seatEl = document.getElementById('seat-' + ai.toLowerCase()); seatEl.classList.add('active'); playSound('turn');
                     await new Promise(r => setTimeout(r, 1500 + Math.random() * 1500)); 
 
-                    let rand = Math.random();
-                    let action = 'call';
-                    if (rand > 0.85) action = 'raise';
-                    else if (rand < 0.15) action = 'fold';
+                    let rand = Math.random(); let action = 'call';
+                    if (rand > 0.85) action = 'raise'; else if (rand < 0.15) action = 'fold';
 
-                    if (action === 'fold') {
-                        foldPlayer(ai);
-                        logAction(ai, 'fold');
-                        playSound('fold');
-                    } else {
-                        let amt = action === 'raise' ? currentCallAmount * 2 : currentCallAmount;
-                        pot += amt;
-                        if(action === 'raise') currentCallAmount = amt;
-                        logAction(ai, action, amt);
-                        playSound('chip');
-                    }
+                    if (action === 'fold') { foldPlayer(ai); logAction(ai, 'fold'); playSound('fold'); } 
+                    else { let amt = action === 'raise' ? currentCallAmount * 2 : currentCallAmount; pot += amt; if(action === 'raise') currentCallAmount = amt; logAction(ai, action, amt); playSound('chip'); }
                     
-                    updateUI();
-                    seatEl.classList.remove('active');
-                    await new Promise(r => setTimeout(r, 500)); 
+                    updateUI(); seatEl.classList.remove('active'); await new Promise(r => setTimeout(r, 500)); 
                 }
             }
 
             activeCount = Object.values(playerStates).filter(p => p.isActive).length;
-            if (activeCount === 1) {
-                executeShowdown(); 
-            } else if (!playerStates['YOU'].isActive || bankroll <= 0) {
-                isProcessing = false; 
-                setTimeout(advancePhase, 1500); 
-            } else {
-                document.getElementById('seat-user').classList.add('active');
-                playSound('turn');
-                isProcessing = false;
-                setButtonsEnabled(true);
-            }
+            if (activeCount === 1) { executeShowdown(); } else if (!playerStates['YOU'].isActive || bankroll <= 0) { isProcessing = false; setTimeout(advancePhase, 1500); } 
+            else { document.getElementById('seat-user').classList.add('active'); playSound('turn'); isProcessing = false; setButtonsEnabled(true); }
         }
 
         btnCall.addEventListener('click', () => {
             if (!isProcessing) {
-                let callAmt = Math.min(bankroll, currentCallAmount);
-                bankroll -= callAmt; pot += callAmt;
-                
-                if (callAmt < currentCallAmount || bankroll === 0) {
-                    logAction('YOU', 'all in', callAmt);
-                } else {
-                    logAction('YOU', 'call', callAmt);
-                }
-                playSound('chip');
-                updateUI(); advancePhase();
+                let callAmt = Math.min(bankroll, currentCallAmount); bankroll -= callAmt; pot += callAmt;
+                if (callAmt < currentCallAmount || bankroll === 0) { logAction('YOU', 'all in', callAmt); } else { logAction('YOU', 'call', callAmt); }
+                playSound('chip'); updateUI(); advancePhase();
             }
         });
 
@@ -769,101 +630,18 @@
             let totalBet = currentCallAmount + customRaiseAmount;
             if (bankroll >= totalBet && !isProcessing) {
                 bankroll -= totalBet; pot += totalBet; currentCallAmount = totalBet; 
-                logAction('YOU', 'raise', totalBet);
-                playSound('chip');
-                customRaiseAmount = 5000; 
-                updateUI(); advancePhase();
+                logAction('YOU', 'raise', totalBet); playSound('chip'); customRaiseAmount = 5000; updateUI(); advancePhase();
             }
         });
 
-        btnFold.addEventListener('click', () => {
-            if(!isProcessing) { 
-                logAction('YOU', 'fold'); 
-                foldPlayer('YOU');
-                playSound('fold');
-                setButtonsEnabled(false);
-                advancePhase(); 
-            }
-        });
-
-        // --- DOUBLE OR NOTHING LOGIC ---
-        document.getElementById('btn-double').addEventListener('click', () => {
-            playSound('chip');
-            bankroll -= currentWinAmount; // Pull winnings out of bankroll to risk
-            updateUI();
-            
-            document.getElementById('recap-view').style.display = 'none';
-            document.getElementById('double-view').style.display = 'flex';
-            document.getElementById('modal-action-btns').style.display = 'none'; 
-            document.getElementById('double-choice-btns').style.display = 'flex'; 
-            
-            document.getElementById('double-card-display').innerHTML = `<div class="css-card facedown"></div>`;
-        });
-
-        function handleDoubleGuess(guessedColor) {
-            let randomRank = RANKS[Math.floor(Math.random() * RANKS.length)];
-            let suitsArr = Object.keys(SUITS);
-            let randomSuit = suitsArr[Math.floor(Math.random() * suitsArr.length)];
-            let actualColor = (randomSuit === 'H' || randomSuit === 'D') ? 'red' : 'black';
-            
-            document.getElementById('double-card-display').innerHTML = generateCardHTML({rank: randomRank, suit: randomSuit});
-            setTimeout(() => { document.querySelector('#double-card-display .css-card').classList.add('dealt'); }, 50);
-
-            document.getElementById('double-choice-btns').style.display = 'none'; 
-            
-            setTimeout(() => {
-                document.getElementById('modal-action-btns').style.display = 'flex';
-                document.getElementById('recap-view').style.display = 'flex';
-                document.getElementById('double-view').style.display = 'none';
-
-                if (guessedColor === actualColor) {
-                    currentWinAmount *= 2; // Double it!
-                    bankroll += currentWinAmount;
-                    playSound('win');
-                    
-                    document.getElementById('modal-title-text').innerText = "DOUBLE SUCCESS!";
-                    document.getElementById('recap-winner').innerText = "YOU DOUBLED IT!";
-                    document.getElementById('recap-winner').style.color = "var(--accent-green)";
-                    document.getElementById('recap-hand').innerText = "WINNINGS MULTIPLIED";
-                    document.getElementById('recap-amount').innerText = `+${formatMoney(currentWinAmount)}`;
-                    
-                    document.getElementById('btn-double').style.display = 'block';
-                    document.getElementById('btn-next-hand').innerText = 'COLLECT';
-                } else {
-                    currentWinAmount = 0; // Busted!
-                    playSound('fold');
-                    
-                    document.getElementById('modal-title-text').innerText = "BUSTED";
-                    document.getElementById('recap-winner').innerText = "YOU LOST THE DOUBLE";
-                    document.getElementById('recap-winner').style.color = "#ef4444";
-                    document.getElementById('recap-hand').innerText = "BETTER LUCK NEXT TIME";
-                    document.getElementById('recap-amount').innerText = `+$0`;
-                    
-                    document.getElementById('btn-double').style.display = 'none';
-                    document.getElementById('btn-next-hand').innerText = 'START NEXT HAND';
-                }
-                updateUI();
-            }, 1500); 
-        }
-
-        document.getElementById('btn-guess-red').addEventListener('click', () => { playSound('deal'); handleDoubleGuess('red'); });
-        document.getElementById('btn-guess-black').addEventListener('click', () => { playSound('deal'); handleDoubleGuess('black'); });
-
-        // Final Collection
-        document.getElementById('btn-next-hand').addEventListener('click', () => {
-            document.getElementById('payout-modal').style.display = 'none';
-            startNewHand();
-        });
+        btnFold.addEventListener('click', () => { if(!isProcessing) { logAction('YOU', 'fold'); foldPlayer('YOU'); playSound('fold'); setButtonsEnabled(false); advancePhase(); } });
+        document.getElementById('btn-next-hand').addEventListener('click', () => { document.getElementById('payout-modal').style.display = 'none'; startNewHand(); });
 
         let holdTimer; let holdInterval;
         function updateRaiseAmount(direction) {
             let step = customRaiseAmount >= 50000 ? 10000 : (customRaiseAmount >= 10000 ? 5000 : 1000); 
             if (direction === 'up' && customRaiseAmount < bankroll) { customRaiseAmount += step; playSound('chip'); } 
-            else if (direction === 'down' && customRaiseAmount > 1000) { 
-                if (customRaiseAmount === 10000) step = 1000;
-                else if (customRaiseAmount === 50000) step = 5000;
-                customRaiseAmount -= step; playSound('chip');
-            }
+            else if (direction === 'down' && customRaiseAmount > 1000) { if (customRaiseAmount === 10000) step = 1000; else if (customRaiseAmount === 50000) step = 5000; customRaiseAmount -= step; playSound('chip'); }
             updateUI();
         }
 
@@ -874,6 +652,85 @@
         btnPlus.addEventListener('touchstart', (e) => { e.preventDefault(); startRaiseChange('up'); }); btnPlus.addEventListener('touchend', stopRaiseChange);
         btnMinus.addEventListener('mousedown', () => startRaiseChange('down')); btnMinus.addEventListener('mouseup', stopRaiseChange); btnMinus.addEventListener('mouseleave', stopRaiseChange);
         btnMinus.addEventListener('touchstart', (e) => { e.preventDefault(); startRaiseChange('down'); }); btnMinus.addEventListener('touchend', stopRaiseChange);
+
+        // --- HIGH ROLLER ROULETTE ENGINE ---
+        let currentWheelRotation = 0;
+        document.getElementById('btn-double').addEventListener('click', () => {
+            playSound('chip');
+            bankroll -= currentWinAmount; // Pull winnings out of bankroll to risk
+            updateUI();
+            
+            document.getElementById('recap-view').style.display = 'none';
+            document.getElementById('double-view').style.display = 'flex';
+            document.getElementById('modal-action-btns').style.display = 'none'; 
+            document.getElementById('double-choice-btns').style.display = 'flex'; 
+        });
+
+        function handleRouletteSpin(guessedColor) {
+            playSound('deal'); 
+            document.getElementById('double-choice-btns').style.display = 'none'; 
+            
+            let rand = Math.random();
+            let actualColor;
+            let slice;
+
+            // Odds: 40% Red, 40% Black, 20% Green (Slots 0 and 5 are Green)
+            if (rand < 0.4) {
+                actualColor = 'red'; slice = [1, 3, 7, 9][Math.floor(Math.random()*4)];
+            } else if (rand < 0.8) {
+                actualColor = 'black'; slice = [2, 4, 6, 8][Math.floor(Math.random()*4)];
+            } else {
+                actualColor = 'green'; slice = [0, 5][Math.floor(Math.random()*2)];
+            }
+
+            // Math to force the wheel to land on the correct 36-degree CSS slice
+            let targetAngle = 360 - (slice * 36 + 18);
+            let spins = 5 * 360; // 5 full visual spins
+            currentWheelRotation += spins + targetAngle - (currentWheelRotation % 360); 
+
+            let wheel = document.getElementById('roulette-wheel-inner');
+            wheel.style.transform = `rotate(${currentWheelRotation}deg)`;
+
+            setTimeout(() => {
+                document.getElementById('modal-action-btns').style.display = 'flex';
+                document.getElementById('recap-view').style.display = 'flex';
+                document.getElementById('double-view').style.display = 'none';
+
+                if (guessedColor === actualColor) {
+                    let multiplier = (actualColor === 'green') ? 5 : 2;
+                    currentWinAmount *= multiplier; 
+                    bankroll += currentWinAmount;
+                    playSound('win');
+                    
+                    document.getElementById('modal-title-text').innerText = "WHEEL HIT!";
+                    document.getElementById('recap-winner').innerText = `${multiplier}X MULTIPLIER!`;
+                    document.getElementById('recap-winner').style.color = "var(--accent-green)";
+                    document.getElementById('recap-hand').innerText = `${actualColor.toUpperCase()} WINS`;
+                    document.getElementById('recap-amount').innerText = `+${formatMoney(currentWinAmount)}`;
+                    
+                    document.getElementById('btn-double').style.display = 'block';
+                    document.getElementById('btn-double').innerText = 'SPIN AGAIN';
+                    document.getElementById('btn-next-hand').innerText = 'COLLECT';
+                } else {
+                    currentWinAmount = 0; 
+                    playSound('fold');
+                    
+                    document.getElementById('modal-title-text').innerText = "BUSTED";
+                    document.getElementById('recap-winner').innerText = "WHEEL MISSED";
+                    document.getElementById('recap-winner').style.color = "#ef4444";
+                    document.getElementById('recap-hand').innerText = `LANDED ON ${actualColor.toUpperCase()}`;
+                    document.getElementById('recap-amount').innerText = `+$0`;
+                    
+                    document.getElementById('btn-double').style.display = 'none';
+                    document.getElementById('btn-next-hand').innerText = 'START NEXT HAND';
+                }
+                updateUI();
+            }, 3500); 
+        }
+
+        document.getElementById('btn-guess-red').addEventListener('click', () => { handleRouletteSpin('red'); });
+        document.getElementById('btn-guess-black').addEventListener('click', () => { handleRouletteSpin('black'); });
+        document.getElementById('btn-guess-green').addEventListener('click', () => { handleRouletteSpin('green'); });
 
         window.onload = () => { setTimeout(startNewHand, 500); };
     </script>
