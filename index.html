@@ -97,20 +97,32 @@
         .side-panel { background: rgba(0, 0, 0, 0.85); border: 1px solid #334155; border-radius: 12px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); backdrop-filter: blur(10px); }
         .panel-header { color: var(--accent-gold); font-size: 1rem; font-weight: 900; margin: 0 0 15px 0; border-bottom: 1px solid #334155; padding-bottom: 10px; letter-spacing: 2px; text-transform: uppercase; }
         
-        .leaderboard-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(51, 65, 85, 0.5); font-family: sans-serif; font-size: 0.95rem; }
+        .leaderboard-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(51, 65, 85, 0.5); font-family: sans-serif; font-size: 0.95rem; }
         .leaderboard-row:last-child { border-bottom: none; padding-bottom: 0; }
         .lb-name { font-weight: 700; color: #f8fafc; letter-spacing: 0.5px; }
         .lb-score { color: var(--accent-gold); font-weight: 700; }
         
-        /* FIX: Added padding-right to avoid scrollbar overlap */
-        .log-list { list-style: none; padding: 0 15px 0 0; margin: 0; display: flex; flex-direction: column; gap: 12px; font-family: sans-serif; font-size: 0.9rem; max-height: 180px; overflow-y: auto; overflow-x: hidden; }
+        .log-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; font-family: sans-serif; font-size: 0.9rem; max-height: 180px; overflow-y: auto; padding-right: 15px; }
+        .log-list::-webkit-scrollbar { width: 6px; }
+        .log-list::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 4px; }
+        .log-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
         .log-item { display: flex; justify-content: space-between; color: #cbd5e1; line-height: 1.4; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 6px; }
         .log-item:last-child { border-bottom: none; }
         .log-item strong { color: white; font-weight: 700; letter-spacing: 0.5px; }
         .log-action.raise { color: var(--accent-green); font-weight: 700; }
         .log-action.call { color: #60a5fa; font-weight: 700; }
         .log-action.fold { color: #f87171; font-weight: 700; }
-        .log-action.check { color: #94a3b8; font-weight: 700; }
+        
+        .status-list { display: flex; flex-direction: column; gap: 8px; font-family: sans-serif; font-size: 0.85rem; }
+        .status-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(51, 65, 85, 0.5); padding-bottom: 8px; }
+        .status-row:last-child { border-bottom: none; padding-bottom: 0; }
+        .status-name { font-weight: 700; color: white; letter-spacing: 0.5px; }
+        .status-state { font-weight: 700; text-transform: uppercase; letter-spacing: 1px; font-size: 0.75rem; }
+        .state-folded { color: #ef4444; }
+        .state-raised { color: var(--accent-green); }
+        .state-called { color: #60a5fa; }
+        .state-waiting { color: #94a3b8; }
+        .state-winner { color: var(--accent-gold); text-shadow: 0 0 5px rgba(254, 209, 1, 0.5); }
 
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-family: sans-serif; }
         .stat-item { display: flex; flex-direction: column; background: var(--accent-black); padding: 12px 10px; border-radius: 8px; border: 1px solid #334155; align-items: center; box-shadow: inset 0 5px 10px rgba(0,0,0,0.8); }
@@ -193,7 +205,7 @@
             <div id="controls">
                 <div class="stat-box">
                     <div class="stat-label">MASTER BANKROLL</div>
-                    <div class="stat-value" id="ui-bankroll">$5,104,000</div>
+                    <div class="stat-value" id="ui-bankroll">$3,258,000</div>
                 </div>
                 <div class="action-group">
                     <button class="poker-btn btn-fold" id="btn-fold">FOLD</button>
@@ -230,17 +242,15 @@
                 </div>
             </div>
 
-            <!-- FIX: Player Status Module Replaces Hand Strength -->
             <div class="side-panel">
                 <h2 class="panel-header">Player Status</h2>
-                <div id="ui-player-status" style="display: flex; flex-direction: column; gap: 4px;">
-                    <!-- JS injects status rows here -->
-                </div>
+                <div class="status-list" id="ui-player-status">
+                    </div>
             </div>
 
             <div class="side-panel">
                 <h2 class="panel-header">Table Leaders</h2>
-                <div class="leaderboard-row"><span class="lb-name">YOU</span><span class="lb-score" id="lb-user">$5,104,000</span></div>
+                <div class="leaderboard-row"><span class="lb-name">YOU</span><span class="lb-score" id="lb-user">$3,258,000</span></div>
                 <div class="leaderboard-row"><span class="lb-name">PRO</span><span class="lb-score">$150,000</span></div>
                 <div class="leaderboard-row"><span class="lb-name">HUSTLER</span><span class="lb-score">$125,000</span></div>
                 <div class="leaderboard-row"><span class="lb-name">GAMBIT</span><span class="lb-score">$95,000</span></div>
@@ -252,7 +262,6 @@
         </div>
     </div>
 
-    <!-- RECAP MODAL -->
     <div id="payout-modal">
         <div class="modal-box">
             <div class="modal-title">HAND COMPLETE</div>
@@ -263,20 +272,26 @@
         </div>
     </div>
 
-    <!-- POKER JAVASCRIPT ENGINE -->
     <script>
         const sfx = {
-            shuffle: new Audio('snd_shuffle.mp3'), deal: new Audio('snd_deal.mp3'),
-            turn: new Audio('snd_turn.mp3'), chip: new Audio('snd_chip.mp3'),
-            fold: new Audio('snd_fold.mp3'), win: new Audio('snd_win.mp3')
+            shuffle: new Audio('snd_shuffle.mp3'),
+            deal: new Audio('snd_deal.mp3'),
+            turn: new Audio('snd_turn.mp3'),
+            chip: new Audio('snd_chip.mp3'),
+            fold: new Audio('snd_fold.mp3'),
+            win: new Audio('snd_win.mp3')
         };
         Object.values(sfx).forEach(s => s.volume = 0.5);
 
         function playSound(soundName) {
-            try { let s = sfx[soundName].cloneNode(); s.volume = sfx[soundName].volume; s.play().catch(e => {}); } catch(e) {}
+            try {
+                let s = sfx[soundName].cloneNode(); 
+                s.volume = sfx[soundName].volume;
+                s.play().catch(e => {}); 
+            } catch(e) {}
         }
 
-        let bankroll = 5104000; 
+        let bankroll = 3258000; 
         let pot = 0;
         let currentCallAmount = 2000;
         let customRaiseAmount = 5000;
@@ -289,8 +304,7 @@
         const AI_PLAYERS = ['PRO', 'HUSTLER', 'GAMBIT', 'WILD', 'SHARK', 'ROCK'];
         const ALL_SEATS = ['YOU', ...AI_PLAYERS];
 
-        // Initialize state objects
-        ALL_SEATS.forEach(p => playerStates[p] = { isActive: true, hand: [], currentAction: 'WAITING' });
+        ALL_SEATS.forEach(p => playerStates[p] = { isActive: true, hand: [], lastAction: 'WAITING' });
 
         const SUITS = { 'H': '&hearts;', 'D': '&diams;', 'S': '&spades;', 'C': '&clubs;' };
         const SUIT_COLORS = { 'H': 'suit-hearts', 'D': 'suit-diamonds', 'S': 'suit-spades', 'C': 'suit-clubs' };
@@ -306,7 +320,6 @@
         const uiStatBet = document.getElementById('ui-stat-bet');
         const uiStatActive = document.getElementById('ui-stat-active');
         const lbUser = document.getElementById('lb-user');
-        const uiPlayerStatus = document.getElementById('ui-player-status');
 
         const btnCall = document.getElementById('btn-call');
         const btnRaise = document.getElementById('btn-raise');
@@ -332,34 +345,7 @@
             }
         }
 
-        // FIX: Renders the Player Status Module
-        function updatePlayerStatuses() {
-            uiPlayerStatus.innerHTML = '';
-            ALL_SEATS.forEach(p => {
-                let status = playerStates[p].currentAction;
-                if (!playerStates[p].isActive) status = 'FOLDED';
-                
-                let color = '#94a3b8'; // Default waiting/check
-                if (status === 'FOLDED') color = '#ef4444';
-                else if (status.includes('RAISE')) color = 'var(--accent-green)';
-                else if (status.includes('CALL') || status.includes('ALL IN')) color = '#60a5fa';
-                else if (status === 'WAITING') color = '#f8fafc';
-                
-                uiPlayerStatus.innerHTML += `
-                    <div class="leaderboard-row" style="padding: 6px 0; border:none;">
-                        <span class="lb-name">${p}</span>
-                        <span style="color: ${color}; font-weight: 900; font-size: 0.8rem; letter-spacing: 1px;">${status}</span>
-                    </div>
-                `;
-            });
-        }
-
         function setOnTableAction(player, action, amount = 0) {
-            // Update State
-            playerStates[player].currentAction = action.toUpperCase();
-            updatePlayerStatuses();
-
-            // Update floating UI tag
             let el = document.getElementById('action-' + player);
             if(!el) return;
             if(action === 'fold') { el.innerHTML = `<span style="color:#ef4444">FOLDED</span>`; }
@@ -370,12 +356,29 @@
         }
 
         function clearAllOnTableActions() {
+            ALL_SEATS.forEach(p => setOnTableAction(p, ''));
+        }
+
+        function updatePlayerStatuses() {
+            const container = document.getElementById('ui-player-status');
+            if(!container) return;
+            let html = '';
             ALL_SEATS.forEach(p => {
-                if (playerStates[p].isActive) playerStates[p].currentAction = 'WAITING';
-                let el = document.getElementById('action-' + p);
-                if (el) el.innerHTML = '';
+                let state = playerStates[p] ? playerStates[p].lastAction : 'WAITING';
+                if(!playerStates[p]?.isActive) state = 'FOLDED';
+
+                let stateClass = 'state-waiting';
+                if(state === 'FOLDED') stateClass = 'state-folded';
+                else if(state === 'RAISED' || state === 'RAISE') stateClass = 'state-raised';
+                else if(state === 'CALLED' || state === 'CALL' || state === 'ALL IN') stateClass = 'state-called';
+                else if(state === 'WINNER') stateClass = 'state-winner';
+
+                html += `<div class="status-row">
+                    <span class="status-name">${p}</span>
+                    <span class="status-state ${stateClass}">${state}</span>
+                </div>`;
             });
-            updatePlayerStatuses();
+            container.innerHTML = html;
         }
 
         function logAction(player, action, amount = 0) {
@@ -383,16 +386,17 @@
             li.className = 'log-item';
             
             if (player === 'Dealer') {
-                li.innerHTML = `<span><strong>Dealer</strong> ${action}</span><span class="log-action check">--</span>`;
+                li.innerHTML = `<span><strong>Dealer</strong> ${action}</span><span class="log-action">--</span>`;
             } else {
-                let amtStr = `<span class="log-action check">--</span>`;
-                if (amount > 0) amtStr = `<span class="log-action ${action}">${action === 'raise' ? '+' : ''}${formatMoney(amount)}</span>`;
-                else if (action === 'fold') amtStr = `<span class="log-action fold">--</span>`;
-                
+                let amtStr = amount > 0 ? `<span class="log-action ${action}">${action === 'raise' ? '+' : ''}${formatMoney(amount)}</span>` : `<span class="log-action fold">--</span>`;
                 li.innerHTML = `<span><strong>${player}</strong> ${action}s</span>${amtStr}`;
                 setOnTableAction(player, action, amount);
+                if (playerStates[player]) {
+                    playerStates[player].lastAction = action.toUpperCase();
+                }
             }
             uiLog.prepend(li);
+            updatePlayerStatuses();
         }
 
         function createDeck() {
@@ -407,7 +411,7 @@
         }
 
         function generateCardHTML(card, isFacedown = false) {
-            if (isFacedown) return `<div class="css-card facedown"></div>`;
+            if (isFacedown || !card) return `<div class="css-card facedown"></div>`;
             const displayRank = card.rank === 'T' ? '10' : card.rank;
             return `
                 <div class="css-card ${SUIT_COLORS[card.suit]}">
@@ -440,48 +444,41 @@
             const rounds = ["Pre-Flop", "The Flop", "The Turn", "The River", "Showdown"];
             uiStatRound.innerText = rounds[gamePhase];
 
-            // FIX: Adapts the user button depending on if the phase bet was reset to $0
-            if (bankroll === 0) {
-                btnCall.innerText = `ALL IN`;
-            } else if (currentCallAmount === 0) {
-                btnCall.innerText = `CHECK`;
-            } else if (bankroll <= currentCallAmount) {
+            if (bankroll <= currentCallAmount) {
                 btnCall.innerText = `ALL IN ${formatMoney(bankroll)}`;
             } else {
                 btnCall.innerText = `CALL ${formatMoney(currentCallAmount)}`;
             }
+            updatePlayerStatuses();
         }
 
         function foldPlayer(playerID) {
             playerStates[playerID].isActive = false;
-            playerStates[playerID].currentAction = 'FOLDED';
+            playerStates[playerID].lastAction = 'FOLDED';
             let seat = document.getElementById('seat-' + playerID.toLowerCase());
             if(seat) seat.classList.add('folded');
             
             let handContainer = playerID === 'YOU' ? uiUserHand : document.getElementById('hand-' + playerID.toLowerCase());
             if(handContainer) handContainer.innerHTML = '';
-            updatePlayerStatuses();
         }
 
         async function startNewHand() {
             isProcessing = false;
             setButtonsEnabled(true);
+            clearAllOnTableActions();
             createDeck();
             playSound('shuffle');
             
             ALL_SEATS.forEach(p => {
-                playerStates[p].isActive = true;
-                playerStates[p].hand = [];
+                playerStates[p] = { isActive: true, hand: [], lastAction: 'WAITING' };
                 let seat = document.getElementById('seat-' + p.toLowerCase());
                 if(seat) seat.classList.remove('folded', 'active');
             });
             
-            clearAllOnTableActions(); // Resets statuses to WAITING
-            
             communityCards = [];
             pot = 0;
             currentCallAmount = 2000;
-            customRaiseAmount = 5000; // Reset Dial
+            customRaiseAmount = 5000; 
             gamePhase = 0;
             uiCommunity.innerHTML = '';
 
@@ -508,11 +505,11 @@
         function executeShowdown() {
             logAction('Dealer', 'announces showdown');
             
-            let commCardsStr = communityCards.map(c => c.rank + c.suit.toLowerCase());
             let activePlayers = ALL_SEATS.filter(p => playerStates[p].isActive);
             
             if (activePlayers.length === 1) {
                 let winnerID = activePlayers[0];
+                playerStates[winnerID].lastAction = 'WINNER';
                 document.getElementById('recap-winner').innerText = `${winnerID} WINS!`;
                 document.getElementById('recap-hand').innerText = "OPPONENTS FOLDED";
                 document.getElementById('recap-amount').innerText = `+${formatMoney(pot)}`;
@@ -530,30 +527,42 @@
                 return;
             }
 
-            while (communityCards.length < 5) {
-                communityCards.push(deck.pop());
+            while (communityCards.length < 5 && deck.length > 0) {
+                let c = deck.pop();
+                if(c) communityCards.push(c);
             }
             uiCommunity.innerHTML = communityCards.map(c => generateCardHTML(c)).join('');
             animateCardsIn(uiCommunity);
-            commCardsStr = communityCards.map(c => c.rank + c.suit.toLowerCase());
+
+            let commCardsStr = communityCards.filter(c => c).map(c => c.rank + c.suit.toLowerCase());
             
             activePlayers.forEach(p => {
                 if(p !== 'YOU') {
                     let handDiv = document.getElementById('hand-' + p.toLowerCase());
-                    handDiv.innerHTML = generateCardHTML(playerStates[p].hand[0]) + generateCardHTML(playerStates[p].hand[1]);
-                    animateCardsIn(handDiv);
+                    if(handDiv && playerStates[p].hand[0] && playerStates[p].hand[1]) {
+                        handDiv.innerHTML = generateCardHTML(playerStates[p].hand[0]) + generateCardHTML(playerStates[p].hand[1]);
+                        animateCardsIn(handDiv);
+                    }
                 }
             });
 
             try {
                 activePlayers.forEach(p => {
-                    let pCardsStr = playerStates[p].hand.map(c => c.rank + c.suit.toLowerCase());
+                    let pCardsStr = playerStates[p].hand.filter(c => c).map(c => c.rank + c.suit.toLowerCase());
                     playerStates[p].solved = Hand.solve(pCardsStr.concat(commCardsStr));
                 });
                 
-                let solvedHands = activePlayers.map(p => playerStates[p].solved);
+                let solvedHands = activePlayers.map(p => playerStates[p].solved).filter(h => h);
+                if (solvedHands.length === 0) throw new Error("No hands to solve");
+
                 let winningHands = Hand.winners(solvedHands);
-                let winners = activePlayers.filter(p => winningHands.includes(playerStates[p].solved));
+                
+                // FIX: Match by exact hand description to avoid JS object reference equality bugs
+                let winners = activePlayers.filter(p => {
+                    return winningHands.some(wh => wh.name === playerStates[p].solved.name && wh.descr === playerStates[p].solved.descr);
+                });
+
+                winners.forEach(w => playerStates[w].lastAction = 'WINNER');
                 
                 if (winners.length > 1) {
                     let splitAmount = Math.floor(pot / winners.length);
@@ -562,7 +571,10 @@
                     document.getElementById('recap-amount').innerText = `+${formatMoney(splitAmount)} EACH`;
                     document.getElementById('recap-winner').style.color = 'var(--accent-cyan)';
                     
-                    if (winners.includes('YOU')) { bankroll += splitAmount; playSound('win'); }
+                    if (winners.includes('YOU')) {
+                        bankroll += splitAmount;
+                        playSound('win');
+                    }
                 } else {
                     let winnerID = winners[0];
                     document.getElementById('recap-winner').innerText = `${winnerID} WINS!`;
@@ -582,7 +594,8 @@
                 setTimeout(() => { document.getElementById('payout-modal').style.display = 'flex'; }, 2000);
 
             } catch (error) {
-                document.getElementById('recap-winner').innerText = `ERROR`;
+                console.error("Math Engine Failed", error);
+                document.getElementById('recap-winner').innerText = `POT SPLIT!`;
                 document.getElementById('recap-hand').innerText = "ENGINE OVERRIDE";
                 document.getElementById('recap-amount').innerText = `+${formatMoney(0)}`;
                 setTimeout(() => { document.getElementById('payout-modal').style.display = 'flex'; }, 2000);
@@ -602,13 +615,15 @@
             setButtonsEnabled(false);
             
             gamePhase++;
-            
-            // FIX: Reset Call Amount per betting phase
-            currentCallAmount = 0; 
-            customRaiseAmount = 5000; 
-            
             clearAllOnTableActions();
             document.querySelectorAll('.seat').forEach(s => s.classList.remove('active'));
+
+            ALL_SEATS.forEach(p => {
+                if (playerStates[p] && playerStates[p].isActive) {
+                    playerStates[p].lastAction = 'WAITING';
+                }
+            });
+            updatePlayerStatuses();
 
             if (gamePhase >= 4) { executeShowdown(); return; }
 
@@ -621,83 +636,75 @@
             if (gamePhase === 1) { cardsToDeal = [deck.pop(), deck.pop(), deck.pop()]; } 
             else if (gamePhase === 2 || gamePhase === 3) { cardsToDeal = [deck.pop()]; } 
 
+            cardsToDeal = cardsToDeal.filter(c => c !== undefined);
             communityCards.push(...cardsToDeal);
             await dealCommunityCardsAnimation(cardsToDeal);
+            
             updateUI();
             
             await new Promise(r => setTimeout(r, 800)); 
 
-            for (let i = 0; i < AI_PLAYERS.length; i++) {
-                let ai = AI_PLAYERS[i];
-                if (!playerStates[ai].isActive) continue; 
+            let activeCount = Object.values(playerStates).filter(p => p.isActive).length;
 
-                let seatEl = document.getElementById('seat-' + ai.toLowerCase());
-                seatEl.classList.add('active'); 
-                playSound('turn');
-                
-                await new Promise(r => setTimeout(r, 1500 + Math.random() * 1500)); 
+            if (activeCount > 1) {
+                for (let i = 0; i < AI_PLAYERS.length; i++) {
+                    let ai = AI_PLAYERS[i];
+                    if (!playerStates[ai].isActive) continue; 
 
-                let action = 'call';
-                // If it's a new round and bet is $0, AI can check
-                if (currentCallAmount === 0) {
-                    action = Math.random() > 0.6 ? 'raise' : 'check';
-                } else {
+                    let seatEl = document.getElementById('seat-' + ai.toLowerCase());
+                    seatEl.classList.add('active'); 
+                    playSound('turn');
+                    
+                    await new Promise(r => setTimeout(r, 1500 + Math.random() * 1500)); 
+
                     let rand = Math.random();
+                    let action = 'call';
                     if (rand > 0.85) action = 'raise';
                     else if (rand < 0.15) action = 'fold';
-                }
 
-                if (action === 'fold') {
-                    foldPlayer(ai);
-                    logAction(ai, 'fold');
-                    playSound('fold');
-                } else if (action === 'check') {
-                    logAction(ai, 'check');
-                } else {
-                    let amt = action === 'raise' ? (currentCallAmount === 0 ? 5000 : currentCallAmount * 2) : currentCallAmount;
-                    pot += amt;
-                    if(action === 'raise') currentCallAmount = amt;
-                    logAction(ai, action, amt);
-                    playSound('chip');
+                    if (action === 'fold') {
+                        foldPlayer(ai);
+                        logAction(ai, 'fold');
+                        playSound('fold');
+                    } else {
+                        let amt = action === 'raise' ? currentCallAmount * 2 : currentCallAmount;
+                        pot += amt;
+                        if(action === 'raise') currentCallAmount = amt;
+                        logAction(ai, action, amt);
+                        playSound('chip');
+                    }
+                    
+                    updateUI();
+                    seatEl.classList.remove('active');
+                    await new Promise(r => setTimeout(r, 500)); 
                 }
-                
-                updateUI();
-                seatEl.classList.remove('active');
-                await new Promise(r => setTimeout(r, 500)); 
             }
 
-            let activeCount = Object.values(playerStates).filter(p => p.isActive).length;
+            activeCount = Object.values(playerStates).filter(p => p.isActive).length;
             if (activeCount === 1) {
                 executeShowdown(); 
             } else if (!playerStates['YOU'].isActive || bankroll <= 0) {
+                isProcessing = false; 
                 setTimeout(advancePhase, 1500); 
             } else {
                 document.getElementById('seat-user').classList.add('active');
                 playSound('turn');
                 isProcessing = false;
-                
-                // Resets custom dial to $5k for the user's turn
-                customRaiseAmount = 5000;
                 setButtonsEnabled(true);
-                updateUI();
             }
         }
 
         btnCall.addEventListener('click', () => {
             if (!isProcessing) {
-                if (currentCallAmount === 0) {
-                    logAction('YOU', 'check');
+                let callAmt = Math.min(bankroll, currentCallAmount);
+                bankroll -= callAmt; pot += callAmt;
+                
+                if (callAmt < currentCallAmount || bankroll === 0) {
+                    logAction('YOU', 'all in', callAmt);
                 } else {
-                    let callAmt = Math.min(bankroll, currentCallAmount);
-                    bankroll -= callAmt; pot += callAmt;
-                    
-                    if (callAmt < currentCallAmount || bankroll === 0) {
-                        logAction('YOU', 'all in', callAmt);
-                    } else {
-                        logAction('YOU', 'call', callAmt);
-                    }
-                    playSound('chip');
+                    logAction('YOU', 'call', callAmt);
                 }
+                playSound('chip');
                 updateUI(); advancePhase();
             }
         });
@@ -708,6 +715,9 @@
                 bankroll -= totalBet; pot += totalBet; currentCallAmount = totalBet; 
                 logAction('YOU', 'raise', totalBet);
                 playSound('chip');
+                
+                customRaiseAmount = 5000; 
+                
                 updateUI(); advancePhase();
             }
         });
@@ -717,9 +727,8 @@
                 logAction('YOU', 'fold'); 
                 foldPlayer('YOU');
                 playSound('fold');
-                isProcessing = true;
                 setButtonsEnabled(false);
-                setTimeout(advancePhase, 1000); 
+                advancePhase(); 
             }
         });
 
