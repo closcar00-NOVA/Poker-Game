@@ -89,6 +89,7 @@
         .btn-fold { background: linear-gradient(180deg, #ef4444, #7f1d1d); border: 2px solid #fca5a5; }
         .btn-call { background: linear-gradient(180deg, #3b82f6, #1e3a8a); border: 2px solid #93c5fd; }
         .btn-raise { background: linear-gradient(180deg, var(--accent-green), #004d2d); border: 2px solid #34d399; }
+        
         .bet-controls { display: flex; align-items: center; gap: 8px; }
         .bet-btn { background: linear-gradient(180deg, #334155, var(--accent-black)); border: 1px solid #475569; color: white; width: 30px; height: 30px; border-radius: 6px; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; user-select: none; }
         .bet-btn:disabled { filter: grayscale(1); opacity: 0.5; cursor: not-allowed; }
@@ -129,8 +130,9 @@
         .stat-item .stat-title { font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
         .stat-item .stat-value { font-size: 1.1rem; font-weight: 700; color: var(--accent-gold); text-shadow: 0 0 10px rgba(254, 209, 1, 0.3); font-family: 'Orbitron', sans-serif;}
 
+        /* PAYOUT MODAL WITH DOUBLE UP FEATURE */
         #payout-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(2, 6, 23, 0.95); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(15px); }
-        .modal-box { background: linear-gradient(180deg, #1e293b, var(--accent-black)); border: 2px solid var(--accent-gold); border-radius: 20px; padding: 50px 80px; text-align: center; display: flex; flex-direction: column; align-items: center; box-shadow: 0 20px 50px rgba(0,0,0,0.9), inset 0 0 20px rgba(254, 209, 1, 0.2); }
+        .modal-box { background: linear-gradient(180deg, #1e293b, var(--accent-black)); border: 2px solid var(--accent-gold); border-radius: 20px; padding: 50px 80px; width: 600px; text-align: center; display: flex; flex-direction: column; align-items: center; box-shadow: 0 20px 50px rgba(0,0,0,0.9), inset 0 0 20px rgba(254, 209, 1, 0.2); }
         .modal-title { font-size: 1.5rem; color: #94a3b8; letter-spacing: 4px; margin-bottom: 10px; text-transform: uppercase; }
         .modal-winner { font-size: 3.5rem; color: white; font-weight: 900; margin-bottom: 5px; text-shadow: 0 0 20px rgba(255,255,255,0.3); }
         .modal-hand { font-size: 1.2rem; color: var(--accent-cyan); margin-bottom: 25px; text-transform: uppercase; letter-spacing: 2px;}
@@ -233,6 +235,12 @@
             </div>
 
             <div class="side-panel">
+                <h2 class="panel-header">Player Status</h2>
+                <div class="status-list" id="ui-player-status"></div>
+            </div>
+
+            <!-- REORDERED: Table Stats is now below Player Status -->
+            <div class="side-panel">
                 <h2 class="panel-header">Table Stats</h2>
                 <div class="stats-grid">
                     <div class="stat-item"><span class="stat-title">Blinds</span><span class="stat-value">$1K / $2K</span></div>
@@ -240,12 +248,6 @@
                     <div class="stat-item"><span class="stat-title">Round</span><span class="stat-value" id="ui-stat-round">Pre-Flop</span></div>
                     <div class="stat-item"><span class="stat-title">Active</span><span class="stat-value" id="ui-stat-active">7 Players</span></div>
                 </div>
-            </div>
-
-            <div class="side-panel">
-                <h2 class="panel-header">Player Status</h2>
-                <div class="status-list" id="ui-player-status">
-                    </div>
             </div>
 
             <div class="side-panel">
@@ -258,20 +260,44 @@
                 <div class="leaderboard-row"><span class="lb-name">SHARK</span><span class="lb-score">$45,000</span></div>
                 <div class="leaderboard-row"><span class="lb-name">ROCK</span><span class="lb-score">$12,000</span></div>
             </div>
-
         </div>
     </div>
 
+    <!-- DOUBLE OR NOTHING MODAL -->
     <div id="payout-modal">
         <div class="modal-box">
-            <div class="modal-title">HAND COMPLETE</div>
-            <div class="modal-winner" id="recap-winner">YOU WIN!</div>
-            <div class="modal-hand" id="recap-hand">FULL HOUSE</div>
-            <div class="modal-amount" id="recap-amount">+$125,000</div>
-            <button id="btn-next-hand" class="poker-btn btn-call" style="padding: 20px 60px; font-size: 1.5rem; width: 100%;">START NEXT HAND</button>
+            
+            <!-- Standard Recap View -->
+            <div id="recap-view" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+                <div class="modal-title" id="modal-title-text">HAND COMPLETE</div>
+                <div class="modal-winner" id="recap-winner">YOU WIN!</div>
+                <div class="modal-hand" id="recap-hand">FULL HOUSE</div>
+                <div class="modal-amount" id="recap-amount">+$125,000</div>
+            </div>
+
+            <!-- Bonus Double Up View -->
+            <div id="double-view" style="display: none; flex-direction: column; align-items: center; width: 100%;">
+                <div class="modal-title">DOUBLE OR NOTHING</div>
+                <div class="modal-hand">GUESS THE CARD COLOR</div>
+                <div id="double-card-display" style="margin: 30px 0; transform: scale(1.5);">
+                    <div class="css-card facedown"></div>
+                </div>
+                <div style="display: flex; gap: 15px; width: 100%; margin-bottom: 20px;" id="double-choice-btns">
+                    <button id="btn-guess-red" class="poker-btn btn-fold" style="padding: 15px; flex: 1; border-color:#fca5a5;">RED</button>
+                    <button id="btn-guess-black" class="poker-btn btn-call" style="padding: 15px; flex: 1; background: linear-gradient(180deg, #475569, #0f172a); border-color: #334155;">BLACK</button>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display: flex; gap: 15px; width: 100%; margin-top: 10px;" id="modal-action-btns">
+                <button id="btn-double" class="poker-btn btn-raise" style="display: none; padding: 20px; font-size: 1.2rem; flex: 1; box-shadow: 0 0 20px rgba(0, 152, 90, 0.6);">DOUBLE UP</button>
+                <button id="btn-next-hand" class="poker-btn btn-call" style="padding: 20px; font-size: 1.2rem; flex: 1;">START NEXT HAND</button>
+            </div>
+
         </div>
     </div>
 
+    <!-- POKER JAVASCRIPT ENGINE -->
     <script>
         const sfx = {
             shuffle: new Audio('snd_shuffle.mp3'),
@@ -299,6 +325,9 @@
         let deck = [];
         let communityCards = [];
         let isProcessing = false;
+        
+        // Double or Nothing Tracking
+        let currentWinAmount = 0;
 
         let playerStates = {};
         const AI_PLAYERS = ['PRO', 'HUSTLER', 'GAMBIT', 'WILD', 'SHARK', 'ROCK'];
@@ -469,6 +498,15 @@
             createDeck();
             playSound('shuffle');
             
+            // Modal Reset for Next Hand
+            document.getElementById('recap-view').style.display = 'flex';
+            document.getElementById('double-view').style.display = 'none';
+            document.getElementById('modal-action-btns').style.display = 'flex';
+            document.getElementById('modal-title-text').innerText = "HAND COMPLETE";
+            document.getElementById('btn-double').style.display = 'none';
+            document.getElementById('btn-next-hand').innerText = 'START NEXT HAND';
+            currentWinAmount = 0;
+
             ALL_SEATS.forEach(p => {
                 playerStates[p] = { isActive: true, hand: [], lastAction: 'WAITING' };
                 let seat = document.getElementById('seat-' + p.toLowerCase());
@@ -502,28 +540,53 @@
             document.getElementById('seat-user').classList.add('active');
         }
 
-        function executeShowdown() {
-            logAction('Dealer', 'announces showdown');
-            
-            let activePlayers = ALL_SEATS.filter(p => playerStates[p].isActive);
-            
-            if (activePlayers.length === 1) {
-                let winnerID = activePlayers[0];
-                playerStates[winnerID].lastAction = 'WINNER';
+        function triggerPayoutModal(winnerID, handName, amount, isSplit = false) {
+            if (isSplit) {
+                document.getElementById('recap-winner').innerText = `POT SPLIT!`;
+                document.getElementById('recap-hand').innerText = handName;
+                document.getElementById('recap-amount').innerText = `+${formatMoney(amount)} EACH`;
+                document.getElementById('recap-winner').style.color = 'var(--accent-cyan)';
+            } else {
                 document.getElementById('recap-winner').innerText = `${winnerID} WINS!`;
-                document.getElementById('recap-hand').innerText = "OPPONENTS FOLDED";
-                document.getElementById('recap-amount').innerText = `+${formatMoney(pot)}`;
-                
+                document.getElementById('recap-hand').innerText = handName;
+                document.getElementById('recap-amount').innerText = `+${formatMoney(amount)}`;
                 if(winnerID === 'YOU') {
-                    bankroll += pot;
                     document.getElementById('recap-winner').style.color = 'var(--accent-green)';
-                    playSound('win');
                 } else {
                     document.getElementById('recap-winner').style.color = 'var(--accent-gold)';
                 }
+            }
+
+            // Double Up Engine Logic
+            if (currentWinAmount > 0) {
+                document.getElementById('btn-double').style.display = 'block';
+                document.getElementById('btn-next-hand').innerText = 'COLLECT';
+            } else {
+                document.getElementById('btn-double').style.display = 'none';
+                document.getElementById('btn-next-hand').innerText = 'START NEXT HAND';
+            }
+
+            updateUI();
+            setTimeout(() => { document.getElementById('payout-modal').style.display = 'flex'; }, 2000);
+        }
+
+        function executeShowdown() {
+            logAction('Dealer', 'announces showdown');
+            let activePlayers = ALL_SEATS.filter(p => playerStates[p].isActive);
+            
+            // Bypass math if everyone folded
+            if (activePlayers.length === 1) {
+                let winnerID = activePlayers[0];
+                playerStates[winnerID].lastAction = 'WINNER';
                 
-                updateUI();
-                setTimeout(() => { document.getElementById('payout-modal').style.display = 'flex'; }, 1500);
+                if (winnerID === 'YOU') {
+                    currentWinAmount = pot;
+                    bankroll += currentWinAmount;
+                    playSound('win');
+                } else {
+                    currentWinAmount = 0;
+                }
+                triggerPayoutModal(winnerID, "OPPONENTS FOLDED", pot, false);
                 return;
             }
 
@@ -547,58 +610,49 @@
             });
 
             try {
+                let validCommCardsStr = communityCards.slice(0, 5).filter(c => c && c.rank && c.suit).map(c => c.rank + c.suit.toLowerCase());
+                
                 activePlayers.forEach(p => {
-                    let pCardsStr = playerStates[p].hand.filter(c => c).map(c => c.rank + c.suit.toLowerCase());
-                    playerStates[p].solved = Hand.solve(pCardsStr.concat(commCardsStr));
+                    let pCardsStr = playerStates[p].hand.slice(0, 2).filter(c => c && c.rank && c.suit).map(c => c.rank + c.suit.toLowerCase());
+                    if (pCardsStr.length === 2 && validCommCardsStr.length === 5) {
+                        playerStates[p].solved = Hand.solve(pCardsStr.concat(validCommCardsStr));
+                    } else { throw new Error("Missing Card Data"); }
                 });
                 
-                let solvedHands = activePlayers.map(p => playerStates[p].solved).filter(h => h);
-                if (solvedHands.length === 0) throw new Error("No hands to solve");
+                let solvedHands = activePlayers.map(p => playerStates[p].solved).filter(h => h !== undefined);
+                if (solvedHands.length === 0) throw new Error("No hands to evaluate");
 
                 let winningHands = Hand.winners(solvedHands);
+                let winners = activePlayers.filter(p => playerStates[p].solved && winningHands.some(wh => wh.name === playerStates[p].solved.name && wh.descr === playerStates[p].solved.descr));
                 
-                // FIX: Match by exact hand description to avoid JS object reference equality bugs
-                let winners = activePlayers.filter(p => {
-                    return winningHands.some(wh => wh.name === playerStates[p].solved.name && wh.descr === playerStates[p].solved.descr);
-                });
-
                 winners.forEach(w => playerStates[w].lastAction = 'WINNER');
                 
                 if (winners.length > 1) {
                     let splitAmount = Math.floor(pot / winners.length);
-                    document.getElementById('recap-winner').innerText = `POT SPLIT!`;
-                    document.getElementById('recap-hand').innerText = winningHands[0].name;
-                    document.getElementById('recap-amount').innerText = `+${formatMoney(splitAmount)} EACH`;
-                    document.getElementById('recap-winner').style.color = 'var(--accent-cyan)';
-                    
                     if (winners.includes('YOU')) {
-                        bankroll += splitAmount;
-                        playSound('win');
-                    }
-                } else {
-                    let winnerID = winners[0];
-                    document.getElementById('recap-winner').innerText = `${winnerID} WINS!`;
-                    document.getElementById('recap-hand').innerText = winningHands[0].name;
-                    document.getElementById('recap-amount').innerText = `+${formatMoney(pot)}`;
-                    
-                    if(winnerID === 'YOU') {
-                        bankroll += pot;
-                        document.getElementById('recap-winner').style.color = 'var(--accent-green)';
+                        currentWinAmount = splitAmount;
+                        bankroll += currentWinAmount;
                         playSound('win');
                     } else {
-                        document.getElementById('recap-winner').style.color = 'var(--accent-gold)';
+                        currentWinAmount = 0;
                     }
+                    triggerPayoutModal('SPLIT', winningHands[0].name, splitAmount, true);
+                } else {
+                    let winnerID = winners[0];
+                    if (winnerID === 'YOU') {
+                        currentWinAmount = pot;
+                        bankroll += currentWinAmount;
+                        playSound('win');
+                    } else {
+                        currentWinAmount = 0;
+                    }
+                    triggerPayoutModal(winnerID, winningHands[0].name, pot, false);
                 }
-                
-                updateUI();
-                setTimeout(() => { document.getElementById('payout-modal').style.display = 'flex'; }, 2000);
 
             } catch (error) {
-                console.error("Math Engine Failed", error);
-                document.getElementById('recap-winner').innerText = `POT SPLIT!`;
-                document.getElementById('recap-hand').innerText = "ENGINE OVERRIDE";
-                document.getElementById('recap-amount').innerText = `+${formatMoney(0)}`;
-                setTimeout(() => { document.getElementById('payout-modal').style.display = 'flex'; }, 2000);
+                console.error("Solver Error Caught:", error);
+                currentWinAmount = 0;
+                triggerPayoutModal('ERROR', "ENGINE OVERRIDE", 0, true);
             }
         }
 
@@ -641,13 +695,15 @@
             await dealCommunityCardsAnimation(cardsToDeal);
             
             updateUI();
-            
             await new Promise(r => setTimeout(r, 800)); 
 
             let activeCount = Object.values(playerStates).filter(p => p.isActive).length;
 
             if (activeCount > 1) {
                 for (let i = 0; i < AI_PLAYERS.length; i++) {
+                    let currentActive = Object.values(playerStates).filter(p => p.isActive).length;
+                    if (currentActive === 1) break; 
+                    
                     let ai = AI_PLAYERS[i];
                     if (!playerStates[ai].isActive) continue; 
 
@@ -715,9 +771,7 @@
                 bankroll -= totalBet; pot += totalBet; currentCallAmount = totalBet; 
                 logAction('YOU', 'raise', totalBet);
                 playSound('chip');
-                
                 customRaiseAmount = 5000; 
-                
                 updateUI(); advancePhase();
             }
         });
@@ -732,6 +786,70 @@
             }
         });
 
+        // --- DOUBLE OR NOTHING LOGIC ---
+        document.getElementById('btn-double').addEventListener('click', () => {
+            playSound('chip');
+            bankroll -= currentWinAmount; // Pull winnings out of bankroll to risk
+            updateUI();
+            
+            document.getElementById('recap-view').style.display = 'none';
+            document.getElementById('double-view').style.display = 'flex';
+            document.getElementById('modal-action-btns').style.display = 'none'; 
+            document.getElementById('double-choice-btns').style.display = 'flex'; 
+            
+            document.getElementById('double-card-display').innerHTML = `<div class="css-card facedown"></div>`;
+        });
+
+        function handleDoubleGuess(guessedColor) {
+            let randomRank = RANKS[Math.floor(Math.random() * RANKS.length)];
+            let suitsArr = Object.keys(SUITS);
+            let randomSuit = suitsArr[Math.floor(Math.random() * suitsArr.length)];
+            let actualColor = (randomSuit === 'H' || randomSuit === 'D') ? 'red' : 'black';
+            
+            document.getElementById('double-card-display').innerHTML = generateCardHTML({rank: randomRank, suit: randomSuit});
+            setTimeout(() => { document.querySelector('#double-card-display .css-card').classList.add('dealt'); }, 50);
+
+            document.getElementById('double-choice-btns').style.display = 'none'; 
+            
+            setTimeout(() => {
+                document.getElementById('modal-action-btns').style.display = 'flex';
+                document.getElementById('recap-view').style.display = 'flex';
+                document.getElementById('double-view').style.display = 'none';
+
+                if (guessedColor === actualColor) {
+                    currentWinAmount *= 2; // Double it!
+                    bankroll += currentWinAmount;
+                    playSound('win');
+                    
+                    document.getElementById('modal-title-text').innerText = "DOUBLE SUCCESS!";
+                    document.getElementById('recap-winner').innerText = "YOU DOUBLED IT!";
+                    document.getElementById('recap-winner').style.color = "var(--accent-green)";
+                    document.getElementById('recap-hand').innerText = "WINNINGS MULTIPLIED";
+                    document.getElementById('recap-amount').innerText = `+${formatMoney(currentWinAmount)}`;
+                    
+                    document.getElementById('btn-double').style.display = 'block';
+                    document.getElementById('btn-next-hand').innerText = 'COLLECT';
+                } else {
+                    currentWinAmount = 0; // Busted!
+                    playSound('fold');
+                    
+                    document.getElementById('modal-title-text').innerText = "BUSTED";
+                    document.getElementById('recap-winner').innerText = "YOU LOST THE DOUBLE";
+                    document.getElementById('recap-winner').style.color = "#ef4444";
+                    document.getElementById('recap-hand').innerText = "BETTER LUCK NEXT TIME";
+                    document.getElementById('recap-amount').innerText = `+$0`;
+                    
+                    document.getElementById('btn-double').style.display = 'none';
+                    document.getElementById('btn-next-hand').innerText = 'START NEXT HAND';
+                }
+                updateUI();
+            }, 1500); 
+        }
+
+        document.getElementById('btn-guess-red').addEventListener('click', () => { playSound('deal'); handleDoubleGuess('red'); });
+        document.getElementById('btn-guess-black').addEventListener('click', () => { playSound('deal'); handleDoubleGuess('black'); });
+
+        // Final Collection
         document.getElementById('btn-next-hand').addEventListener('click', () => {
             document.getElementById('payout-modal').style.display = 'none';
             startNewHand();
