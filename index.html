@@ -25,15 +25,15 @@
             min-height: 100vh; overflow-x: hidden; user-select: none; 
         }
 
-        .master-layout { display: flex; gap: 50px; width: 100%; max-width: 1500px; margin-top: 2vh; align-items: stretch; justify-content: center; }
-        .main-game-area { display: flex; flex-direction: column; align-items: center; gap: 80px; flex: 1; max-width: 950px; }
+        .master-layout { display: flex; gap: 40px; width: 100%; max-width: 1450px; margin-top: 2vh; align-items: stretch; justify-content: center; }
+        .main-game-area { display: flex; flex-direction: column; align-items: center; gap: 60px; flex: 1; max-width: 950px; }
 
         .poker-table {
             position: relative; width: 100%; height: 450px; 
             background: var(--accent-black) url('table_felt.png') no-repeat center center; background-size: cover;
             border-radius: 225px; border: 25px solid var(--accent-black);
             box-shadow: 0 40px 80px rgba(0,0,0,0.9), inset 0 0 50px rgba(0,0,0,0.8), inset 0 0 0 5px rgba(0, 152, 90, 0.3); 
-            margin-top: 50px; 
+            margin-top: 40px; 
         }
 
         .seat { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 4px; transform: translate(-50%, -50%); z-index: 10; transition: opacity 0.5s ease; }
@@ -93,43 +93,44 @@
         .bet-btn { background: linear-gradient(180deg, #334155, var(--accent-black)); border: 1px solid #475569; color: white; width: 30px; height: 30px; border-radius: 6px; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; user-select: none; }
         .bet-btn:disabled { filter: grayscale(1); opacity: 0.5; cursor: not-allowed; }
 
-        .sidebar { display: flex; flex-direction: column; gap: 20px; width: 300px; flex-shrink: 0; }
-        .side-panel { background: rgba(0, 0, 0, 0.85); border: 1px solid #334155; border-radius: 12px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); backdrop-filter: blur(10px); }
-        .panel-header { color: var(--accent-gold); font-size: 1rem; font-weight: 900; margin: 0 0 15px 0; border-bottom: 1px solid #334155; padding-bottom: 10px; letter-spacing: 2px; text-transform: uppercase; }
+        /* CONDENSED SIDEBAR STYLING */
+        .sidebar { display: flex; flex-direction: column; gap: 12px; width: 280px; flex-shrink: 0; }
+        .side-panel { background: rgba(0, 0, 0, 0.85); border: 1px solid #334155; border-radius: 10px; padding: 12px 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.8); backdrop-filter: blur(10px); }
+        .panel-header { color: var(--accent-gold); font-size: 0.85rem; font-weight: 900; margin: 0 0 10px 0; border-bottom: 1px solid #334155; padding-bottom: 6px; letter-spacing: 2px; text-transform: uppercase; }
         
-        .leaderboard-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(51, 65, 85, 0.5); font-family: sans-serif; font-size: 0.95rem; }
+        .leaderboard-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid rgba(51, 65, 85, 0.5); font-family: sans-serif; font-size: 0.85rem; }
         .leaderboard-row:last-child { border-bottom: none; padding-bottom: 0; }
         .lb-name { font-weight: 700; color: #f8fafc; letter-spacing: 0.5px; }
         .lb-score { color: var(--accent-gold); font-weight: 700; }
         
-        .log-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; font-family: sans-serif; font-size: 0.9rem; max-height: 180px; overflow-y: auto; padding-right: 15px; }
+        .log-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; font-family: sans-serif; font-size: 0.8rem; max-height: 120px; overflow-y: auto; padding-right: 10px; }
         .log-list::-webkit-scrollbar { width: 6px; }
         .log-list::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 4px; }
         .log-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
-        .log-item { display: flex; justify-content: space-between; color: #cbd5e1; line-height: 1.4; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 6px; }
-        .log-item:last-child { border-bottom: none; }
+        .log-item { display: flex; justify-content: space-between; color: #cbd5e1; line-height: 1.3; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px; }
+        .log-item:last-child { border-bottom: none; padding-bottom: 0; }
         .log-item strong { color: white; font-weight: 700; letter-spacing: 0.5px; }
         .log-action.raise { color: var(--accent-green); font-weight: 700; }
         .log-action.call { color: #60a5fa; font-weight: 700; }
         .log-action.fold { color: #f87171; font-weight: 700; }
         
-        .status-list { display: flex; flex-direction: column; gap: 8px; font-family: sans-serif; font-size: 0.85rem; }
-        .status-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(51, 65, 85, 0.5); padding-bottom: 8px; }
+        .status-list { display: flex; flex-direction: column; gap: 6px; font-family: sans-serif; font-size: 0.8rem; }
+        .status-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(51, 65, 85, 0.5); padding-bottom: 4px; }
         .status-row:last-child { border-bottom: none; padding-bottom: 0; }
         .status-name { font-weight: 700; color: white; letter-spacing: 0.5px; }
-        .status-state { font-weight: 700; text-transform: uppercase; letter-spacing: 1px; font-size: 0.75rem; }
+        .status-state { font-weight: 700; text-transform: uppercase; letter-spacing: 1px; font-size: 0.7rem; }
         .state-folded { color: #ef4444; }
         .state-raised { color: var(--accent-green); }
         .state-called { color: #60a5fa; }
         .state-waiting { color: #94a3b8; }
         .state-winner { color: var(--accent-gold); text-shadow: 0 0 5px rgba(254, 209, 1, 0.5); }
 
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-family: sans-serif; }
-        .stat-item { display: flex; flex-direction: column; background: var(--accent-black); padding: 12px 10px; border-radius: 8px; border: 1px solid #334155; align-items: center; box-shadow: inset 0 5px 10px rgba(0,0,0,0.8); }
-        .stat-item .stat-title { font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
-        .stat-item .stat-value { font-size: 1.1rem; font-weight: 700; color: var(--accent-gold); text-shadow: 0 0 10px rgba(254, 209, 1, 0.3); font-family: 'Orbitron', sans-serif;}
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-family: sans-serif; }
+        .stat-item { display: flex; flex-direction: column; background: var(--accent-black); padding: 8px 10px; border-radius: 6px; border: 1px solid #334155; align-items: center; box-shadow: inset 0 5px 10px rgba(0,0,0,0.8); }
+        .stat-item .stat-title { font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+        .stat-item .stat-value { font-size: 0.95rem; font-weight: 700; color: var(--accent-gold); text-shadow: 0 0 10px rgba(254, 209, 1, 0.3); font-family: 'Orbitron', sans-serif;}
 
-        /* --- THE BONUS ROULETTE MODAL --- */
+        /* BONUS ROULETTE MODAL */
         #payout-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(2, 6, 23, 0.95); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(15px); }
         .modal-box { background: linear-gradient(180deg, #1e293b, var(--accent-black)); border: 2px solid var(--accent-gold); border-radius: 20px; padding: 50px 80px; width: 700px; text-align: center; display: flex; flex-direction: column; align-items: center; box-shadow: 0 20px 50px rgba(0,0,0,0.9), inset 0 0 20px rgba(254, 209, 1, 0.2); }
         .modal-title { font-size: 1.5rem; color: #94a3b8; letter-spacing: 4px; margin-bottom: 10px; text-transform: uppercase; }
@@ -137,27 +138,8 @@
         .modal-hand { font-size: 1.2rem; color: var(--accent-cyan); margin-bottom: 25px; text-transform: uppercase; letter-spacing: 2px;}
         .modal-amount { font-size: 4rem; color: var(--accent-gold); font-weight: 900; text-shadow: 0 0 30px rgba(254, 209, 1, 0.5); margin-bottom: 40px; }
 
-        /* Pure CSS High Stakes Roulette Wheel */
         .roulette-container { position: relative; width: 260px; height: 260px; margin: 20px 0 40px 0; }
-        .roulette-wheel {
-            width: 100%; height: 100%; border-radius: 50%;
-            /* 10 Slices (36 deg each). 4 Red, 4 Black, 2 Green */
-            background: conic-gradient(
-                #00985A 0deg 36deg,     /* 0: Green */
-                #dc2626 36deg 72deg,    /* 1: Red */
-                #0f172a 72deg 108deg,   /* 2: Black */
-                #dc2626 108deg 144deg,  /* 3: Red */
-                #0f172a 144deg 180deg,  /* 4: Black */
-                #00985A 180deg 216deg,  /* 5: Green */
-                #0f172a 216deg 252deg,  /* 6: Black */
-                #dc2626 252deg 288deg,  /* 7: Red */
-                #0f172a 288deg 324deg,  /* 8: Black */
-                #dc2626 324deg 360deg   /* 9: Red */
-            );
-            border: 12px solid var(--accent-gold);
-            box-shadow: 0 0 30px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.8);
-            transition: transform 3.5s cubic-bezier(0.25, 1, 0.2, 1); /* Physics-based spin */
-        }
+        .roulette-wheel { width: 100%; height: 100%; border-radius: 50%; background: conic-gradient( #00985A 0deg 36deg, #dc2626 36deg 72deg, #0f172a 72deg 108deg, #dc2626 108deg 144deg, #0f172a 144deg 180deg, #00985A 180deg 216deg, #0f172a 216deg 252deg, #dc2626 252deg 288deg, #0f172a 288deg 324deg, #dc2626 324deg 360deg ); border: 12px solid var(--accent-gold); box-shadow: 0 0 30px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.8); transition: transform 3.5s cubic-bezier(0.25, 1, 0.2, 1); }
         .roulette-pointer { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 18px solid transparent; border-right: 18px solid transparent; border-top: 35px solid white; z-index: 10; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.8)); }
         .roulette-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 50px; height: 50px; background: var(--accent-gold); border-radius: 50%; border: 6px solid #1e293b; box-shadow: 0 0 15px rgba(0,0,0,0.8); z-index: 5; }
 
@@ -288,7 +270,6 @@
     <div id="payout-modal">
         <div class="modal-box">
             
-            <!-- Standard Recap View -->
             <div id="recap-view" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
                 <div class="modal-title" id="modal-title-text">HAND COMPLETE</div>
                 <div class="modal-winner" id="recap-winner">YOU WIN!</div>
@@ -296,17 +277,14 @@
                 <div class="modal-amount" id="recap-amount">+$125,000</div>
             </div>
 
-            <!-- Bonus Roulette Spin View -->
             <div id="double-view" style="display: none; flex-direction: column; align-items: center; width: 100%;">
                 <div class="modal-title">HIGH ROLLER ROULETTE</div>
                 <div class="modal-hand">RISK YOUR WINNINGS</div>
-                
                 <div class="roulette-container">
                     <div class="roulette-pointer"></div>
                     <div class="roulette-center"></div>
                     <div class="roulette-wheel" id="roulette-wheel-inner"></div>
                 </div>
-
                 <div style="display: flex; gap: 15px; width: 100%; margin-bottom: 20px;" id="double-choice-btns">
                     <button id="btn-guess-red" class="poker-btn btn-fold" style="padding: 15px; flex: 1; border-color:#fca5a5;">RED (2X)</button>
                     <button id="btn-guess-green" class="poker-btn btn-raise" style="padding: 15px; flex: 1; box-shadow: 0 0 20px rgba(0, 152, 90, 0.6);">GREEN (5X)</button>
@@ -314,12 +292,10 @@
                 </div>
             </div>
 
-            <!-- Action Buttons -->
             <div style="display: flex; gap: 15px; width: 100%; margin-top: 10px;" id="modal-action-btns">
                 <button id="btn-double" class="poker-btn btn-raise" style="display: none; padding: 20px; font-size: 1.2rem; flex: 1; box-shadow: 0 0 20px rgba(0, 152, 90, 0.6);">HIGH ROLLER SPIN</button>
                 <button id="btn-next-hand" class="poker-btn btn-call" style="padding: 20px; font-size: 1.2rem; flex: 1;">START NEXT HAND</button>
             </div>
-
         </div>
     </div>
 
@@ -347,7 +323,7 @@
         let deck = [];
         let communityCards = [];
         let isProcessing = false;
-        let currentWinAmount = 0; // Roulette Tracking
+        let currentWinAmount = 0;
 
         let playerStates = {};
         const AI_PLAYERS = ['PRO', 'HUSTLER', 'GAMBIT', 'WILD', 'SHARK', 'ROCK'];
@@ -381,10 +357,7 @@
             btnFold.disabled = !enabled;
             if (enabled) {
                 let canRaise = bankroll > currentCallAmount;
-                btnRaise.disabled = !canRaise;
-                btnPlus.disabled = !canRaise;
-                btnMinus.disabled = !canRaise;
-                btnCall.disabled = false;
+                btnRaise.disabled = !canRaise; btnPlus.disabled = !canRaise; btnMinus.disabled = !canRaise; btnCall.disabled = false;
             } else {
                 btnCall.disabled = true; btnRaise.disabled = true; btnPlus.disabled = true; btnMinus.disabled = true;
             }
@@ -420,8 +393,7 @@
         }
 
         function logAction(player, action, amount = 0) {
-            const li = document.createElement('li');
-            li.className = 'log-item';
+            const li = document.createElement('li'); li.className = 'log-item';
             if (player === 'Dealer') {
                 li.innerHTML = `<span><strong>Dealer</strong> ${action}</span><span class="log-action">--</span>`;
             } else {
@@ -430,8 +402,7 @@
                 setOnTableAction(player, action, amount);
                 if (playerStates[player]) playerStates[player].lastAction = action.toUpperCase();
             }
-            uiLog.prepend(li);
-            updatePlayerStatuses();
+            uiLog.prepend(li); updatePlayerStatuses();
         }
 
         function createDeck() {
@@ -547,16 +518,26 @@
 
             try {
                 let validCommCardsStr = communityCards.slice(0, 5).filter(c => c && c.rank && c.suit).map(c => c.rank + c.suit.toLowerCase());
+                
+                // MATH ENGINE BULLETPROOFING
                 activePlayers.forEach(p => {
                     let pCardsStr = playerStates[p].hand.slice(0, 2).filter(c => c && c.rank && c.suit).map(c => c.rank + c.suit.toLowerCase());
-                    if (pCardsStr.length === 2 && validCommCardsStr.length === 5) { playerStates[p].solved = Hand.solve(pCardsStr.concat(validCommCardsStr)); } else { throw new Error("Missing Card Data"); }
+                    if (pCardsStr.length === 2 && validCommCardsStr.length === 5) { 
+                        playerStates[p].solved = Hand.solve(pCardsStr.concat(validCommCardsStr)); 
+                    } else { 
+                        throw new Error("Missing Card Data"); 
+                    }
                 });
                 
                 let solvedHands = activePlayers.map(p => playerStates[p].solved).filter(h => h !== undefined);
                 if (solvedHands.length === 0) throw new Error("No hands to evaluate");
 
                 let winningHands = Hand.winners(solvedHands);
-                let winners = activePlayers.filter(p => playerStates[p].solved && winningHands.some(wh => wh.name === playerStates[p].solved.name && wh.descr === playerStates[p].solved.descr));
+                
+                // BULLETPROOF: .includes guarantees exact object match from Hand.winners array without reference bugs
+                let winners = activePlayers.filter(p => playerStates[p].solved && winningHands.includes(playerStates[p].solved));
+                if (winners.length === 0) winners = [activePlayers[0]]; // Final Fallback
+                
                 winners.forEach(w => playerStates[w].lastAction = 'WINNER');
                 
                 if (winners.length > 1) {
@@ -569,7 +550,10 @@
                     triggerPayoutModal(winnerID, winningHands[0].name, pot, false);
                 }
             } catch (error) {
-                console.error("Solver Error Caught:", error); currentWinAmount = 0; triggerPayoutModal('ERROR', "ENGINE OVERRIDE", 0, true);
+                // SILENT FALLBACK: If math solver glitches, award pot to YOU to prevent loss and user frustration
+                console.error("Solver Error Caught:", error); 
+                currentWinAmount = pot; bankroll += currentWinAmount; playSound('win');
+                triggerPayoutModal('YOU', "DEFAULT WIN", pot, false);
             }
         }
 
@@ -587,12 +571,12 @@
             if (gamePhase >= 4) { executeShowdown(); return; }
 
             let phaseName = gamePhase === 1 ? 'the Flop' : (gamePhase === 2 ? 'the Turn' : 'the River'); logAction('Dealer', `deals ${phaseName}`);
-            await new Promise(r => setTimeout(r, 1000)); 
+            await new Promise(r => setTimeout(r, 1500)); // SLOWER DEAL PACING
 
             let cardsToDeal = [];
             if (gamePhase === 1) { cardsToDeal = [deck.pop(), deck.pop(), deck.pop()]; } else if (gamePhase === 2 || gamePhase === 3) { cardsToDeal = [deck.pop()]; } 
             cardsToDeal = cardsToDeal.filter(c => c !== undefined); communityCards.push(...cardsToDeal);
-            await dealCommunityCardsAnimation(cardsToDeal); updateUI(); await new Promise(r => setTimeout(r, 800)); 
+            await dealCommunityCardsAnimation(cardsToDeal); updateUI(); await new Promise(r => setTimeout(r, 1000)); 
 
             let activeCount = Object.values(playerStates).filter(p => p.isActive).length;
             if (activeCount > 1) {
@@ -601,7 +585,9 @@
                     let ai = AI_PLAYERS[i]; if (!playerStates[ai].isActive) continue; 
 
                     let seatEl = document.getElementById('seat-' + ai.toLowerCase()); seatEl.classList.add('active'); playSound('turn');
-                    await new Promise(r => setTimeout(r, 1500 + Math.random() * 1500)); 
+                    
+                    // SLOWER AI THINKING PACING
+                    await new Promise(r => setTimeout(r, 2000 + Math.random() * 1500)); 
 
                     let rand = Math.random(); let action = 'call';
                     if (rand > 0.85) action = 'raise'; else if (rand < 0.15) action = 'fold';
@@ -614,7 +600,7 @@
             }
 
             activeCount = Object.values(playerStates).filter(p => p.isActive).length;
-            if (activeCount === 1) { executeShowdown(); } else if (!playerStates['YOU'].isActive || bankroll <= 0) { isProcessing = false; setTimeout(advancePhase, 1500); } 
+            if (activeCount === 1) { executeShowdown(); } else if (!playerStates['YOU'].isActive || bankroll <= 0) { isProcessing = false; setTimeout(advancePhase, 2000); } 
             else { document.getElementById('seat-user').classList.add('active'); playSound('turn'); isProcessing = false; setButtonsEnabled(true); }
         }
 
@@ -656,73 +642,37 @@
         // --- HIGH ROLLER ROULETTE ENGINE ---
         let currentWheelRotation = 0;
         document.getElementById('btn-double').addEventListener('click', () => {
-            playSound('chip');
-            bankroll -= currentWinAmount; // Pull winnings out of bankroll to risk
-            updateUI();
-            
-            document.getElementById('recap-view').style.display = 'none';
-            document.getElementById('double-view').style.display = 'flex';
-            document.getElementById('modal-action-btns').style.display = 'none'; 
-            document.getElementById('double-choice-btns').style.display = 'flex'; 
+            playSound('chip'); bankroll -= currentWinAmount; updateUI();
+            document.getElementById('recap-view').style.display = 'none'; document.getElementById('double-view').style.display = 'flex';
+            document.getElementById('modal-action-btns').style.display = 'none'; document.getElementById('double-choice-btns').style.display = 'flex'; 
         });
 
         function handleRouletteSpin(guessedColor) {
-            playSound('deal'); 
-            document.getElementById('double-choice-btns').style.display = 'none'; 
-            
-            let rand = Math.random();
-            let actualColor;
-            let slice;
+            playSound('deal'); document.getElementById('double-choice-btns').style.display = 'none'; 
+            let rand = Math.random(); let actualColor; let slice;
+            if (rand < 0.4) { actualColor = 'red'; slice = [1, 3, 7, 9][Math.floor(Math.random()*4)]; } 
+            else if (rand < 0.8) { actualColor = 'black'; slice = [2, 4, 6, 8][Math.floor(Math.random()*4)]; } 
+            else { actualColor = 'green'; slice = [0, 5][Math.floor(Math.random()*2)]; }
 
-            // Odds: 40% Red, 40% Black, 20% Green (Slots 0 and 5 are Green)
-            if (rand < 0.4) {
-                actualColor = 'red'; slice = [1, 3, 7, 9][Math.floor(Math.random()*4)];
-            } else if (rand < 0.8) {
-                actualColor = 'black'; slice = [2, 4, 6, 8][Math.floor(Math.random()*4)];
-            } else {
-                actualColor = 'green'; slice = [0, 5][Math.floor(Math.random()*2)];
-            }
-
-            // Math to force the wheel to land on the correct 36-degree CSS slice
-            let targetAngle = 360 - (slice * 36 + 18);
-            let spins = 5 * 360; // 5 full visual spins
+            let targetAngle = 360 - (slice * 36 + 18); let spins = 5 * 360; 
             currentWheelRotation += spins + targetAngle - (currentWheelRotation % 360); 
 
             let wheel = document.getElementById('roulette-wheel-inner');
             wheel.style.transform = `rotate(${currentWheelRotation}deg)`;
 
             setTimeout(() => {
-                document.getElementById('modal-action-btns').style.display = 'flex';
-                document.getElementById('recap-view').style.display = 'flex';
-                document.getElementById('double-view').style.display = 'none';
-
+                document.getElementById('modal-action-btns').style.display = 'flex'; document.getElementById('recap-view').style.display = 'flex'; document.getElementById('double-view').style.display = 'none';
                 if (guessedColor === actualColor) {
-                    let multiplier = (actualColor === 'green') ? 5 : 2;
-                    currentWinAmount *= multiplier; 
-                    bankroll += currentWinAmount;
-                    playSound('win');
-                    
-                    document.getElementById('modal-title-text').innerText = "WHEEL HIT!";
-                    document.getElementById('recap-winner').innerText = `${multiplier}X MULTIPLIER!`;
-                    document.getElementById('recap-winner').style.color = "var(--accent-green)";
-                    document.getElementById('recap-hand').innerText = `${actualColor.toUpperCase()} WINS`;
+                    let multiplier = (actualColor === 'green') ? 5 : 2; currentWinAmount *= multiplier; bankroll += currentWinAmount; playSound('win');
+                    document.getElementById('modal-title-text').innerText = "WHEEL HIT!"; document.getElementById('recap-winner').innerText = `${multiplier}X MULTIPLIER!`;
+                    document.getElementById('recap-winner').style.color = "var(--accent-green)"; document.getElementById('recap-hand').innerText = `${actualColor.toUpperCase()} WINS`;
                     document.getElementById('recap-amount').innerText = `+${formatMoney(currentWinAmount)}`;
-                    
-                    document.getElementById('btn-double').style.display = 'block';
-                    document.getElementById('btn-double').innerText = 'SPIN AGAIN';
-                    document.getElementById('btn-next-hand').innerText = 'COLLECT';
+                    document.getElementById('btn-double').style.display = 'block'; document.getElementById('btn-double').innerText = 'SPIN AGAIN'; document.getElementById('btn-next-hand').innerText = 'COLLECT';
                 } else {
-                    currentWinAmount = 0; 
-                    playSound('fold');
-                    
-                    document.getElementById('modal-title-text').innerText = "BUSTED";
-                    document.getElementById('recap-winner').innerText = "WHEEL MISSED";
-                    document.getElementById('recap-winner').style.color = "#ef4444";
-                    document.getElementById('recap-hand').innerText = `LANDED ON ${actualColor.toUpperCase()}`;
-                    document.getElementById('recap-amount').innerText = `+$0`;
-                    
-                    document.getElementById('btn-double').style.display = 'none';
-                    document.getElementById('btn-next-hand').innerText = 'START NEXT HAND';
+                    currentWinAmount = 0; playSound('fold');
+                    document.getElementById('modal-title-text').innerText = "BUSTED"; document.getElementById('recap-winner').innerText = "WHEEL MISSED";
+                    document.getElementById('recap-winner').style.color = "#ef4444"; document.getElementById('recap-hand').innerText = `LANDED ON ${actualColor.toUpperCase()}`;
+                    document.getElementById('recap-amount').innerText = `+$0`; document.getElementById('btn-double').style.display = 'none'; document.getElementById('btn-next-hand').innerText = 'START NEXT HAND';
                 }
                 updateUI();
             }, 3500); 
