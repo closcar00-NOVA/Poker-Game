@@ -35,7 +35,6 @@
         /* THE IMAGE-BASED TABLE */
         .poker-table {
             position: relative; width: 100%; height: 450px; 
-            /* Pulls the user-uploaded image without CSS borders obstructing it */
             background: transparent url('table_felt.png') no-repeat center center; 
             background-size: 100% 100%;
             border-radius: 225px; 
@@ -69,32 +68,43 @@
         
         .community-cards { display: flex; gap: 10px; min-height: 125px; }
 
-        /* SLIM NEON OUTLINE CARDS (Larger Scale) */
+        /* CLASSIC VINTAGE PLAYING CARDS */
         .css-card { 
-            width: 85px; height: 125px; background: #050505; 
-            border: 2px solid currentColor; border-radius: 6px; 
+            width: 85px; height: 125px; 
+            background: #fdf5e6; /* Old parchment base */
+            background-image: radial-gradient(circle at center, #fffcf5 0%, #e8dcc7 100%);
+            border: 1px solid #b8a892; border-radius: 6px; 
             position: relative; display: flex; justify-content: center; align-items: center; 
-            box-shadow: 0 0 10px currentColor, inset 0 0 10px currentColor; 
+            box-shadow: 2px 4px 10px rgba(0,0,0,0.5), inset 0 0 15px rgba(139, 69, 19, 0.15); /* Physical shadow + aged inner edge */
             opacity: 0; transform: translateY(-20px); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            color: #1a1a1a;
         }
         .css-card.dealt { opacity: 1; transform: translateY(0); }
-        .css-card.facedown { background: #050505; border-color: #334155; box-shadow: none; color: #334155; }
         
-        .card-corner { position: absolute; display: flex; flex-direction: column; align-items: center; line-height: 1; font-family: 'Inter', sans-serif; font-weight: 400; font-size: 1.1rem; letter-spacing: -1px; }
+        /* Vintage Burgundy Card Backs */
+        .css-card.facedown { 
+            background: #8b0000; 
+            background-image: repeating-linear-gradient(45deg, #721c24, #721c24 5px, #8b0000 5px, #8b0000 10px); 
+            border-color: #4a0c13; 
+            box-shadow: 2px 4px 10px rgba(0,0,0,0.5); 
+            color: transparent; 
+        }
+        
+        .card-corner { position: absolute; display: flex; flex-direction: column; align-items: center; line-height: 1; font-family: 'Georgia', serif; font-weight: bold; font-size: 1.1rem; letter-spacing: -1px; }
         .card-corner.top-left { top: 6px; left: 6px; }
         .card-corner.bottom-right { bottom: 6px; right: 6px; transform: rotate(180deg); }
-        .card-center { font-size: 3rem; line-height: 1; font-weight: 300; filter: drop-shadow(0 0 6px currentColor); }
+        .card-center { font-size: 3rem; line-height: 1; font-weight: normal; font-family: 'Georgia', serif; }
 
-        /* Mapped to Reference Image Colors */
-        .suit-hearts, .suit-diamonds { color: var(--neon-red); text-shadow: 0 0 8px var(--neon-red); } 
-        .suit-spades, .suit-clubs { color: var(--neon-green); text-shadow: 0 0 8px var(--neon-green); } 
+        /* Classic Muted Ink Colors (No Glow) */
+        .suit-hearts, .suit-diamonds { color: #b91c1c; text-shadow: none; } 
+        .suit-spades, .suit-clubs { color: #1a1a1a; text-shadow: none; } 
 
         .opp-hand { position: absolute; display: flex; top: 10px; left: 55px; z-index: -1; }
-        .opp-hand .css-card { width: 45px; height: 65px; border-width: 1px; box-shadow: 0 0 6px currentColor, inset 0 0 6px currentColor; }
+        .opp-hand .css-card { width: 45px; height: 65px; border-width: 1px; box-shadow: 2px 2px 5px rgba(0,0,0,0.5); }
         .opp-hand .css-card:nth-child(2) { margin-left: -20px; } 
 
         .player-hand { position: absolute; display: flex; gap: 8px; top: -20px; left: 55px; z-index: 20; min-height: 60px; }
-        .player-hand .css-card { width: 70px; height: 105px; border-width: 2px; }
+        .player-hand .css-card { width: 70px; height: 105px; border-width: 1px; }
         .player-hand .css-card .card-center { font-size: 2.5rem; }
         .player-hand .css-card .card-corner { font-size: 0.9rem; }
 
@@ -148,7 +158,7 @@
         .l-state { font-family: 'Rajdhani', sans-serif; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; font-size: 0.75rem; text-align: center; }
         .l-bank { text-align: right; color: var(--neon-gold); font-family: 'Rajdhani', sans-serif; font-weight: 600; letter-spacing: 1px;}
         
-        .state-folded { color: var(--neon-red); }
+        .state-folded { color: #ef4444; }
         .state-raised { color: var(--neon-green); }
         .state-called { color: var(--neon-cyan); }
         .state-waiting { color: #64748b; }
@@ -327,7 +337,6 @@
         ALL_SEATS.forEach(p => playerStates[p] = { isActive: true, hand: [], lastAction: 'WAITING' });
 
         const SUITS = { 'H': '&hearts;', 'D': '&diams;', 'S': '&spades;', 'C': '&clubs;' };
-        const SUIT_COLORS = { 'H': 'suit-hearts', 'D': 'suit-diamonds', 'S': 'suit-spades', 'C': 'suit-clubs' };
         const RANKS = ['2','3','4','5','6','7','8','9','T','J','Q','K','A'];
 
         const uiPot = document.getElementById('ui-pot'); const uiBankroll = document.getElementById('ui-bankroll');
@@ -401,8 +410,9 @@
         function generateCardHTML(card, isFacedown = false) {
             if (isFacedown || !card) return `<div class="css-card facedown"></div>`;
             const displayRank = card.rank === 'T' ? '10' : card.rank;
+            let suitClass = (card.suit === 'H' || card.suit === 'D') ? 'suit-hearts' : 'suit-spades';
             return `
-                <div class="css-card ${SUIT_COLORS[card.suit]}">
+                <div class="css-card ${suitClass}">
                     <div class="card-corner top-left"><span>${displayRank}</span><span>${SUITS[card.suit]}</span></div>
                     <div class="card-center">${SUITS[card.suit]}</div>
                     <div class="card-corner bottom-right"><span>${displayRank}</span><span>${SUITS[card.suit]}</span></div>
