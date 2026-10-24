@@ -3,41 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VEGAS PRO - High Roller Poker</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <title>VEGAS PRO - Cyber Edition</title>
+    <!-- Sharp, modern technical fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pokersolver/2.1.4/pokersolver.min.js"></script>
     <style>
         :root { 
-            --accent-gold: #FED101; 
-            --accent-green: #00985A; 
-            --accent-black: #000000;
-            --accent-cyan: #06b6d4;
+            --neon-cyan: #00f3ff;
+            --neon-green: #00ff66;
+            --neon-red: #ff0055;
+            --neon-gold: #ffd700;
+            --dark-bg: #050505;
+            --panel-bg: #09090b;
+            --border-dim: rgba(255, 255, 255, 0.1);
         }
         
         *, *::before, *::after { box-sizing: border-box; }
         
         body { 
             margin: 0; padding: 20px; 
-            background: radial-gradient(circle at center, rgba(30, 41, 59, 0.6) 0%, rgba(0, 0, 0, 0.95) 100%), url('poker_env.png') no-repeat center center fixed; 
-            background-size: cover;
-            color: white; font-family: 'Orbitron', sans-serif; 
+            background: var(--dark-bg);
+            background-image: radial-gradient(circle at center, #111827 0%, var(--dark-bg) 100%);
+            color: white; 
+            font-family: 'Inter', sans-serif; 
             display: flex; align-items: flex-start; justify-content: center; 
             min-height: 100vh; overflow-x: hidden; user-select: none; 
         }
 
-        .master-layout { display: flex; gap: 40px; width: 100%; max-width: 1450px; margin-top: 2vh; align-items: stretch; justify-content: center; }
+        .master-layout { display: flex; gap: 40px; width: 100%; max-width: 1400px; margin-top: 3vh; align-items: stretch; justify-content: center; }
         .main-game-area { display: flex; flex-direction: column; align-items: center; gap: 60px; flex: 1; max-width: 950px; }
 
+        /* PURE CSS MODERN TABLE */
         .poker-table {
-            position: relative; width: 100%; height: 450px; 
-            background: var(--accent-black) url('table_felt.png') no-repeat center center; background-size: cover;
-            border-radius: 225px; border: 25px solid var(--accent-black);
-            box-shadow: 0 40px 80px rgba(0,0,0,0.9), inset 0 0 50px rgba(0,0,0,0.8), inset 0 0 0 5px rgba(0, 152, 90, 0.3); 
-            margin-top: 40px; 
+            position: relative; width: 100%; height: 420px; 
+            background: radial-gradient(ellipse at center, #0f172a 0%, #020617 100%);
+            border-radius: 210px; 
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            box-shadow: 0 0 40px rgba(0, 243, 255, 0.05), inset 0 0 50px rgba(0,0,0,0.9); 
+            margin-top: 60px; 
         }
 
-        .seat { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 4px; transform: translate(-50%, -50%); z-index: 10; transition: opacity 0.5s ease; }
-        .seat.folded { opacity: 0.4; } 
+        .seat { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 6px; transform: translate(-50%, -50%); z-index: 10; transition: opacity 0.5s ease; }
+        .seat.folded { opacity: 0.25; filter: grayscale(1); } 
         
         #seat-user     { top: 100%; left: 50%; }  
         #seat-hustler  { top: 85%;  left: 10%; }
@@ -47,101 +54,109 @@
         #seat-wild     { top: 30%;  left: 95%; }  
         #seat-pro      { top: 85%;  left: 90%; } 
 
-        .avatar { width: 85px; height: 85px; border-radius: 50%; background: #1e293b; border: 3px solid #334155; object-fit: cover; box-shadow: 0 10px 20px rgba(0,0,0,0.6); transition: all 0.3s ease; }
-        .nameplate { background: rgba(0, 0, 0, 0.9); border: 1px solid #334155; padding: 4px 12px; border-radius: 12px; font-size: 0.8rem; letter-spacing: 1px; text-transform: uppercase; color: #94a3b8; backdrop-filter: blur(5px); white-space: nowrap; margin-top: 4px;}
-        .player-action-text { min-height: 20px; font-family: sans-serif; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; background: rgba(0,0,0,0.8); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(51, 65, 85, 0.5); display: flex; align-items: center; justify-content: center; white-space: nowrap;}
+        .avatar { width: 75px; height: 75px; border-radius: 50%; background: #1e293b; border: 1px solid var(--border-dim); object-fit: cover; box-shadow: 0 5px 15px rgba(0,0,0,0.8); transition: all 0.3s ease; }
         
-        .seat.active .avatar { border-color: var(--accent-green); box-shadow: 0 0 30px rgba(0, 152, 90, 0.8), inset 0 0 15px rgba(0, 152, 90, 0.5); transform: scale(1.1); }
-        .seat.active .nameplate { border-color: var(--accent-green); color: var(--accent-green); text-shadow: 0 0 10px rgba(0, 152, 90, 0.5); }
+        /* Razor thin nameplates */
+        .nameplate { background: #000; border: 1px solid var(--border-dim); padding: 4px 10px; border-radius: 4px; font-family: 'Rajdhani', sans-serif; font-size: 0.85rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #94a3b8; }
+        .player-action-text { min-height: 18px; font-family: 'Rajdhani', sans-serif; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 2px 8px; border-radius: 2px; display: flex; align-items: center; justify-content: center; white-space: nowrap;}
+        
+        .seat.active .avatar { border-color: var(--neon-cyan); box-shadow: 0 0 20px rgba(0, 243, 255, 0.4); transform: scale(1.05); }
+        .seat.active .nameplate { border-color: var(--neon-cyan); color: var(--neon-cyan); text-shadow: 0 0 8px rgba(0, 243, 255, 0.5); }
 
-        .dealer-button { position: absolute; width: 30px; height: 30px; border-radius: 50%; background: #ffffff; color: #000; font-weight: 900; display: flex; align-items: center; justify-content: center; font-size: 14px; box-shadow: 2px 5px 10px rgba(0,0,0,0.6), inset 0 0 5px rgba(0,0,0,0.3); border: 2px solid #e2e8f0; z-index: 15; top: -15px; right: -25px; }
+        .dealer-button { position: absolute; width: 24px; height: 24px; border-radius: 50%; background: transparent; color: white; border: 1px solid white; font-family: 'Rajdhani', sans-serif; font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 12px; z-index: 15; top: -10px; right: -20px; backdrop-filter: blur(5px); }
 
-        .table-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 15px; z-index: 5; }
-        .main-pot { display: flex; align-items: center; gap: 15px; background: rgba(0, 0, 0, 0.7); padding: 5px 20px; border-radius: 30px; border: 1px solid var(--accent-gold); box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-        .pot-amount { font-size: 1.5rem; font-weight: 900; color: var(--accent-gold); text-shadow: 0 0 10px rgba(254, 209, 1, 0.4); }
-        .chip-stack-large { height: 50px; object-fit: contain; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.8)); }
-        .community-cards { display: flex; gap: 8px; min-height: 95px; }
+        .table-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 20px; z-index: 5; }
+        .main-pot { display: flex; align-items: center; gap: 10px; background: transparent; padding: 5px 15px; border-radius: 4px; border: 1px solid var(--neon-gold); box-shadow: 0 0 15px rgba(255, 215, 0, 0.1); }
+        .pot-amount { font-family: 'Rajdhani', sans-serif; font-size: 1.8rem; font-weight: 700; color: var(--neon-gold); text-shadow: 0 0 10px rgba(255, 215, 0, 0.3); letter-spacing: 1px; }
+        
+        .community-cards { display: flex; gap: 6px; min-height: 95px; }
 
-        .css-card { width: 65px; height: 95px; background: #ffffff; color: #0f172a; border: 3px solid #e2e8f0; border-radius: 6px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: inset 0 0 10px rgba(0,0,0,0.1), 2px 5px 10px rgba(0,0,0,0.6); font-family: 'Inter', sans-serif; font-weight: 900; font-size: 1.4rem; opacity: 0; transform: translateY(-30px); transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        /* Sharper, thinner cards */
+        .css-card { width: 60px; height: 90px; background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; border-radius: 4px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 5px 10px rgba(0,0,0,0.5); font-family: 'Inter', sans-serif; font-weight: 700; font-size: 1.3rem; opacity: 0; transform: translateY(-20px); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .css-card.dealt { opacity: 1; transform: translateY(0); }
-        .css-card.facedown { background: #0f172a url('card_back.png') center/cover; border-color: #1e293b; }
-        .suit-hearts, .suit-diamonds { color: #dc2626; } 
-        .suit-spades, .suit-clubs { color: #000000; } 
-        .css-card .suit-icon { font-size: 2rem; line-height: 1; }
+        .css-card.facedown { background: repeating-linear-gradient(45deg, #0f172a, #0f172a 5px, #1e293b 5px, #1e293b 10px); border-color: #334155; }
+        .suit-hearts, .suit-diamonds { color: #ef4444; } 
+        .suit-spades, .suit-clubs { color: #0f172a; } 
+        .css-card .suit-icon { font-size: 1.8rem; line-height: 1; }
 
-        .opp-hand { position: absolute; display: flex; top: 15px; left: 65px; z-index: -1; }
-        .opp-hand .css-card { width: 35px; height: 50px; box-shadow: 2px 2px 5px rgba(0,0,0,0.8); }
+        .opp-hand { position: absolute; display: flex; top: 15px; left: 60px; z-index: -1; }
+        .opp-hand .css-card { width: 35px; height: 50px; }
         .opp-hand .css-card:nth-child(2) { margin-left: -15px; } 
 
-        .player-hand { position: absolute; display: flex; gap: 5px; top: -10px; left: 65px; z-index: 20; min-height: 60px; }
-        .player-hand .css-card { width: 50px; height: 75px; font-size: 1.1rem; border-width: 2px; }
-        .player-hand .css-card .suit-icon { font-size: 1.5rem; }
+        .player-hand { position: absolute; display: flex; gap: 4px; top: -15px; left: 60px; z-index: 20; min-height: 60px; }
+        .player-hand .css-card { width: 45px; height: 70px; font-size: 1rem; }
+        .player-hand .css-card .suit-icon { font-size: 1.3rem; }
 
-        #controls { display: flex; justify-content: space-between; align-items: stretch; gap: 20px; background: linear-gradient(180deg, #1e293b, var(--accent-black)); padding: 20px; border-radius: 12px; border-top: 2px solid #475569; width: 100%; box-shadow: 0 20px 40px rgba(0,0,0,0.8); }
-        .stat-box { display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--accent-black); padding: 10px 15px; border-radius: 8px; border: 1px solid #334155; flex: 1; box-shadow: inset 0 5px 10px rgba(0,0,0,0.8); }
-        .stat-label { font-size: 0.75rem; color: #64748b; margin-bottom: 5px; letter-spacing: 1px; white-space: nowrap; }
-        .stat-value { text-align: center; font-size: 1.4rem; font-weight: 700; color: var(--accent-gold); text-shadow: 0 0 10px rgba(254, 209, 1, 0.3); }
-        .action-group { display: flex; gap: 10px; flex: 2; }
-        .poker-btn { flex: 1; font-family: 'Orbitron', sans-serif; font-size: 1.2rem; font-weight: 900; border-radius: 8px; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; color: white; transition: all 0.2s; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-        .poker-btn:hover:not(:disabled) { filter: brightness(1.2); transform: translateY(-2px); }
-        .poker-btn:active:not(:disabled) { transform: translateY(2px); }
-        .poker-btn:disabled { filter: grayscale(1); opacity: 0.5; cursor: not-allowed; }
-        .btn-fold { background: linear-gradient(180deg, #ef4444, #7f1d1d); border: 2px solid #fca5a5; }
-        .btn-call { background: linear-gradient(180deg, #3b82f6, #1e3a8a); border: 2px solid #93c5fd; }
-        .btn-raise { background: linear-gradient(180deg, var(--accent-green), #004d2d); border: 2px solid #34d399; }
-        .bet-controls { display: flex; align-items: center; gap: 8px; }
-        .bet-btn { background: linear-gradient(180deg, #334155, var(--accent-black)); border: 1px solid #475569; color: white; width: 30px; height: 30px; border-radius: 6px; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; user-select: none; }
-        .bet-btn:disabled { filter: grayscale(1); opacity: 0.5; cursor: not-allowed; }
+        /* SLEEK NEON CONTROLS */
+        #controls { display: flex; justify-content: space-between; align-items: stretch; gap: 15px; background: var(--panel-bg); padding: 15px; border-radius: 6px; border: 1px solid var(--border-dim); width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .stat-box { display: flex; flex-direction: column; align-items: center; justify-content: center; background: transparent; padding: 5px 15px; flex: 1; border-right: 1px solid var(--border-dim); }
+        #controls .stat-box:last-child { border-right: none; }
+        .stat-label { font-family: 'Rajdhani', sans-serif; font-size: 0.7rem; color: #64748b; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; }
+        .stat-value { font-family: 'Rajdhani', sans-serif; text-align: center; font-size: 1.6rem; font-weight: 700; color: white; letter-spacing: 1px; }
+        
+        .action-group { display: flex; gap: 10px; flex: 2; padding: 0 15px; border-right: 1px solid var(--border-dim); }
+        
+        /* HOLLOW WIREFRAME BUTTONS */
+        .poker-btn { flex: 1; font-family: 'Rajdhani', sans-serif; font-size: 1.1rem; font-weight: 600; border-radius: 4px; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; background: transparent; transition: all 0.2s ease; }
+        .poker-btn:disabled { opacity: 0.3; cursor: not-allowed; border-color: #334155 !important; color: #64748b !important; }
+        
+        .btn-fold { border: 1px solid var(--neon-red); color: var(--neon-red); }
+        .btn-fold:hover:not(:disabled) { background: var(--neon-red); color: #000; box-shadow: 0 0 15px rgba(255, 0, 85, 0.4); }
+        
+        .btn-call { border: 1px solid var(--neon-cyan); color: var(--neon-cyan); }
+        .btn-call:hover:not(:disabled) { background: var(--neon-cyan); color: #000; box-shadow: 0 0 15px rgba(0, 243, 255, 0.4); }
+        
+        .btn-raise { border: 1px solid var(--neon-green); color: var(--neon-green); }
+        .btn-raise:hover:not(:disabled) { background: var(--neon-green); color: #000; box-shadow: 0 0 15px rgba(0, 255, 102, 0.4); }
 
-        /* CONDENSED SIDEBAR STYLING */
-        .sidebar { display: flex; flex-direction: column; gap: 12px; width: 280px; flex-shrink: 0; }
-        .side-panel { background: rgba(0, 0, 0, 0.85); border: 1px solid #334155; border-radius: 10px; padding: 12px 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.8); backdrop-filter: blur(10px); }
-        .panel-header { color: var(--accent-gold); font-size: 0.85rem; font-weight: 900; margin: 0 0 10px 0; border-bottom: 1px solid #334155; padding-bottom: 6px; letter-spacing: 2px; text-transform: uppercase; }
+        .bet-controls { display: flex; align-items: center; gap: 10px; }
+        .bet-btn { background: transparent; border: 1px solid #475569; color: white; width: 28px; height: 28px; border-radius: 4px; font-size: 1.2rem; font-family: 'Inter', sans-serif; cursor: pointer; display: flex; align-items: center; justify-content: center; user-select: none; transition: 0.2s; }
+        .bet-btn:hover:not(:disabled) { border-color: white; }
+
+        /* MINIMALIST SIDEBAR */
+        .sidebar { display: flex; flex-direction: column; gap: 20px; width: 320px; flex-shrink: 0; }
+        .side-panel { background: var(--panel-bg); border: 1px solid var(--border-dim); border-radius: 6px; padding: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .panel-header { font-family: 'Rajdhani', sans-serif; color: white; font-size: 0.9rem; font-weight: 600; margin: 0 0 12px 0; border-bottom: 1px solid var(--border-dim); padding-bottom: 8px; letter-spacing: 3px; text-transform: uppercase; }
         
-        .leaderboard-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid rgba(51, 65, 85, 0.5); font-family: sans-serif; font-size: 0.85rem; }
-        .leaderboard-row:last-child { border-bottom: none; padding-bottom: 0; }
-        .lb-name { font-weight: 700; color: #f8fafc; letter-spacing: 0.5px; }
-        .lb-score { color: var(--accent-gold); font-weight: 700; }
+        /* THE GAME DASH (Stats + Log) */
+        .dash-stats { display: flex; justify-content: space-between; font-family: 'Rajdhani', sans-serif; font-size: 0.8rem; letter-spacing: 1px; color: #94a3b8; margin-bottom: 15px; border-bottom: 1px solid var(--border-dim); padding-bottom: 10px; text-transform: uppercase; }
+        .dash-stats span { color: var(--neon-cyan); font-weight: 600; }
         
-        .log-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; font-family: sans-serif; font-size: 0.8rem; max-height: 120px; overflow-y: auto; padding-right: 10px; }
-        .log-list::-webkit-scrollbar { width: 6px; }
-        .log-list::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 4px; }
-        .log-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
-        .log-item { display: flex; justify-content: space-between; color: #cbd5e1; line-height: 1.3; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px; }
-        .log-item:last-child { border-bottom: none; padding-bottom: 0; }
-        .log-item strong { color: white; font-weight: 700; letter-spacing: 0.5px; }
-        .log-action.raise { color: var(--accent-green); font-weight: 700; }
-        .log-action.call { color: #60a5fa; font-weight: 700; }
-        .log-action.fold { color: #f87171; font-weight: 700; }
+        .log-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; font-size: 0.75rem; height: 120px; overflow-y: auto; padding-right: 10px; }
+        .log-list::-webkit-scrollbar { width: 2px; }
+        .log-list::-webkit-scrollbar-track { background: transparent; }
+        .log-list::-webkit-scrollbar-thumb { background: var(--border-dim); }
+        .log-item { display: flex; justify-content: space-between; color: #64748b; line-height: 1.4; border-bottom: 1px dashed rgba(255,255,255,0.05); padding-bottom: 4px; }
+        .log-item strong { color: white; font-weight: 500; }
+        .log-action.raise { color: var(--neon-green); }
+        .log-action.call { color: var(--neon-cyan); }
+        .log-action.fold { color: var(--neon-red); }
+
+        /* THE PLAYER LEDGER (Grid) */
+        .ledger-row { display: grid; grid-template-columns: 2fr 1.5fr 2fr; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.8rem; }
+        .ledger-row:last-child { border-bottom: none; padding-bottom: 0; }
+        .l-name { font-weight: 600; color: white; letter-spacing: 0.5px; }
+        .l-state { font-family: 'Rajdhani', sans-serif; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; font-size: 0.75rem; text-align: center; }
+        .l-bank { text-align: right; color: var(--neon-gold); font-family: 'Rajdhani', sans-serif; font-weight: 600; letter-spacing: 1px;}
         
-        .status-list { display: flex; flex-direction: column; gap: 6px; font-family: sans-serif; font-size: 0.8rem; }
-        .status-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(51, 65, 85, 0.5); padding-bottom: 4px; }
-        .status-row:last-child { border-bottom: none; padding-bottom: 0; }
-        .status-name { font-weight: 700; color: white; letter-spacing: 0.5px; }
-        .status-state { font-weight: 700; text-transform: uppercase; letter-spacing: 1px; font-size: 0.7rem; }
         .state-folded { color: #ef4444; }
-        .state-raised { color: var(--accent-green); }
-        .state-called { color: #60a5fa; }
-        .state-waiting { color: #94a3b8; }
-        .state-winner { color: var(--accent-gold); text-shadow: 0 0 5px rgba(254, 209, 1, 0.5); }
-
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-family: sans-serif; }
-        .stat-item { display: flex; flex-direction: column; background: var(--accent-black); padding: 8px 10px; border-radius: 6px; border: 1px solid #334155; align-items: center; box-shadow: inset 0 5px 10px rgba(0,0,0,0.8); }
-        .stat-item .stat-title { font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
-        .stat-item .stat-value { font-size: 0.95rem; font-weight: 700; color: var(--accent-gold); text-shadow: 0 0 10px rgba(254, 209, 1, 0.3); font-family: 'Orbitron', sans-serif;}
+        .state-raised { color: var(--neon-green); }
+        .state-called { color: var(--neon-cyan); }
+        .state-waiting { color: #64748b; }
+        .state-winner { color: var(--neon-gold); text-shadow: 0 0 5px rgba(254, 209, 1, 0.5); }
 
         /* BONUS ROULETTE MODAL */
-        #payout-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(2, 6, 23, 0.95); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(15px); }
-        .modal-box { background: linear-gradient(180deg, #1e293b, var(--accent-black)); border: 2px solid var(--accent-gold); border-radius: 20px; padding: 50px 80px; width: 700px; text-align: center; display: flex; flex-direction: column; align-items: center; box-shadow: 0 20px 50px rgba(0,0,0,0.9), inset 0 0 20px rgba(254, 209, 1, 0.2); }
-        .modal-title { font-size: 1.5rem; color: #94a3b8; letter-spacing: 4px; margin-bottom: 10px; text-transform: uppercase; }
-        .modal-winner { font-size: 3.5rem; color: white; font-weight: 900; margin-bottom: 5px; text-shadow: 0 0 20px rgba(255,255,255,0.3); }
-        .modal-hand { font-size: 1.2rem; color: var(--accent-cyan); margin-bottom: 25px; text-transform: uppercase; letter-spacing: 2px;}
-        .modal-amount { font-size: 4rem; color: var(--accent-gold); font-weight: 900; text-shadow: 0 0 30px rgba(254, 209, 1, 0.5); margin-bottom: 40px; }
+        #payout-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 5, 5, 0.95); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(10px); }
+        .modal-box { background: var(--panel-bg); border: 1px solid var(--neon-cyan); border-radius: 8px; padding: 50px 80px; width: 600px; text-align: center; display: flex; flex-direction: column; align-items: center; box-shadow: 0 0 40px rgba(0, 243, 255, 0.1); }
+        .modal-title { font-family: 'Rajdhani', sans-serif; font-size: 1.2rem; color: #94a3b8; letter-spacing: 6px; margin-bottom: 10px; text-transform: uppercase; }
+        .modal-winner { font-family: 'Rajdhani', sans-serif; font-size: 3rem; color: white; font-weight: 700; margin-bottom: 5px; text-shadow: 0 0 20px rgba(255,255,255,0.2); text-transform: uppercase;}
+        .modal-hand { font-family: 'Rajdhani', sans-serif; font-size: 1rem; color: var(--neon-cyan); margin-bottom: 25px; text-transform: uppercase; letter-spacing: 3px;}
+        .modal-amount { font-family: 'Rajdhani', sans-serif; font-size: 3.5rem; color: var(--neon-gold); font-weight: 700; text-shadow: 0 0 20px rgba(255, 215, 0, 0.3); margin-bottom: 40px; }
 
-        .roulette-container { position: relative; width: 260px; height: 260px; margin: 20px 0 40px 0; }
-        .roulette-wheel { width: 100%; height: 100%; border-radius: 50%; background: conic-gradient( #00985A 0deg 36deg, #dc2626 36deg 72deg, #0f172a 72deg 108deg, #dc2626 108deg 144deg, #0f172a 144deg 180deg, #00985A 180deg 216deg, #0f172a 216deg 252deg, #dc2626 252deg 288deg, #0f172a 288deg 324deg, #dc2626 324deg 360deg ); border: 12px solid var(--accent-gold); box-shadow: 0 0 30px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.8); transition: transform 3.5s cubic-bezier(0.25, 1, 0.2, 1); }
-        .roulette-pointer { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 18px solid transparent; border-right: 18px solid transparent; border-top: 35px solid white; z-index: 10; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.8)); }
-        .roulette-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 50px; height: 50px; background: var(--accent-gold); border-radius: 50%; border: 6px solid #1e293b; box-shadow: 0 0 15px rgba(0,0,0,0.8); z-index: 5; }
+        .roulette-container { position: relative; width: 220px; height: 220px; margin: 20px 0 40px 0; }
+        .roulette-wheel { width: 100%; height: 100%; border-radius: 50%; background: conic-gradient( var(--neon-green) 0deg 36deg, var(--neon-red) 36deg 72deg, var(--panel-bg) 72deg 108deg, var(--neon-red) 108deg 144deg, var(--panel-bg) 144deg 180deg, var(--neon-green) 180deg 216deg, var(--panel-bg) 216deg 252deg, var(--neon-red) 252deg 288deg, var(--panel-bg) 288deg 324deg, var(--neon-red) 324deg 360deg ); border: 4px solid rgba(255,255,255,0.1); box-shadow: 0 0 20px rgba(0,0,0,0.8); transition: transform 3.5s cubic-bezier(0.25, 1, 0.2, 1); }
+        .roulette-pointer { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 12px solid transparent; border-right: 12px solid transparent; border-top: 25px solid white; z-index: 10; }
+        .roulette-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40px; height: 40px; background: #000; border-radius: 50%; border: 2px solid rgba(255,255,255,0.2); z-index: 5; }
 
         @media (max-width: 1200px) { .master-layout { flex-direction: column; align-items: center; } .sidebar { width: 100%; max-width: 950px; flex-direction: row; flex-wrap: wrap; } .side-panel { flex: 1; min-width: 300px; } }
     </style>
@@ -153,7 +168,6 @@
             <div class="poker-table">
                 <div class="table-center">
                     <div class="main-pot">
-                        <img src="pot_chips.png" class="chip-stack-large" alt="Pot Chips" onerror="this.style.display='none'">
                         <div class="pot-amount" id="ui-pot">$0</div>
                     </div>
                     <div class="community-cards" id="ui-community"></div>
@@ -211,7 +225,7 @@
 
             <div id="controls">
                 <div class="stat-box">
-                    <div class="stat-label">MASTER BANKROLL</div>
+                    <div class="stat-label">Bankroll</div>
                     <div class="stat-value" id="ui-bankroll">$3,258,000</div>
                 </div>
                 <div class="action-group">
@@ -220,7 +234,7 @@
                     <button class="poker-btn btn-raise" id="btn-raise">RAISE</button>
                 </div>
                 <div class="stat-box">
-                    <div class="stat-label">RAISE AMT</div>
+                    <div class="stat-label">Raise Amt</div>
                     <div class="bet-controls">
                         <button class="bet-btn" id="btn-minus">-</button>
                         <div class="stat-value" id="ui-raise-amt">$5,000</div>
@@ -231,45 +245,34 @@
         </div>
 
         <div class="sidebar">
+            
+            <!-- MODULE 1: THE GAME DASH -->
             <div class="side-panel">
-                <h2 class="panel-header">Action Log</h2>
+                <h2 class="panel-header">Game Dash</h2>
+                <div class="dash-stats">
+                    <div>Blinds: <span>$1K/$2K</span></div>
+                    <div>Bet: <span id="ui-stat-bet">$0</span></div>
+                    <div>Round: <span id="ui-stat-round">Pre-Flop</span></div>
+                </div>
                 <ul class="log-list" id="ui-log">
                     <li class="log-item"><span><strong>Dealer</strong> shuffles deck</span><span class="log-action">--</span></li>
                 </ul>
             </div>
 
+            <!-- MODULE 2: THE PLAYER LEDGER -->
             <div class="side-panel">
-                <h2 class="panel-header">Player Status</h2>
-                <div class="status-list" id="ui-player-status"></div>
-            </div>
-
-            <div class="side-panel">
-                <h2 class="panel-header">Table Stats</h2>
-                <div class="stats-grid">
-                    <div class="stat-item"><span class="stat-title">Blinds</span><span class="stat-value">$1K / $2K</span></div>
-                    <div class="stat-item"><span class="stat-title">Current Bet</span><span class="stat-value" id="ui-stat-bet">$0</span></div>
-                    <div class="stat-item"><span class="stat-title">Round</span><span class="stat-value" id="ui-stat-round">Pre-Flop</span></div>
-                    <div class="stat-item"><span class="stat-title">Active</span><span class="stat-value" id="ui-stat-active">7 Players</span></div>
+                <h2 class="panel-header">Player Ledger</h2>
+                <div id="ui-ledger">
+                    <!-- JS injects dynamic 3-column grid -->
                 </div>
             </div>
 
-            <div class="side-panel">
-                <h2 class="panel-header">Table Leaders</h2>
-                <div class="leaderboard-row"><span class="lb-name">YOU</span><span class="lb-score" id="lb-user">$3,258,000</span></div>
-                <div class="leaderboard-row"><span class="lb-name">PRO</span><span class="lb-score">$150,000</span></div>
-                <div class="leaderboard-row"><span class="lb-name">HUSTLER</span><span class="lb-score">$125,000</span></div>
-                <div class="leaderboard-row"><span class="lb-name">GAMBIT</span><span class="lb-score">$95,000</span></div>
-                <div class="leaderboard-row"><span class="lb-name">WILD</span><span class="lb-score">$80,000</span></div>
-                <div class="leaderboard-row"><span class="lb-name">SHARK</span><span class="lb-score">$45,000</span></div>
-                <div class="leaderboard-row"><span class="lb-name">ROCK</span><span class="lb-score">$12,000</span></div>
-            </div>
         </div>
     </div>
 
     <!-- DOUBLE OR NOTHING ROULETTE MODAL -->
     <div id="payout-modal">
         <div class="modal-box">
-            
             <div id="recap-view" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
                 <div class="modal-title" id="modal-title-text">HAND COMPLETE</div>
                 <div class="modal-winner" id="recap-winner">YOU WIN!</div>
@@ -286,15 +289,15 @@
                     <div class="roulette-wheel" id="roulette-wheel-inner"></div>
                 </div>
                 <div style="display: flex; gap: 15px; width: 100%; margin-bottom: 20px;" id="double-choice-btns">
-                    <button id="btn-guess-red" class="poker-btn btn-fold" style="padding: 15px; flex: 1; border-color:#fca5a5;">RED (2X)</button>
-                    <button id="btn-guess-green" class="poker-btn btn-raise" style="padding: 15px; flex: 1; box-shadow: 0 0 20px rgba(0, 152, 90, 0.6);">GREEN (5X)</button>
-                    <button id="btn-guess-black" class="poker-btn btn-call" style="padding: 15px; flex: 1; background: linear-gradient(180deg, #475569, #0f172a); border-color: #334155;">BLACK (2X)</button>
+                    <button id="btn-guess-red" class="poker-btn btn-fold" style="padding: 15px; flex: 1;">RED (2X)</button>
+                    <button id="btn-guess-green" class="poker-btn btn-raise" style="padding: 15px; flex: 1;">GREEN (5X)</button>
+                    <button id="btn-guess-black" class="poker-btn" style="padding: 15px; flex: 1; border-color:#cbd5e1; color:#cbd5e1;">BLACK (2X)</button>
                 </div>
             </div>
 
             <div style="display: flex; gap: 15px; width: 100%; margin-top: 10px;" id="modal-action-btns">
-                <button id="btn-double" class="poker-btn btn-raise" style="display: none; padding: 20px; font-size: 1.2rem; flex: 1; box-shadow: 0 0 20px rgba(0, 152, 90, 0.6);">HIGH ROLLER SPIN</button>
-                <button id="btn-next-hand" class="poker-btn btn-call" style="padding: 20px; font-size: 1.2rem; flex: 1;">START NEXT HAND</button>
+                <button id="btn-double" class="poker-btn btn-raise" style="display: none; padding: 15px; flex: 1;">HIGH ROLLER SPIN</button>
+                <button id="btn-next-hand" class="poker-btn btn-call" style="padding: 15px; flex: 1;">START NEXT HAND</button>
             </div>
         </div>
     </div>
@@ -328,6 +331,10 @@
         let playerStates = {};
         const AI_PLAYERS = ['PRO', 'HUSTLER', 'GAMBIT', 'WILD', 'SHARK', 'ROCK'];
         const ALL_SEATS = ['YOU', ...AI_PLAYERS];
+        
+        // Static Mock Bankrolls for AI to populate the new Ledger UI
+        const AI_STARTING_BANKS = { 'PRO': 150000, 'HUSTLER': 125000, 'GAMBIT': 95000, 'WILD': 80000, 'SHARK': 45000, 'ROCK': 12000 };
+
         ALL_SEATS.forEach(p => playerStates[p] = { isActive: true, hand: [], lastAction: 'WAITING' });
 
         const SUITS = { 'H': '&hearts;', 'D': '&diams;', 'S': '&spades;', 'C': '&clubs;' };
@@ -342,8 +349,6 @@
         const uiLog = document.getElementById('ui-log');
         const uiStatRound = document.getElementById('ui-stat-round');
         const uiStatBet = document.getElementById('ui-stat-bet');
-        const uiStatActive = document.getElementById('ui-stat-active');
-        const lbUser = document.getElementById('lb-user');
 
         const btnCall = document.getElementById('btn-call');
         const btnRaise = document.getElementById('btn-raise');
@@ -366,28 +371,37 @@
         function setOnTableAction(player, action, amount = 0) {
             let el = document.getElementById('action-' + player);
             if(!el) return;
-            if(action === 'fold') { el.innerHTML = `<span style="color:#ef4444">FOLDED</span>`; }
-            else if(action === 'raise') { el.innerHTML = `<span style="color:var(--accent-green)">RAISED +${formatMoney(amount)}</span>`; }
-            else if(action === 'call' || action === 'all in') { el.innerHTML = `<span style="color:#60a5fa">CALLED ${formatMoney(amount)}</span>`; }
+            if(action === 'fold') { el.innerHTML = `<span style="color:var(--neon-red)">FOLDED</span>`; }
+            else if(action === 'raise') { el.innerHTML = `<span style="color:var(--neon-green)">RAISED +${formatMoney(amount)}</span>`; }
+            else if(action === 'call' || action === 'all in') { el.innerHTML = `<span style="color:var(--neon-cyan)">CALLED ${formatMoney(amount)}</span>`; }
             else if(action === 'check') { el.innerHTML = `<span style="color:#94a3b8">CHECKED</span>`; }
             else { el.innerHTML = ''; }
         }
 
         function clearAllOnTableActions() { ALL_SEATS.forEach(p => setOnTableAction(p, '')); }
 
+        // NEW CONSOLIDATED LEDGER FUNCTION
         function updatePlayerStatuses() {
-            const container = document.getElementById('ui-player-status');
+            const container = document.getElementById('ui-ledger');
             if(!container) return;
             let html = '';
             ALL_SEATS.forEach(p => {
                 let state = playerStates[p] ? playerStates[p].lastAction : 'WAITING';
                 if(!playerStates[p]?.isActive) state = 'FOLDED';
+                
                 let stateClass = 'state-waiting';
                 if(state === 'FOLDED') stateClass = 'state-folded';
                 else if(state === 'RAISED' || state === 'RAISE') stateClass = 'state-raised';
                 else if(state === 'CALLED' || state === 'CALL' || state === 'ALL IN') stateClass = 'state-called';
                 else if(state === 'WINNER') stateClass = 'state-winner';
-                html += `<div class="status-row"><span class="status-name">${p}</span><span class="status-state ${stateClass}">${state}</span></div>`;
+                
+                let pBank = p === 'YOU' ? bankroll : AI_STARTING_BANKS[p];
+
+                html += `<div class="ledger-row">
+                    <span class="l-name">${p}</span>
+                    <span class="l-state ${stateClass}">${state}</span>
+                    <span class="l-bank">${formatMoney(pBank)}</span>
+                </div>`;
             });
             container.innerHTML = html;
         }
@@ -426,11 +440,9 @@
         }
 
         function updateUI() {
-            uiBankroll.innerText = formatMoney(bankroll); lbUser.innerText = formatMoney(bankroll);
+            uiBankroll.innerText = formatMoney(bankroll); 
             uiPot.innerText = formatMoney(pot); uiRaiseAmt.innerText = formatMoney(customRaiseAmount);
             uiStatBet.innerText = formatMoney(currentCallAmount);
-            let activeCount = Object.values(playerStates).filter(p => p.isActive).length;
-            uiStatActive.innerText = `${activeCount} Players`;
             const rounds = ["Pre-Flop", "The Flop", "The Turn", "The River", "Showdown"];
             uiStatRound.innerText = rounds[gamePhase];
             if (bankroll <= currentCallAmount) { btnCall.innerText = `ALL IN ${formatMoney(bankroll)}`; } else { btnCall.innerText = `CALL ${formatMoney(currentCallAmount)}`; }
@@ -478,11 +490,11 @@
         function triggerPayoutModal(winnerID, handName, amount, isSplit = false) {
             if (isSplit) {
                 document.getElementById('recap-winner').innerText = `POT SPLIT!`; document.getElementById('recap-hand').innerText = handName;
-                document.getElementById('recap-amount').innerText = `+${formatMoney(amount)} EACH`; document.getElementById('recap-winner').style.color = 'var(--accent-cyan)';
+                document.getElementById('recap-amount').innerText = `+${formatMoney(amount)} EACH`; document.getElementById('recap-winner').style.color = 'var(--neon-cyan)';
             } else {
                 document.getElementById('recap-winner').innerText = `${winnerID} WINS!`; document.getElementById('recap-hand').innerText = handName;
                 document.getElementById('recap-amount').innerText = `+${formatMoney(amount)}`;
-                document.getElementById('recap-winner').style.color = (winnerID === 'YOU') ? 'var(--accent-green)' : 'var(--accent-gold)';
+                document.getElementById('recap-winner').style.color = (winnerID === 'YOU') ? 'var(--neon-green)' : 'var(--neon-gold)';
             }
 
             if (currentWinAmount > 0) {
@@ -519,7 +531,6 @@
             try {
                 let validCommCardsStr = communityCards.slice(0, 5).filter(c => c && c.rank && c.suit).map(c => c.rank + c.suit.toLowerCase());
                 
-                // MATH ENGINE BULLETPROOFING
                 activePlayers.forEach(p => {
                     let pCardsStr = playerStates[p].hand.slice(0, 2).filter(c => c && c.rank && c.suit).map(c => c.rank + c.suit.toLowerCase());
                     if (pCardsStr.length === 2 && validCommCardsStr.length === 5) { 
@@ -533,10 +544,8 @@
                 if (solvedHands.length === 0) throw new Error("No hands to evaluate");
 
                 let winningHands = Hand.winners(solvedHands);
-                
-                // BULLETPROOF: .includes guarantees exact object match from Hand.winners array without reference bugs
                 let winners = activePlayers.filter(p => playerStates[p].solved && winningHands.includes(playerStates[p].solved));
-                if (winners.length === 0) winners = [activePlayers[0]]; // Final Fallback
+                if (winners.length === 0) winners = [activePlayers[0]]; 
                 
                 winners.forEach(w => playerStates[w].lastAction = 'WINNER');
                 
@@ -550,7 +559,6 @@
                     triggerPayoutModal(winnerID, winningHands[0].name, pot, false);
                 }
             } catch (error) {
-                // SILENT FALLBACK: If math solver glitches, award pot to YOU to prevent loss and user frustration
                 console.error("Solver Error Caught:", error); 
                 currentWinAmount = pot; bankroll += currentWinAmount; playSound('win');
                 triggerPayoutModal('YOU', "DEFAULT WIN", pot, false);
@@ -571,7 +579,7 @@
             if (gamePhase >= 4) { executeShowdown(); return; }
 
             let phaseName = gamePhase === 1 ? 'the Flop' : (gamePhase === 2 ? 'the Turn' : 'the River'); logAction('Dealer', `deals ${phaseName}`);
-            await new Promise(r => setTimeout(r, 1500)); // SLOWER DEAL PACING
+            await new Promise(r => setTimeout(r, 1500)); 
 
             let cardsToDeal = [];
             if (gamePhase === 1) { cardsToDeal = [deck.pop(), deck.pop(), deck.pop()]; } else if (gamePhase === 2 || gamePhase === 3) { cardsToDeal = [deck.pop()]; } 
@@ -585,8 +593,6 @@
                     let ai = AI_PLAYERS[i]; if (!playerStates[ai].isActive) continue; 
 
                     let seatEl = document.getElementById('seat-' + ai.toLowerCase()); seatEl.classList.add('active'); playSound('turn');
-                    
-                    // SLOWER AI THINKING PACING
                     await new Promise(r => setTimeout(r, 2000 + Math.random() * 1500)); 
 
                     let rand = Math.random(); let action = 'call';
@@ -665,7 +671,7 @@
                 if (guessedColor === actualColor) {
                     let multiplier = (actualColor === 'green') ? 5 : 2; currentWinAmount *= multiplier; bankroll += currentWinAmount; playSound('win');
                     document.getElementById('modal-title-text').innerText = "WHEEL HIT!"; document.getElementById('recap-winner').innerText = `${multiplier}X MULTIPLIER!`;
-                    document.getElementById('recap-winner').style.color = "var(--accent-green)"; document.getElementById('recap-hand').innerText = `${actualColor.toUpperCase()} WINS`;
+                    document.getElementById('recap-winner').style.color = "var(--neon-green)"; document.getElementById('recap-hand').innerText = `${actualColor.toUpperCase()} WINS`;
                     document.getElementById('recap-amount').innerText = `+${formatMoney(currentWinAmount)}`;
                     document.getElementById('btn-double').style.display = 'block'; document.getElementById('btn-double').innerText = 'SPIN AGAIN'; document.getElementById('btn-next-hand').innerText = 'COLLECT';
                 } else {
