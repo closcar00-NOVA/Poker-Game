@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VEGAS PRO - Cyber Edition</title>
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pokersolver/2.1.4/pokersolver.min.js"></script>
     <style>
         :root { 
             --neon-cyan: #00f3ff;
             --neon-green: #00ff66;
-            --neon-red: #ff3366;
+            --neon-red: #ff003c;
             --neon-gold: #ffd700;
             --dark-bg: #050505;
             --panel-bg: #09090b;
@@ -32,14 +32,14 @@
         .master-layout { display: flex; gap: 40px; width: 100%; max-width: 1400px; margin-top: 3vh; align-items: stretch; justify-content: center; }
         .main-game-area { display: flex; flex-direction: column; align-items: center; gap: 60px; flex: 1; max-width: 950px; }
 
-        /* CLASSIC GREEN & WOOD TABLE */
+        /* THE IMAGE-BASED TABLE */
         .poker-table {
-            position: relative; width: 100%; height: 420px; 
-            background: radial-gradient(ellipse at center, #1b5e20 0%, #0a2e0e 100%);
-            border-radius: 210px; 
-            border: 24px solid #3e2315; /* Classic Wood Railing */
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 0 40px rgba(0,0,0,0.9), inset 0 0 0 4px rgba(0,0,0,0.5); 
-            margin-top: 60px; 
+            position: relative; width: 100%; height: 450px; 
+            /* Pulls the user-uploaded image without CSS borders obstructing it */
+            background: transparent url('table_felt.png') no-repeat center center; 
+            background-size: 100% 100%;
+            border-radius: 225px; 
+            margin-top: 50px; 
         }
 
         .seat { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 6px; transform: translate(-50%, -50%); z-index: 10; transition: opacity 0.5s ease; }
@@ -53,7 +53,6 @@
         #seat-wild     { top: 30%;  left: 95%; }  
         #seat-pro      { top: 85%;  left: 90%; } 
 
-        /* SMALLER AVATARS */
         .avatar { width: 55px; height: 55px; border-radius: 50%; background: #1e293b; border: 1px solid var(--border-dim); object-fit: cover; box-shadow: 0 5px 15px rgba(0,0,0,0.8); transition: all 0.3s ease; }
         
         .nameplate { background: #000; border: 1px solid var(--border-dim); padding: 4px 10px; border-radius: 4px; font-family: 'Rajdhani', sans-serif; font-size: 0.85rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #94a3b8; }
@@ -65,38 +64,39 @@
         .dealer-button { position: absolute; width: 24px; height: 24px; border-radius: 50%; background: transparent; color: white; border: 1px solid white; font-family: 'Rajdhani', sans-serif; font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 12px; z-index: 15; top: -10px; right: -20px; backdrop-filter: blur(5px); }
 
         .table-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 20px; z-index: 5; }
-        .main-pot { display: flex; align-items: center; gap: 10px; background: transparent; padding: 5px 15px; border-radius: 4px; border: 1px solid var(--neon-gold); background: rgba(0,0,0,0.4); box-shadow: 0 0 15px rgba(255, 215, 0, 0.1); }
+        .main-pot { display: flex; align-items: center; gap: 10px; padding: 5px 15px; border-radius: 4px; border: 1px solid var(--neon-gold); background: rgba(0,0,0,0.6); box-shadow: 0 0 15px rgba(255, 215, 0, 0.1); }
         .pot-amount { font-family: 'Rajdhani', sans-serif; font-size: 1.8rem; font-weight: 700; color: var(--neon-gold); text-shadow: 0 0 10px rgba(255, 215, 0, 0.3); letter-spacing: 1px; }
         
-        .community-cards { display: flex; gap: 8px; min-height: 120px; }
+        .community-cards { display: flex; gap: 10px; min-height: 125px; }
 
-        /* LARGER, CLEANER BLACK NEON CARDS */
+        /* SLIM NEON OUTLINE CARDS (Larger Scale) */
         .css-card { 
-            width: 75px; height: 110px; background: #050505; border: 1px solid rgba(0, 243, 255, 0.3); border-radius: 8px; 
+            width: 85px; height: 125px; background: #050505; 
+            border: 2px solid currentColor; border-radius: 6px; 
             position: relative; display: flex; justify-content: center; align-items: center; 
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.8); /* Removed heavy cyan glow for cleaner look */
+            box-shadow: 0 0 10px currentColor, inset 0 0 10px currentColor; 
             opacity: 0; transform: translateY(-20px); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
         }
         .css-card.dealt { opacity: 1; transform: translateY(0); }
-        .css-card.facedown { background: repeating-linear-gradient(45deg, #0f172a, #0f172a 5px, #1e293b 5px, #1e293b 10px); border-color: #334155; }
+        .css-card.facedown { background: #050505; border-color: #334155; box-shadow: none; color: #334155; }
         
-        .card-corner { position: absolute; display: flex; flex-direction: column; align-items: center; line-height: 1; font-family: 'Inter', sans-serif; font-weight: 900; font-size: 1.1rem; letter-spacing: -1px; }
+        .card-corner { position: absolute; display: flex; flex-direction: column; align-items: center; line-height: 1; font-family: 'Inter', sans-serif; font-weight: 400; font-size: 1.1rem; letter-spacing: -1px; }
         .card-corner.top-left { top: 6px; left: 6px; }
         .card-corner.bottom-right { bottom: 6px; right: 6px; transform: rotate(180deg); }
-        .card-center { font-size: 2.8rem; line-height: 1; }
+        .card-center { font-size: 3rem; line-height: 1; font-weight: 300; filter: drop-shadow(0 0 6px currentColor); }
 
-        /* Tighter text shadow for better legibility */
-        .suit-hearts, .suit-diamonds { color: var(--neon-red); text-shadow: 0 0 3px var(--neon-red); } 
-        .suit-spades, .suit-clubs { color: var(--neon-cyan); text-shadow: 0 0 3px var(--neon-cyan); } 
+        /* Mapped to Reference Image Colors */
+        .suit-hearts, .suit-diamonds { color: var(--neon-red); text-shadow: 0 0 8px var(--neon-red); } 
+        .suit-spades, .suit-clubs { color: var(--neon-green); text-shadow: 0 0 8px var(--neon-green); } 
 
         .opp-hand { position: absolute; display: flex; top: 10px; left: 55px; z-index: -1; }
-        .opp-hand .css-card { width: 45px; height: 65px; border-width: 1px; }
+        .opp-hand .css-card { width: 45px; height: 65px; border-width: 1px; box-shadow: 0 0 6px currentColor, inset 0 0 6px currentColor; }
         .opp-hand .css-card:nth-child(2) { margin-left: -20px; } 
 
-        .player-hand { position: absolute; display: flex; gap: 5px; top: -15px; left: 55px; z-index: 20; min-height: 60px; }
-        .player-hand .css-card { width: 60px; height: 90px; border-width: 1px; }
-        .player-hand .css-card .card-center { font-size: 2.2rem; }
-        .player-hand .css-card .card-corner { font-size: 0.85rem; }
+        .player-hand { position: absolute; display: flex; gap: 8px; top: -20px; left: 55px; z-index: 20; min-height: 60px; }
+        .player-hand .css-card { width: 70px; height: 105px; border-width: 2px; }
+        .player-hand .css-card .card-center { font-size: 2.5rem; }
+        .player-hand .css-card .card-corner { font-size: 0.9rem; }
 
         /* MINIMALIST CONTROL PANEL */
         #controls { display: flex; justify-content: space-between; align-items: stretch; gap: 20px; background: #0c0c0e; padding: 20px 30px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); width: 100%; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
@@ -112,7 +112,7 @@
         .poker-btn:disabled { opacity: 0.25; cursor: not-allowed; border-color: #334155 !important; color: #64748b !important; box-shadow: none !important; }
         
         .btn-fold { border: 1px solid var(--neon-red); color: var(--neon-red); }
-        .btn-fold:hover:not(:disabled) { box-shadow: 0 0 15px rgba(255, 51, 102, 0.3), inset 0 0 10px rgba(255, 51, 102, 0.2); }
+        .btn-fold:hover:not(:disabled) { box-shadow: 0 0 15px rgba(255, 0, 60, 0.3), inset 0 0 10px rgba(255, 0, 60, 0.2); }
         
         .btn-call { border: 1px solid var(--neon-cyan); color: var(--neon-cyan); }
         .btn-call:hover:not(:disabled) { box-shadow: 0 0 15px rgba(0, 243, 255, 0.3), inset 0 0 10px rgba(0, 243, 255, 0.2); }
@@ -148,7 +148,7 @@
         .l-state { font-family: 'Rajdhani', sans-serif; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; font-size: 0.75rem; text-align: center; }
         .l-bank { text-align: right; color: var(--neon-gold); font-family: 'Rajdhani', sans-serif; font-weight: 600; letter-spacing: 1px;}
         
-        .state-folded { color: #ef4444; }
+        .state-folded { color: var(--neon-red); }
         .state-raised { color: var(--neon-green); }
         .state-called { color: var(--neon-cyan); }
         .state-waiting { color: #64748b; }
