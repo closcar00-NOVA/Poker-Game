@@ -32,12 +32,13 @@
         .master-layout { display: flex; gap: 40px; width: 100%; max-width: 1400px; margin-top: 3vh; align-items: stretch; justify-content: center; }
         .main-game-area { display: flex; flex-direction: column; align-items: center; gap: 60px; flex: 1; max-width: 950px; }
 
+        /* CLASSIC GREEN & WOOD TABLE */
         .poker-table {
             position: relative; width: 100%; height: 420px; 
-            background: radial-gradient(ellipse at center, #0f172a 0%, #020617 100%);
+            background: radial-gradient(ellipse at center, #1b5e20 0%, #0a2e0e 100%);
             border-radius: 210px; 
-            border: 1px solid rgba(0, 243, 255, 0.3);
-            box-shadow: 0 0 40px rgba(0, 243, 255, 0.05), inset 0 0 50px rgba(0,0,0,0.9); 
+            border: 24px solid #3e2315; /* Classic Wood Railing */
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 0 40px rgba(0,0,0,0.9), inset 0 0 0 4px rgba(0,0,0,0.5); 
             margin-top: 60px; 
         }
 
@@ -52,7 +53,8 @@
         #seat-wild     { top: 30%;  left: 95%; }  
         #seat-pro      { top: 85%;  left: 90%; } 
 
-        .avatar { width: 75px; height: 75px; border-radius: 50%; background: #1e293b; border: 1px solid var(--border-dim); object-fit: cover; box-shadow: 0 5px 15px rgba(0,0,0,0.8); transition: all 0.3s ease; }
+        /* SMALLER AVATARS */
+        .avatar { width: 55px; height: 55px; border-radius: 50%; background: #1e293b; border: 1px solid var(--border-dim); object-fit: cover; box-shadow: 0 5px 15px rgba(0,0,0,0.8); transition: all 0.3s ease; }
         
         .nameplate { background: #000; border: 1px solid var(--border-dim); padding: 4px 10px; border-radius: 4px; font-family: 'Rajdhani', sans-serif; font-size: 0.85rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #94a3b8; }
         .player-action-text { min-height: 18px; font-family: 'Rajdhani', sans-serif; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 2px 8px; border-radius: 2px; display: flex; align-items: center; justify-content: center; white-space: nowrap;}
@@ -63,37 +65,38 @@
         .dealer-button { position: absolute; width: 24px; height: 24px; border-radius: 50%; background: transparent; color: white; border: 1px solid white; font-family: 'Rajdhani', sans-serif; font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 12px; z-index: 15; top: -10px; right: -20px; backdrop-filter: blur(5px); }
 
         .table-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 20px; z-index: 5; }
-        .main-pot { display: flex; align-items: center; gap: 10px; background: transparent; padding: 5px 15px; border-radius: 4px; border: 1px solid var(--neon-gold); box-shadow: 0 0 15px rgba(255, 215, 0, 0.1); }
+        .main-pot { display: flex; align-items: center; gap: 10px; background: transparent; padding: 5px 15px; border-radius: 4px; border: 1px solid var(--neon-gold); background: rgba(0,0,0,0.4); box-shadow: 0 0 15px rgba(255, 215, 0, 0.1); }
         .pot-amount { font-family: 'Rajdhani', sans-serif; font-size: 1.8rem; font-weight: 700; color: var(--neon-gold); text-shadow: 0 0 10px rgba(255, 215, 0, 0.3); letter-spacing: 1px; }
         
-        .community-cards { display: flex; gap: 8px; min-height: 100px; }
+        .community-cards { display: flex; gap: 8px; min-height: 120px; }
 
-        /* BLACK NEON PLAYING CARDS */
+        /* LARGER, CLEANER BLACK NEON CARDS */
         .css-card { 
-            width: 65px; height: 95px; background: #050505; border: 2px solid var(--neon-cyan); border-radius: 6px; 
+            width: 75px; height: 110px; background: #050505; border: 1px solid rgba(0, 243, 255, 0.3); border-radius: 8px; 
             position: relative; display: flex; justify-content: center; align-items: center; 
-            box-shadow: 0 0 15px rgba(0, 243, 255, 0.3), inset 0 0 15px rgba(0, 243, 255, 0.2); 
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.8); /* Removed heavy cyan glow for cleaner look */
             opacity: 0; transform: translateY(-20px); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
         }
         .css-card.dealt { opacity: 1; transform: translateY(0); }
-        .css-card.facedown { background: #050505; border-color: #334155; box-shadow: none; }
+        .css-card.facedown { background: repeating-linear-gradient(45deg, #0f172a, #0f172a 5px, #1e293b 5px, #1e293b 10px); border-color: #334155; }
         
-        .card-corner { position: absolute; display: flex; flex-direction: column; align-items: center; line-height: 1; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 0.9rem; letter-spacing: -1px; }
-        .card-corner.top-left { top: 4px; left: 4px; }
-        .card-corner.bottom-right { bottom: 4px; right: 4px; transform: rotate(180deg); }
-        .card-center { font-size: 2.2rem; line-height: 1; filter: drop-shadow(0 0 8px currentColor); }
+        .card-corner { position: absolute; display: flex; flex-direction: column; align-items: center; line-height: 1; font-family: 'Inter', sans-serif; font-weight: 900; font-size: 1.1rem; letter-spacing: -1px; }
+        .card-corner.top-left { top: 6px; left: 6px; }
+        .card-corner.bottom-right { bottom: 6px; right: 6px; transform: rotate(180deg); }
+        .card-center { font-size: 2.8rem; line-height: 1; }
 
-        .suit-hearts, .suit-diamonds { color: var(--neon-red); text-shadow: 0 0 6px var(--neon-red); } 
-        .suit-spades, .suit-clubs { color: var(--neon-cyan); text-shadow: 0 0 6px var(--neon-cyan); } 
+        /* Tighter text shadow for better legibility */
+        .suit-hearts, .suit-diamonds { color: var(--neon-red); text-shadow: 0 0 3px var(--neon-red); } 
+        .suit-spades, .suit-clubs { color: var(--neon-cyan); text-shadow: 0 0 3px var(--neon-cyan); } 
 
-        .opp-hand { position: absolute; display: flex; top: 15px; left: 60px; z-index: -1; }
-        .opp-hand .css-card { width: 35px; height: 50px; border-width: 1px; }
-        .opp-hand .css-card:nth-child(2) { margin-left: -15px; } 
+        .opp-hand { position: absolute; display: flex; top: 10px; left: 55px; z-index: -1; }
+        .opp-hand .css-card { width: 45px; height: 65px; border-width: 1px; }
+        .opp-hand .css-card:nth-child(2) { margin-left: -20px; } 
 
-        .player-hand { position: absolute; display: flex; gap: 5px; top: -15px; left: 60px; z-index: 20; min-height: 60px; }
-        .player-hand .css-card { width: 50px; height: 75px; border-width: 1px; }
-        .player-hand .css-card .card-center { font-size: 1.8rem; }
-        .player-hand .css-card .card-corner { font-size: 0.75rem; }
+        .player-hand { position: absolute; display: flex; gap: 5px; top: -15px; left: 55px; z-index: 20; min-height: 60px; }
+        .player-hand .css-card { width: 60px; height: 90px; border-width: 1px; }
+        .player-hand .css-card .card-center { font-size: 2.2rem; }
+        .player-hand .css-card .card-corner { font-size: 0.85rem; }
 
         /* MINIMALIST CONTROL PANEL */
         #controls { display: flex; justify-content: space-between; align-items: stretch; gap: 20px; background: #0c0c0e; padding: 20px 30px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); width: 100%; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
@@ -270,6 +273,7 @@
         </div>
     </div>
 
+    <!-- DOUBLE OR NOTHING ROULETTE MODAL -->
     <div id="payout-modal">
         <div class="modal-box">
             <div id="recap-view" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
@@ -488,6 +492,7 @@
                     }
                 }
             });
+
             try {
                 let validCommCardsStr = communityCards.slice(0, 5).filter(c => c && c.rank && c.suit).map(c => c.rank + c.suit.toLowerCase());
                 activePlayers.forEach(p => {
