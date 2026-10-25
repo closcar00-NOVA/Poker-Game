@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VEGAS PRO - Cyber Edition</title>
-    <!-- Added Montserrat for ultra-thin typography -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300&family=Rajdhani:wght@400;600;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300;600&family=Rajdhani:wght@400;600;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pokersolver/2.1.4/pokersolver.min.js"></script>
     <style>
         :root { 
@@ -20,7 +19,6 @@
         
         *, *::before, *::after { box-sizing: border-box; }
         
-        /* RESTORED: env_background.png with a dark overlay for text legibility */
         body { 
             margin: 0; padding: 20px; 
             background: radial-gradient(circle at center, rgba(17, 24, 39, 0.75) 0%, rgba(5, 5, 5, 0.95) 100%), url('env_background.png') no-repeat center center fixed; 
@@ -31,7 +29,6 @@
             min-height: 100vh; overflow-x: hidden; user-select: none; 
         }
 
-        /* SOUND TOGGLE BUTTON */
         #sound-toggle {
             position: fixed; top: 20px; right: 20px; z-index: 1000;
             background: rgba(0,0,0,0.6); border: 1px solid var(--border-dim); border-radius: 4px;
@@ -118,9 +115,8 @@
         .stat-box { display: flex; flex-direction: column; align-items: center; justify-content: center; background: transparent; padding: 0 20px; flex: 1; border-right: 1px solid var(--border-dim); }
         #controls .stat-box:last-child { border-right: none; }
         
-        /* UPDATED: Montserrat Thin Typography for Labels */
         .stat-label { font-family: 'Montserrat', sans-serif; font-weight: 300; font-size: 0.75rem; color: #94a3b8; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 8px; }
-        .stat-value { font-family: 'Inter', sans-serif; text-align: center; font-size: 1.4rem; font-weight: 500; color: white; letter-spacing: 2px; }
+        .stat-value { font-family: 'Montserrat', sans-serif; text-align: center; font-size: 1.4rem; font-weight: 600; color: white; letter-spacing: 1px; }
         
         .action-group { display: flex; gap: 15px; flex: 2.5; padding: 0 25px; border-right: 1px solid var(--border-dim); align-items: center; justify-content: center; }
         
@@ -128,7 +124,7 @@
         .poker-btn:disabled { opacity: 0.25; cursor: not-allowed; border-color: #334155 !important; color: #64748b !important; box-shadow: none !important; }
         
         .btn-fold { border: 1px solid var(--neon-red); color: var(--neon-red); }
-        .btn-fold:hover:not(:disabled) { box-shadow: 0 0 15px rgba(255, 0, 60, 0.3), inset 0 0 10px rgba(255, 0, 60, 0.2); }
+        .btn-fold:hover:not(:disabled) { box-shadow: 0 0 15px rgba(255, 51, 102, 0.3), inset 0 0 10px rgba(255, 51, 102, 0.2); }
         
         .btn-call { border: 1px solid var(--neon-cyan); color: var(--neon-cyan); }
         .btn-call:hover:not(:disabled) { box-shadow: 0 0 15px rgba(0, 243, 255, 0.3), inset 0 0 10px rgba(0, 243, 255, 0.2); }
@@ -159,9 +155,9 @@
 
         .ledger-row { display: grid; grid-template-columns: 2fr 1.5fr 2fr; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.8rem; }
         .ledger-row:last-child { border-bottom: none; padding-bottom: 0; }
-        .l-name { font-weight: 600; color: white; letter-spacing: 0.5px; }
-        .l-state { font-family: 'Montserrat', sans-serif; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; font-size: 0.75rem; text-align: center; }
-        .l-bank { text-align: right; color: var(--neon-gold); font-family: 'Montserrat', sans-serif; font-weight: 600; letter-spacing: 3px;}
+        .l-name { font-weight: 600; color: white; letter-spacing: 0.5px; font-family: 'Montserrat', sans-serif;}
+        .l-state { font-family: 'Montserrat', sans-serif; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; font-size: 0.75rem; text-align: center; }
+        .l-bank { text-align: right; color: var(--neon-gold); font-family: 'Montserrat', sans-serif; font-weight: 600; letter-spacing: 1px;}
         
         .state-folded { color: var(--neon-red); }
         .state-raised { color: var(--neon-green); }
@@ -169,7 +165,6 @@
         .state-waiting { color: #64748b; }
         .state-winner { color: var(--neon-gold); text-shadow: 0 0 5px rgba(254, 209, 1, 0.5); }
 
-        /* BONUS ROULETTE MODAL */
         #payout-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 5, 5, 0.95); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(10px); }
         .modal-box { background: var(--panel-bg); border: 1px solid var(--neon-cyan); border-radius: 8px; padding: 50px 80px; width: 600px; text-align: center; display: flex; flex-direction: column; align-items: center; box-shadow: 0 0 40px rgba(0, 243, 255, 0.1); }
         .modal-title { font-family: 'Rajdhani', sans-serif; font-size: 1.2rem; color: #94a3b8; letter-spacing: 6px; margin-bottom: 10px; text-transform: uppercase; }
@@ -331,16 +326,11 @@
         };
         Object.values(sfx).forEach(s => s.volume = 0.5);
 
-        // SOUND TOGGLE LOGIC
         let soundEnabled = true;
         document.getElementById('sound-toggle').addEventListener('click', (e) => {
             soundEnabled = !soundEnabled;
             e.target.innerText = soundEnabled ? "SOUND: ON" : "SOUND: OFF";
-            if(soundEnabled) {
-                e.target.classList.remove('muted');
-            } else {
-                e.target.classList.add('muted');
-            }
+            if(soundEnabled) { e.target.classList.remove('muted'); } else { e.target.classList.add('muted'); }
         });
 
         function playSound(soundName) { 
@@ -498,7 +488,7 @@
                 document.getElementById('recap-amount').innerText = `+${formatMoney(amount)}`;
                 document.getElementById('recap-winner').style.color = (winnerID === 'YOU') ? 'var(--neon-green)' : 'var(--neon-gold)';
             }
-            if (currentWinAmount > 0) { document.getElementById('btn-double').style.display = 'block'; document.getElementById('btn-next-hand').innerText = 'COLLECT'; } 
+            if (currentWinAmount > 0 && winnerID === 'YOU') { document.getElementById('btn-double').style.display = 'block'; document.getElementById('btn-next-hand').innerText = 'COLLECT'; } 
             else { document.getElementById('btn-double').style.display = 'none'; document.getElementById('btn-next-hand').innerText = 'START NEXT HAND'; }
             updateUI(); setTimeout(() => { document.getElementById('payout-modal').style.display = 'flex'; }, 2000);
         }
@@ -533,8 +523,11 @@
                 
                 let solvedHands = activePlayers.map(p => playerStates[p].solved).filter(h => h !== undefined);
                 if (solvedHands.length === 0) throw new Error("No hands to evaluate");
+                
                 let winningHands = Hand.winners(solvedHands);
-                let winners = activePlayers.filter(p => playerStates[p].solved && winningHands.includes(playerStates[p].solved));
+                
+                // BULLETPROOF: Using .some() to strictly match description instead of exact object reference
+                let winners = activePlayers.filter(p => playerStates[p].solved && winningHands.some(wh => wh.name === playerStates[p].solved.name && wh.descr === playerStates[p].solved.descr));
                 if (winners.length === 0) winners = [activePlayers[0]]; 
                 winners.forEach(w => playerStates[w].lastAction = 'WINNER');
                 
@@ -547,7 +540,23 @@
                     if (winnerID === 'YOU') { currentWinAmount = pot; bankroll += currentWinAmount; playSound('win'); } else { currentWinAmount = 0; }
                     triggerPayoutModal(winnerID, winningHands[0].name, pot, false);
                 }
-            } catch (error) { console.error("Solver Error Caught:", error); currentWinAmount = pot; bankroll += currentWinAmount; playSound('win'); triggerPayoutModal('YOU', "DEFAULT WIN", pot, false); }
+            } catch (error) { 
+                console.error("Solver Error Caught:", error); 
+                
+                // BULLETPROOF FALLBACK: Strictly find remaining active players and award them, never default to YOU if folded
+                let fallbackWinners = activePlayers;
+                if(fallbackWinners.length === 0) fallbackWinners = [AI_PLAYERS[0]];
+                
+                if (fallbackWinners.length > 1) {
+                    let splitAmount = Math.floor(pot / fallbackWinners.length);
+                    if (fallbackWinners.includes('YOU')) { currentWinAmount = splitAmount; bankroll += currentWinAmount; playSound('win'); } else { currentWinAmount = 0; }
+                    triggerPayoutModal('SPLIT', "ENGINE OVERRIDE", splitAmount, true);
+                } else {
+                    let winnerID = fallbackWinners[0];
+                    if (winnerID === 'YOU') { currentWinAmount = pot; bankroll += currentWinAmount; playSound('win'); } else { currentWinAmount = 0; }
+                    triggerPayoutModal(winnerID, "DEFAULT WIN", pot, false);
+                }
+            }
         }
 
         async function dealCommunityCardsAnimation(cardsToDeal) {
