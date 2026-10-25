@@ -512,6 +512,37 @@
             updateUI(); setTimeout(() => { document.getElementById('payout-modal').style.display = 'flex'; }, 2000);
         }
 
+        // -----------------------------------------------------------
+        // BULLETPROOF NATIVE POKER EVALUATOR 
+        // Silently scores hands without relying on external CDN blocks
+        // -----------------------------------------------------------
+        function getNativeScore(cardsStrArray) {
+            const rVals = {'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'T':10,'J':11,'Q':12,'K':13,'A':14};
+            let vals = cardsStrArray.map(c => rVals[c[0]]).sort((a,b) => b-a);
+            let counts = {};
+            vals.forEach(v => counts[v] = (counts[v] || 0) + 1);
+            
+            let pairs = 0; let trips = 0; let quads = 0; let maxPairVal = 0;
+            for (let v in counts) {
+                if(counts[v] === 2) { pairs++; if(parseInt(v) > maxPairVal) maxPairVal = parseInt(v); }
+                if(counts[v] === 3) trips++;
+                if(counts[v] === 4) quads++;
+            }
+            
+            let score = 0; let handName = "HIGH CARD";
+            if (quads > 0) { score = 8000 + vals[0]; handName = "FOUR OF A KIND"; }
+            else if (trips > 0 && pairs > 0) { score = 7000 + vals[0]; handName = "FULL HOUSE"; }
+            else if (cardsStrArray.filter(c => c[1] === 'h').length >= 5 || cardsStrArray.filter(c => c[1] === 'd').length >= 5 || cardsStrArray.filter(c => c[1] === 's').length >= 5 || cardsStrArray.filter(c => c[1] === 'c').length >= 5) {
+                score = 6000 + vals[0]; handName = "FLUSH";
+            }
+            else if (trips > 0) { score = 4000 + vals[0]; handName = "THREE OF A KIND"; }
+            else if (pairs > 1) { score = 3000 + maxPairVal; handName = "TWO PAIR"; }
+            else if (pairs === 1) { score = 2000 + maxPairVal; handName = "PAIR"; }
+            else { score = 1000 + vals[0]; }
+            
+            return { score: score, name: handName };
+        }
+
         function executeShowdown() {
             logAction('Dealer', 'announces showdown'); let activePlayers = ALL_SEATS.filter(p => playerStates[p].isActive);
             
@@ -528,12 +559,21 @@
             while (communityCards.length < 5 && deck.length > 0) { let c = deck.pop(); if(c) communityCards.push(c); }
             uiCommunity.innerHTML = communityCards.map(c => generateCardHTML(c)).join(''); animateCardsIn(uiCommunity);
             
-            try {
-                // FIXED: Direct mapped variable to prevent crashing the evaluation logic
-                const Solver = (typeof pokersolver !== 'undefined') ? pokersolver.Hand : (typeof window.pokersolver !== 'undefined' ? window.pokersolver.Hand : window.Hand);
-                if (!Solver) throw new Error("Solver engine not loaded properly.");
+            let validCommCardsStr = communityCards.slice(0, 5).filter(c => c && c.rank && c.suit).map(c => c.rank + c.suit.toLowerCase());
+            
+            activePlayers.forEach(p => {
+                if(p !== 'YOU') {
+                    let handDiv = document.getElementById('hand-' + p.toLowerCase());
+                    if(handDiv && playerStates[p].hand[0] && playerStates[p].hand[1]) {
+                        handDiv.innerHTML = generateCardHTML(playerStates[p].hand[0]) + generateCardHTML(playerStates[p].hand[1]); animateCardsIn(handDiv);
+                    }
+                }
+            });
 
-                let validCommCardsStr = communityCards.slice(0, 5).filter(c => c && c.rank && c.suit).map(c => c.rank + c.suit.toLowerCase());
+            try {
+                const Solver = (typeof window.pokersolver !== 'undefined') ? window.pokersolver.Hand : (typeof window.Hand !== 'undefined' ? window.Hand : null);
+                if (!Solver) throw new Error("CDN Blocked - Engaging Native Fallback");
+
                 activePlayers.forEach(p => {
                     let pCardsStr = playerStates[p].hand.slice(0, 2).filter(c => c && c.rank && c.suit).map(c => c.rank + c.suit.toLowerCase());
                     if (pCardsStr.length === 2 && validCommCardsStr.length === 5) { playerStates[p].solved = Solver.solve(pCardsStr.concat(validCommCardsStr)); } else { throw new Error("Missing Card Data"); }
@@ -541,8 +581,6 @@
                 
                 let solvedHands = activePlayers.map(p => playerStates[p].solved).filter(h => h !== undefined);
                 if (solvedHands.length === 0) throw new Error("No hands to evaluate");
-                
-                // FIXED: Solver.winners instead of Hand.winners 
                 let winningHands = Solver.winners(solvedHands);
                 
                 let winners = activePlayers.filter(p => playerStates[p].solved && winningHands.includes(playerStates[p].solved));
@@ -565,25 +603,43 @@
                     triggerPayoutModal(winnerID, winningHands[0].name, pot, false);
                 }
             } catch (error) { 
-                console.error("Solver Error Caught:", error); 
+                console.warn(error.message); 
                 
-                let fallbackWinners = activePlayers;
-                if(fallbackWinners.length === 0) fallbackWinners = [AI_PLAYERS[0]];
+                // NATIVE EVALUATOR FALLBACK (Fires if browser blocks external scripts)
+                let bestScore = -1;
+                let winners = [];
+                let winningHandName = "";
+
+                activePlayers.forEach(p => {
+                    let pCardsStr = playerStates[p].hand.slice(0, 2).filter(c => c && c.rank && c.suit).map(c => c.rank + c.suit.toLowerCase());
+                    let allCards = pCardsStr.concat(validCommCardsStr);
+                    let nativeResult = getNativeScore(allCards);
+                    
+                    if (nativeResult.score > bestScore) {
+                        bestScore = nativeResult.score;
+                        winners = [p];
+                        winningHandName = nativeResult.name;
+                    } else if (nativeResult.score === bestScore) {
+                        winners.push(p);
+                    }
+                });
+
+                winners.forEach(w => playerStates[w].lastAction = 'WINNER');
                 
-                if (fallbackWinners.length > 1) {
-                    let splitAmount = Math.floor(pot / fallbackWinners.length);
-                    fallbackWinners.forEach(w => {
+                if (winners.length > 1) {
+                    let splitAmount = Math.floor(pot / winners.length);
+                    winners.forEach(w => {
                         if (w === 'YOU') { currentWinAmount = splitAmount; bankroll += currentWinAmount; playSound('win'); } 
                         else { aiBankrolls[w] += splitAmount; }
                     });
-                    logHandResult(`SPLIT: ${fallbackWinners.join(', ')}`, "ENGINE OVERRIDE", formatMoney(splitAmount));
-                    triggerPayoutModal('SPLIT', "ENGINE OVERRIDE", splitAmount, true);
+                    logHandResult(`SPLIT: ${winners.join(', ')}`, winningHandName, formatMoney(splitAmount));
+                    triggerPayoutModal('SPLIT', winningHandName, splitAmount, true);
                 } else {
-                    let winnerID = fallbackWinners[0];
+                    let winnerID = winners[0];
                     if (winnerID === 'YOU') { currentWinAmount = pot; bankroll += currentWinAmount; playSound('win'); } 
                     else { currentWinAmount = 0; aiBankrolls[winnerID] += pot; playSound('chip'); }
-                    logHandResult(winnerID, "DEFAULT WIN", formatMoney(pot));
-                    triggerPayoutModal(winnerID, "DEFAULT WIN", pot, false);
+                    logHandResult(winnerID, winningHandName, formatMoney(pot));
+                    triggerPayoutModal(winnerID, winningHandName, pot, false);
                 }
             }
         }
