@@ -143,7 +143,6 @@
         .dash-stats { display: flex; justify-content: space-between; font-family: 'Nunito', sans-serif; font-size: 0.6rem; letter-spacing: 1px; color: #94a3b8; margin-bottom: 15px; border-bottom: 1px solid var(--border-dim); padding-bottom: 10px; text-transform: uppercase; }
         .dash-stats span { color: var(--neon-cyan); font-weight: 600; }
         
-        /* UPDATED: Increased log height by ~50% (120px to 180px) */
         .log-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; font-size: 0.75rem; height: 180px; overflow-y: auto; padding-right: 10px; }
         .log-list::-webkit-scrollbar { width: 2px; }
         .log-list::-webkit-scrollbar-track { background: transparent; }
@@ -416,7 +415,6 @@
             uiLog.prepend(li); updatePlayerStatuses();
         }
 
-        // NEW: Dedicated hand result logger inside Game Dash
         function logHandResult(winnerText, handName, amountStr) {
             const li = document.createElement('li'); 
             li.className = 'log-item';
@@ -529,18 +527,11 @@
             }
             while (communityCards.length < 5 && deck.length > 0) { let c = deck.pop(); if(c) communityCards.push(c); }
             uiCommunity.innerHTML = communityCards.map(c => generateCardHTML(c)).join(''); animateCardsIn(uiCommunity);
-            let commCardsStr = communityCards.filter(c => c).map(c => c.rank + c.suit.toLowerCase());
             
-            activePlayers.forEach(p => {
-                if(p !== 'YOU') {
-                    let handDiv = document.getElementById('hand-' + p.toLowerCase());
-                    if(handDiv && playerStates[p].hand[0] && playerStates[p].hand[1]) {
-                        handDiv.innerHTML = generateCardHTML(playerStates[p].hand[0]) + generateCardHTML(playerStates[p].hand[1]); animateCardsIn(handDiv);
-                    }
-                }
-            });
-
             try {
+                // BUG FIX: Directly reference the window namespace for the pokersolver library 
+                const Hand = window.pokersolver.Hand;
+
                 let validCommCardsStr = communityCards.slice(0, 5).filter(c => c && c.rank && c.suit).map(c => c.rank + c.suit.toLowerCase());
                 activePlayers.forEach(p => {
                     let pCardsStr = playerStates[p].hand.slice(0, 2).filter(c => c && c.rank && c.suit).map(c => c.rank + c.suit.toLowerCase());
@@ -550,7 +541,8 @@
                 let solvedHands = activePlayers.map(p => playerStates[p].solved).filter(h => h !== undefined);
                 if (solvedHands.length === 0) throw new Error("No hands to evaluate");
                 let winningHands = Hand.winners(solvedHands);
-                let winners = activePlayers.filter(p => playerStates[p].solved && winningHands.some(wh => wh.name === playerStates[p].solved.name && wh.descr === playerStates[p].solved.descr));
+                
+                let winners = activePlayers.filter(p => playerStates[p].solved && winningHands.includes(playerStates[p].solved));
                 if (winners.length === 0) winners = [activePlayers[0]]; 
                 winners.forEach(w => playerStates[w].lastAction = 'WINNER');
                 
@@ -571,6 +563,7 @@
                 }
             } catch (error) { 
                 console.error("Solver Error Caught:", error); 
+                
                 let fallbackWinners = activePlayers;
                 if(fallbackWinners.length === 0) fallbackWinners = [AI_PLAYERS[0]];
                 
