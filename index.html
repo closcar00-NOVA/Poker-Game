@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VEGAS PRO - Cyber Edition</title>
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Added Montserrat for ultra-thin typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300&family=Rajdhani:wght@400;600;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pokersolver/2.1.4/pokersolver.min.js"></script>
     <style>
         :root { 
@@ -19,20 +20,30 @@
         
         *, *::before, *::after { box-sizing: border-box; }
         
+        /* RESTORED: env_background.png with a dark overlay for text legibility */
         body { 
             margin: 0; padding: 20px; 
-            background: var(--dark-bg);
-            background-image: radial-gradient(circle at center, #111827 0%, var(--dark-bg) 100%);
+            background: radial-gradient(circle at center, rgba(17, 24, 39, 0.75) 0%, rgba(5, 5, 5, 0.95) 100%), url('env_background.png') no-repeat center center fixed; 
+            background-size: cover;
             color: white; 
             font-family: 'Inter', sans-serif; 
             display: flex; align-items: flex-start; justify-content: center; 
             min-height: 100vh; overflow-x: hidden; user-select: none; 
         }
 
+        /* SOUND TOGGLE BUTTON */
+        #sound-toggle {
+            position: fixed; top: 20px; right: 20px; z-index: 1000;
+            background: rgba(0,0,0,0.6); border: 1px solid var(--border-dim); border-radius: 4px;
+            padding: 6px 12px; font-family: 'Rajdhani', sans-serif; font-size: 0.85rem; font-weight: 600; letter-spacing: 2px;
+            color: var(--neon-cyan); cursor: pointer; backdrop-filter: blur(5px); transition: 0.2s;
+        }
+        #sound-toggle:hover { border-color: var(--neon-cyan); }
+        #sound-toggle.muted { color: #64748b; border-color: var(--border-dim); }
+
         .master-layout { display: flex; gap: 40px; width: 100%; max-width: 1400px; margin-top: 3vh; align-items: stretch; justify-content: center; }
         .main-game-area { display: flex; flex-direction: column; align-items: center; gap: 60px; flex: 1; max-width: 950px; }
 
-        /* THE IMAGE-BASED TABLE */
         .poker-table {
             position: relative; width: 100%; height: 450px; 
             background: transparent url('table_felt.png') no-repeat center center; 
@@ -68,26 +79,22 @@
         
         .community-cards { display: flex; gap: 10px; min-height: 125px; }
 
-        /* CLASSIC VINTAGE PLAYING CARDS */
         .css-card { 
             width: 85px; height: 125px; 
-            background: #fdf5e6; /* Old parchment base */
+            background: #fdf5e6;
             background-image: radial-gradient(circle at center, #fffcf5 0%, #e8dcc7 100%);
             border: 1px solid #b8a892; border-radius: 6px; 
             position: relative; display: flex; justify-content: center; align-items: center; 
-            box-shadow: 2px 4px 10px rgba(0,0,0,0.5), inset 0 0 15px rgba(139, 69, 19, 0.15); /* Physical shadow + aged inner edge */
+            box-shadow: 2px 4px 10px rgba(0,0,0,0.5), inset 0 0 15px rgba(139, 69, 19, 0.15);
             opacity: 0; transform: translateY(-20px); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
             color: #1a1a1a;
         }
         .css-card.dealt { opacity: 1; transform: translateY(0); }
         
-        /* Vintage Burgundy Card Backs */
         .css-card.facedown { 
             background: #8b0000; 
             background-image: repeating-linear-gradient(45deg, #721c24, #721c24 5px, #8b0000 5px, #8b0000 10px); 
-            border-color: #4a0c13; 
-            box-shadow: 2px 4px 10px rgba(0,0,0,0.5); 
-            color: transparent; 
+            border-color: #4a0c13; box-shadow: 2px 4px 10px rgba(0,0,0,0.5); color: transparent; 
         }
         
         .card-corner { position: absolute; display: flex; flex-direction: column; align-items: center; line-height: 1; font-family: 'Georgia', serif; font-weight: bold; font-size: 1.1rem; letter-spacing: -1px; }
@@ -95,7 +102,6 @@
         .card-corner.bottom-right { bottom: 6px; right: 6px; transform: rotate(180deg); }
         .card-center { font-size: 3rem; line-height: 1; font-weight: normal; font-family: 'Georgia', serif; }
 
-        /* Classic Muted Ink Colors (No Glow) */
         .suit-hearts, .suit-diamonds { color: #b91c1c; text-shadow: none; } 
         .suit-spades, .suit-clubs { color: #1a1a1a; text-shadow: none; } 
 
@@ -108,12 +114,12 @@
         .player-hand .css-card .card-center { font-size: 2.5rem; }
         .player-hand .css-card .card-corner { font-size: 0.9rem; }
 
-        /* MINIMALIST CONTROL PANEL */
         #controls { display: flex; justify-content: space-between; align-items: stretch; gap: 20px; background: #0c0c0e; padding: 20px 30px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); width: 100%; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
         .stat-box { display: flex; flex-direction: column; align-items: center; justify-content: center; background: transparent; padding: 0 20px; flex: 1; border-right: 1px solid var(--border-dim); }
         #controls .stat-box:last-child { border-right: none; }
         
-        .stat-label { font-family: 'Inter', sans-serif; font-size: 0.65rem; color: #64748b; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 8px; }
+        /* UPDATED: Montserrat Thin Typography for Labels */
+        .stat-label { font-family: 'Montserrat', sans-serif; font-weight: 300; font-size: 0.75rem; color: #94a3b8; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 8px; }
         .stat-value { font-family: 'Inter', sans-serif; text-align: center; font-size: 1.7rem; font-weight: 700; color: white; letter-spacing: 1px; }
         
         .action-group { display: flex; gap: 15px; flex: 2.5; padding: 0 25px; border-right: 1px solid var(--border-dim); align-items: center; justify-content: center; }
@@ -134,7 +140,6 @@
         .bet-btn { background: transparent; border: 1px solid #475569; color: white; width: 32px; height: 32px; border-radius: 6px; font-size: 1.2rem; font-family: 'Inter', sans-serif; cursor: pointer; display: flex; align-items: center; justify-content: center; user-select: none; transition: 0.2s; }
         .bet-btn:hover:not(:disabled) { border-color: white; }
 
-        /* MINIMALIST SIDEBAR */
         .sidebar { display: flex; flex-direction: column; gap: 20px; width: 320px; flex-shrink: 0; }
         .side-panel { background: var(--panel-bg); border: 1px solid var(--border-dim); border-radius: 6px; padding: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .panel-header { font-family: 'Rajdhani', sans-serif; color: white; font-size: 0.9rem; font-weight: 600; margin: 0 0 12px 0; border-bottom: 1px solid var(--border-dim); padding-bottom: 8px; letter-spacing: 3px; text-transform: uppercase; }
@@ -158,7 +163,7 @@
         .l-state { font-family: 'Rajdhani', sans-serif; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; font-size: 0.75rem; text-align: center; }
         .l-bank { text-align: right; color: var(--neon-gold); font-family: 'Rajdhani', sans-serif; font-weight: 600; letter-spacing: 1px;}
         
-        .state-folded { color: #ef4444; }
+        .state-folded { color: var(--neon-red); }
         .state-raised { color: var(--neon-green); }
         .state-called { color: var(--neon-cyan); }
         .state-waiting { color: #64748b; }
@@ -181,6 +186,8 @@
     </style>
 </head>
 <body>
+    
+    <div id="sound-toggle">SOUND: ON</div>
 
     <div class="master-layout">
         <div class="main-game-area">
@@ -324,7 +331,22 @@
         };
         Object.values(sfx).forEach(s => s.volume = 0.5);
 
-        function playSound(soundName) { try { let s = sfx[soundName].cloneNode(); s.volume = sfx[soundName].volume; s.play().catch(e => {}); } catch(e) {} }
+        // SOUND TOGGLE LOGIC
+        let soundEnabled = true;
+        document.getElementById('sound-toggle').addEventListener('click', (e) => {
+            soundEnabled = !soundEnabled;
+            e.target.innerText = soundEnabled ? "SOUND: ON" : "SOUND: OFF";
+            if(soundEnabled) {
+                e.target.classList.remove('muted');
+            } else {
+                e.target.classList.add('muted');
+            }
+        });
+
+        function playSound(soundName) { 
+            if(!soundEnabled) return;
+            try { let s = sfx[soundName].cloneNode(); s.volume = sfx[soundName].volume; s.play().catch(e => {}); } catch(e) {} 
+        }
 
         let bankroll = 3256000; let pot = 0; let currentCallAmount = 2000; let customRaiseAmount = 5000;
         let gamePhase = 0; let deck = []; let communityCards = []; let isProcessing = false; let currentWinAmount = 0;
@@ -410,9 +432,8 @@
         function generateCardHTML(card, isFacedown = false) {
             if (isFacedown || !card) return `<div class="css-card facedown"></div>`;
             const displayRank = card.rank === 'T' ? '10' : card.rank;
-            let suitClass = (card.suit === 'H' || card.suit === 'D') ? 'suit-hearts' : 'suit-spades';
             return `
-                <div class="css-card ${suitClass}">
+                <div class="css-card ${card.suit === 'H' || card.suit === 'D' ? 'suit-hearts' : 'suit-spades'}">
                     <div class="card-corner top-left"><span>${displayRank}</span><span>${SUITS[card.suit]}</span></div>
                     <div class="card-center">${SUITS[card.suit]}</div>
                     <div class="card-corner bottom-right"><span>${displayRank}</span><span>${SUITS[card.suit]}</span></div>
