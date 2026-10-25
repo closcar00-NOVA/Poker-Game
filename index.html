@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VEGAS PRO - Cyber Edition</title>
-    <!-- Added Nunito to support your custom dash-stats font -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300;500;600&family=Nunito:wght@400;600&family=Rajdhani:wght@400;600;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pokersolver/2.1.4/pokersolver.min.js"></script>
     <style>
@@ -144,11 +143,12 @@
         .dash-stats { display: flex; justify-content: space-between; font-family: 'Nunito', sans-serif; font-size: 0.6rem; letter-spacing: 1px; color: #94a3b8; margin-bottom: 15px; border-bottom: 1px solid var(--border-dim); padding-bottom: 10px; text-transform: uppercase; }
         .dash-stats span { color: var(--neon-cyan); font-weight: 600; }
         
-        .log-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; font-size: 0.75rem; height: 120px; overflow-y: auto; padding-right: 10px; }
+        /* UPDATED: Increased log height by ~50% (120px to 180px) */
+        .log-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; font-size: 0.75rem; height: 180px; overflow-y: auto; padding-right: 10px; }
         .log-list::-webkit-scrollbar { width: 2px; }
         .log-list::-webkit-scrollbar-track { background: transparent; }
         .log-list::-webkit-scrollbar-thumb { background: var(--border-dim); }
-        .log-item { display: flex; justify-content: space-between; color: #64748b; line-height: 1.4; border-bottom: 1px dashed rgba(255,255,255,0.05); padding-bottom: 4px; }
+        .log-item { display: flex; justify-content: space-between; align-items: center; color: #64748b; line-height: 1.4; border-bottom: 1px dashed rgba(255,255,255,0.05); padding-bottom: 4px; }
         .log-item strong { color: white; font-weight: 500; }
         .log-action.raise { color: var(--neon-green); }
         .log-action.call { color: var(--neon-cyan); }
@@ -339,7 +339,6 @@
             try { let s = sfx[soundName].cloneNode(); s.volume = sfx[soundName].volume; s.play().catch(e => {}); } catch(e) {} 
         }
 
-        // --- NEW DYNAMIC AI BANKROLLS ---
         let bankroll = 3256000; 
         let aiBankrolls = { 'PRO': 150000, 'HUSTLER': 125000, 'GAMBIT': 95000, 'WILD': 80000, 'SHARK': 45000, 'ROCK': 12000 };
         
@@ -399,7 +398,6 @@
                 else if(state === 'CALLED' || state === 'CALL' || state === 'ALL IN') stateClass = 'state-called';
                 else if(state === 'WINNER') stateClass = 'state-winner';
                 
-                // FIXED: Pull from live aiBankrolls instead of static starting array
                 let pBank = p === 'YOU' ? bankroll : aiBankrolls[p];
                 html += `<div class="ledger-row"><span class="l-name">${p}</span><span class="l-state ${stateClass}">${state}</span><span class="l-bank">${formatMoney(pBank)}</span></div>`;
             });
@@ -416,6 +414,15 @@
                 if (playerStates[player]) playerStates[player].lastAction = action.toUpperCase();
             }
             uiLog.prepend(li); updatePlayerStatuses();
+        }
+
+        // NEW: Dedicated hand result logger inside Game Dash
+        function logHandResult(winnerText, handName, amountStr) {
+            const li = document.createElement('li'); 
+            li.className = 'log-item';
+            li.style.borderBottom = '1px dashed var(--neon-gold)';
+            li.innerHTML = `<span style="color: var(--neon-gold);"><strong>${winnerText}</strong> +${amountStr}</span><span style="color: var(--neon-cyan); font-size: 0.65rem; text-transform: uppercase;">${handName}</span>`;
+            uiLog.prepend(li);
         }
 
         function createDeck() {
@@ -466,7 +473,6 @@
             document.getElementById('btn-double').style.display = 'none'; document.getElementById('btn-next-hand').innerText = 'START NEXT HAND';
             currentWinAmount = 0;
 
-            // Remove bankrupt players from the table
             ALL_SEATS.forEach(p => {
                 if(p !== 'YOU' && aiBankrolls[p] <= 0) {
                     playerStates[p] = { isActive: false, hand: [], lastAction: 'BUSTED' };
@@ -518,6 +524,7 @@
                 } else { 
                     currentWinAmount = 0; aiBankrolls[winnerID] += pot; playSound('chip'); 
                 }
+                logHandResult(winnerID, "OPPONENTS FOLDED", formatMoney(pot));
                 triggerPayoutModal(winnerID, "OPPONENTS FOLDED", pot, false); return;
             }
             while (communityCards.length < 5 && deck.length > 0) { let c = deck.pop(); if(c) communityCards.push(c); }
@@ -553,11 +560,13 @@
                         if (w === 'YOU') { currentWinAmount = splitAmount; bankroll += currentWinAmount; playSound('win'); } 
                         else { currentWinAmount = 0; aiBankrolls[w] += splitAmount; playSound('chip'); }
                     });
+                    logHandResult(`SPLIT: ${winners.join(', ')}`, winningHands[0].name, formatMoney(splitAmount));
                     triggerPayoutModal('SPLIT', winningHands[0].name, splitAmount, true);
                 } else {
                     let winnerID = winners[0];
                     if (winnerID === 'YOU') { currentWinAmount = pot; bankroll += currentWinAmount; playSound('win'); } 
                     else { currentWinAmount = 0; aiBankrolls[winnerID] += pot; playSound('chip'); }
+                    logHandResult(winnerID, winningHands[0].name, formatMoney(pot));
                     triggerPayoutModal(winnerID, winningHands[0].name, pot, false);
                 }
             } catch (error) { 
@@ -571,11 +580,13 @@
                         if (w === 'YOU') { currentWinAmount = splitAmount; bankroll += currentWinAmount; playSound('win'); } 
                         else { aiBankrolls[w] += splitAmount; }
                     });
+                    logHandResult(`SPLIT: ${fallbackWinners.join(', ')}`, "ENGINE OVERRIDE", formatMoney(splitAmount));
                     triggerPayoutModal('SPLIT', "ENGINE OVERRIDE", splitAmount, true);
                 } else {
                     let winnerID = fallbackWinners[0];
                     if (winnerID === 'YOU') { currentWinAmount = pot; bankroll += currentWinAmount; playSound('win'); } 
                     else { currentWinAmount = 0; aiBankrolls[winnerID] += pot; playSound('chip'); }
+                    logHandResult(winnerID, "DEFAULT WIN", formatMoney(pot));
                     triggerPayoutModal(winnerID, "DEFAULT WIN", pot, false);
                 }
             }
@@ -611,7 +622,6 @@
                     if (action === 'fold') { 
                         foldPlayer(ai); logAction(ai, 'fold'); playSound('fold'); 
                     } else { 
-                        // FIXED: Deduct from actual AI Bankroll and force All-In if funds are low
                         let amt = action === 'raise' ? currentCallAmount * 2 : currentCallAmount; 
                         if (amt > aiBankrolls[ai]) { amt = aiBankrolls[ai]; action = 'all in'; }
                         
@@ -688,11 +698,15 @@
                     document.getElementById('recap-winner').style.color = "var(--neon-green)"; document.getElementById('recap-hand').innerText = `${actualColor.toUpperCase()} WINS`;
                     document.getElementById('recap-amount').innerText = `+${formatMoney(currentWinAmount)}`;
                     document.getElementById('btn-double').style.display = 'block'; document.getElementById('btn-double').innerText = 'SPIN AGAIN'; document.getElementById('btn-next-hand').innerText = 'COLLECT';
+                    
+                    logHandResult('YOU (ROULETTE)', `${actualColor.toUpperCase()} WINS`, formatMoney(currentWinAmount));
                 } else {
                     currentWinAmount = 0; playSound('fold');
                     document.getElementById('modal-title-text').innerText = "BUSTED"; document.getElementById('recap-winner').innerText = "WHEEL MISSED";
                     document.getElementById('recap-winner').style.color = "#ef4444"; document.getElementById('recap-hand').innerText = `LANDED ON ${actualColor.toUpperCase()}`;
                     document.getElementById('recap-amount').innerText = `+$0`; document.getElementById('btn-double').style.display = 'none'; document.getElementById('btn-next-hand').innerText = 'START NEXT HAND';
+                    
+                    logHandResult('YOU (ROULETTE)', `BUSTED`, '$0');
                 }
                 updateUI();
             }, 3500); 
