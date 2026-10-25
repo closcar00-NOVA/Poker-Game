@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VEGAS PRO - Cyber Edition</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300;600&family=Rajdhani:wght@400;600;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Added Nunito to support your custom dash-stats font -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300;500;600&family=Nunito:wght@400;600&family=Rajdhani:wght@400;600;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pokersolver/2.1.4/pokersolver.min.js"></script>
     <style>
         :root { 
@@ -338,13 +339,16 @@
             try { let s = sfx[soundName].cloneNode(); s.volume = sfx[soundName].volume; s.play().catch(e => {}); } catch(e) {} 
         }
 
-        let bankroll = 3256000; let pot = 0; let currentCallAmount = 2000; let customRaiseAmount = 5000;
+        // --- NEW DYNAMIC AI BANKROLLS ---
+        let bankroll = 3256000; 
+        let aiBankrolls = { 'PRO': 150000, 'HUSTLER': 125000, 'GAMBIT': 95000, 'WILD': 80000, 'SHARK': 45000, 'ROCK': 12000 };
+        
+        let pot = 0; let currentCallAmount = 2000; let customRaiseAmount = 5000;
         let gamePhase = 0; let deck = []; let communityCards = []; let isProcessing = false; let currentWinAmount = 0;
 
         let playerStates = {};
         const AI_PLAYERS = ['PRO', 'HUSTLER', 'GAMBIT', 'WILD', 'SHARK', 'ROCK'];
         const ALL_SEATS = ['YOU', ...AI_PLAYERS];
-        const AI_STARTING_BANKS = { 'PRO': 150000, 'HUSTLER': 125000, 'GAMBIT': 95000, 'WILD': 80000, 'SHARK': 45000, 'ROCK': 12000 };
 
         ALL_SEATS.forEach(p => playerStates[p] = { isActive: true, hand: [], lastAction: 'WAITING' });
 
@@ -395,7 +399,8 @@
                 else if(state === 'CALLED' || state === 'CALL' || state === 'ALL IN') stateClass = 'state-called';
                 else if(state === 'WINNER') stateClass = 'state-winner';
                 
-                let pBank = p === 'YOU' ? bankroll : AI_STARTING_BANKS[p];
+                // FIXED: Pull from live aiBankrolls instead of static starting array
+                let pBank = p === 'YOU' ? bankroll : aiBankrolls[p];
                 html += `<div class="ledger-row"><span class="l-name">${p}</span><span class="l-state ${stateClass}">${state}</span><span class="l-bank">${formatMoney(pBank)}</span></div>`;
             });
             container.innerHTML = html;
@@ -461,20 +466,30 @@
             document.getElementById('btn-double').style.display = 'none'; document.getElementById('btn-next-hand').innerText = 'START NEXT HAND';
             currentWinAmount = 0;
 
+            // Remove bankrupt players from the table
             ALL_SEATS.forEach(p => {
-                playerStates[p] = { isActive: true, hand: [], lastAction: 'WAITING' };
-                let seat = document.getElementById('seat-' + p.toLowerCase());
-                if(seat) seat.classList.remove('folded', 'active');
+                if(p !== 'YOU' && aiBankrolls[p] <= 0) {
+                    playerStates[p] = { isActive: false, hand: [], lastAction: 'BUSTED' };
+                    let seat = document.getElementById('seat-' + p.toLowerCase());
+                    if(seat) seat.style.display = 'none';
+                } else {
+                    playerStates[p] = { isActive: true, hand: [], lastAction: 'WAITING' };
+                    let seat = document.getElementById('seat-' + p.toLowerCase());
+                    if(seat) seat.classList.remove('folded', 'active');
+                }
             });
             
             communityCards = []; pot = 0; currentCallAmount = 2000; customRaiseAmount = 5000; gamePhase = 0; uiCommunity.innerHTML = '';
-            ALL_SEATS.forEach(p => { playerStates[p].hand = [deck.pop(), deck.pop()]; });
+            
+            ALL_SEATS.forEach(p => { if(playerStates[p].isActive) { playerStates[p].hand = [deck.pop(), deck.pop()]; } });
             
             uiUserHand.innerHTML = generateCardHTML(playerStates['YOU'].hand[0]) + generateCardHTML(playerStates['YOU'].hand[1]); animateCardsIn(uiUserHand);
             
             AI_PLAYERS.forEach(ai => {
-                let handDiv = document.getElementById('hand-' + ai.toLowerCase());
-                if(handDiv) { handDiv.innerHTML = generateCardHTML(null, true) + generateCardHTML(null, true); animateCardsIn(handDiv); }
+                if(playerStates[ai].isActive) {
+                    let handDiv = document.getElementById('hand-' + ai.toLowerCase());
+                    if(handDiv) { handDiv.innerHTML = generateCardHTML(null, true) + generateCardHTML(null, true); animateCardsIn(handDiv); }
+                }
             });
             logAction('Dealer', 'shuffles deck'); updateUI(); document.getElementById('seat-user').classList.add('active');
         }
@@ -498,7 +513,11 @@
             
             if (activePlayers.length === 1) {
                 let winnerID = activePlayers[0]; playerStates[winnerID].lastAction = 'WINNER';
-                if (winnerID === 'YOU') { currentWinAmount = pot; bankroll += currentWinAmount; playSound('win'); } else { currentWinAmount = 0; }
+                if (winnerID === 'YOU') { 
+                    currentWinAmount = pot; bankroll += currentWinAmount; playSound('win'); 
+                } else { 
+                    currentWinAmount = 0; aiBankrolls[winnerID] += pot; playSound('chip'); 
+                }
                 triggerPayoutModal(winnerID, "OPPONENTS FOLDED", pot, false); return;
             }
             while (communityCards.length < 5 && deck.length > 0) { let c = deck.pop(); if(c) communityCards.push(c); }
@@ -523,37 +542,40 @@
                 
                 let solvedHands = activePlayers.map(p => playerStates[p].solved).filter(h => h !== undefined);
                 if (solvedHands.length === 0) throw new Error("No hands to evaluate");
-                
                 let winningHands = Hand.winners(solvedHands);
-                
-                // BULLETPROOF: Using .some() to strictly match description instead of exact object reference
                 let winners = activePlayers.filter(p => playerStates[p].solved && winningHands.some(wh => wh.name === playerStates[p].solved.name && wh.descr === playerStates[p].solved.descr));
                 if (winners.length === 0) winners = [activePlayers[0]]; 
                 winners.forEach(w => playerStates[w].lastAction = 'WINNER');
                 
                 if (winners.length > 1) {
                     let splitAmount = Math.floor(pot / winners.length);
-                    if (winners.includes('YOU')) { currentWinAmount = splitAmount; bankroll += currentWinAmount; playSound('win'); } else { currentWinAmount = 0; }
+                    winners.forEach(w => {
+                        if (w === 'YOU') { currentWinAmount = splitAmount; bankroll += currentWinAmount; playSound('win'); } 
+                        else { currentWinAmount = 0; aiBankrolls[w] += splitAmount; playSound('chip'); }
+                    });
                     triggerPayoutModal('SPLIT', winningHands[0].name, splitAmount, true);
                 } else {
                     let winnerID = winners[0];
-                    if (winnerID === 'YOU') { currentWinAmount = pot; bankroll += currentWinAmount; playSound('win'); } else { currentWinAmount = 0; }
+                    if (winnerID === 'YOU') { currentWinAmount = pot; bankroll += currentWinAmount; playSound('win'); } 
+                    else { currentWinAmount = 0; aiBankrolls[winnerID] += pot; playSound('chip'); }
                     triggerPayoutModal(winnerID, winningHands[0].name, pot, false);
                 }
             } catch (error) { 
                 console.error("Solver Error Caught:", error); 
-                
-                // BULLETPROOF FALLBACK: Strictly find remaining active players and award them, never default to YOU if folded
                 let fallbackWinners = activePlayers;
                 if(fallbackWinners.length === 0) fallbackWinners = [AI_PLAYERS[0]];
                 
                 if (fallbackWinners.length > 1) {
                     let splitAmount = Math.floor(pot / fallbackWinners.length);
-                    if (fallbackWinners.includes('YOU')) { currentWinAmount = splitAmount; bankroll += currentWinAmount; playSound('win'); } else { currentWinAmount = 0; }
+                    fallbackWinners.forEach(w => {
+                        if (w === 'YOU') { currentWinAmount = splitAmount; bankroll += currentWinAmount; playSound('win'); } 
+                        else { aiBankrolls[w] += splitAmount; }
+                    });
                     triggerPayoutModal('SPLIT', "ENGINE OVERRIDE", splitAmount, true);
                 } else {
                     let winnerID = fallbackWinners[0];
-                    if (winnerID === 'YOU') { currentWinAmount = pot; bankroll += currentWinAmount; playSound('win'); } else { currentWinAmount = 0; }
+                    if (winnerID === 'YOU') { currentWinAmount = pot; bankroll += currentWinAmount; playSound('win'); } 
+                    else { currentWinAmount = 0; aiBankrolls[winnerID] += pot; playSound('chip'); }
                     triggerPayoutModal(winnerID, "DEFAULT WIN", pot, false);
                 }
             }
@@ -586,8 +608,18 @@
                     let rand = Math.random(); let action = 'call';
                     if (rand > 0.85) action = 'raise'; else if (rand < 0.15) action = 'fold';
 
-                    if (action === 'fold') { foldPlayer(ai); logAction(ai, 'fold'); playSound('fold'); } 
-                    else { let amt = action === 'raise' ? currentCallAmount * 2 : currentCallAmount; pot += amt; if(action === 'raise') currentCallAmount = amt; logAction(ai, action, amt); playSound('chip'); }
+                    if (action === 'fold') { 
+                        foldPlayer(ai); logAction(ai, 'fold'); playSound('fold'); 
+                    } else { 
+                        // FIXED: Deduct from actual AI Bankroll and force All-In if funds are low
+                        let amt = action === 'raise' ? currentCallAmount * 2 : currentCallAmount; 
+                        if (amt > aiBankrolls[ai]) { amt = aiBankrolls[ai]; action = 'all in'; }
+                        
+                        aiBankrolls[ai] -= amt;
+                        pot += amt; 
+                        if(action === 'raise') currentCallAmount = amt; 
+                        logAction(ai, action, amt); playSound('chip'); 
+                    }
                     updateUI(); seatEl.classList.remove('active'); await new Promise(r => setTimeout(r, 500)); 
                 }
             }
