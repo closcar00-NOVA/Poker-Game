@@ -38,6 +38,28 @@
         #sound-toggle:hover { border-color: var(--neon-cyan); }
         #sound-toggle.muted { color: #64748b; border-color: var(--border-dim); }
 
+        /* CLOUD LOGIN OVERLAY */
+        #login-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: radial-gradient(circle at center, rgba(17, 24, 39, 0.95) 0%, rgba(5, 5, 5, 1) 100%);
+            z-index: 2000; backdrop-filter: blur(10px);
+        }
+        .login-box {
+            background: var(--panel-bg); border: 1px solid var(--neon-cyan); border-radius: 8px; 
+            padding: 50px 80px; text-align: center; box-shadow: 0 0 40px rgba(0, 243, 255, 0.1); width: 100%; max-width: 500px;
+        }
+        .login-title { font-family: 'Rajdhani', sans-serif; font-size: 1.2rem; color: #94a3b8; letter-spacing: 6px; margin-bottom: 30px; text-transform: uppercase; }
+        .login-input {
+            background: #000; border: 1px solid var(--border-dim); color: var(--neon-cyan);
+            font-family: 'Rajdhani', sans-serif; font-size: 1.5rem; padding: 15px; text-align: center;
+            border-radius: 6px; margin-bottom: 30px; width: 100%; text-transform: uppercase; letter-spacing: 2px;
+        }
+        .login-input:focus { outline: none; border-color: var(--neon-cyan); box-shadow: 0 0 15px rgba(0, 243, 255, 0.2); }
+        .btn-connect { border: 1px solid var(--neon-cyan); color: var(--neon-cyan); padding: 15px; width: 100%; font-size: 1.2rem; }
+        .btn-connect:hover { box-shadow: 0 0 15px rgba(0, 243, 255, 0.3), inset 0 0 10px rgba(0, 243, 255, 0.2); }
+
+        #game-screen { display: none; width: 100%; justify-content: center; }
         .master-layout { display: flex; gap: 40px; width: 100%; max-width: 1400px; margin-top: 3vh; align-items: stretch; justify-content: center; }
         .main-game-area { display: flex; flex-direction: column; align-items: center; gap: 60px; flex: 1; max-width: 950px; }
 
@@ -184,103 +206,116 @@
     
     <div id="sound-toggle">SOUND: ON</div>
 
-    <div class="master-layout">
-        <div class="main-game-area">
-            <div class="poker-table">
-                <div class="table-center">
-                    <div class="main-pot">
-                        <div class="pot-amount" id="ui-pot">$0</div>
-                    </div>
-                    <div class="community-cards" id="ui-community"></div>
-                </div>
-
-                <div class="seat active" id="seat-user">
-                    <div class="player-hand" id="ui-user-hand"></div>
-                    <img src="avatar_user.png" class="avatar" alt="You" onerror="this.src='data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='">
-                    <div class="nameplate">YOU</div>
-                    <div class="player-action-text" id="action-YOU"></div>
-                </div>
-
-                <div class="seat" id="seat-hustler">
-                    <div class="opp-hand" id="hand-hustler"></div>
-                    <img src="avatar_hustler.png" class="avatar" alt="Hustler" onerror="this.style.display='none'">
-                    <div class="nameplate">HUSTLER</div>
-                    <div class="player-action-text" id="action-HUSTLER"></div>
-                </div>
-
-                <div class="seat" id="seat-shark">
-                    <div class="opp-hand" id="hand-shark"></div>
-                    <img src="avatar_shark.png" class="avatar" alt="Shark" onerror="this.style.display='none'">
-                    <div class="nameplate">SHARK</div>
-                    <div class="player-action-text" id="action-SHARK"></div>
-                </div>
-
-                <div class="seat" id="seat-rock">
-                    <div class="opp-hand" id="hand-rock"></div>
-                    <img src="avatar_rock.png" class="avatar" alt="Rock" onerror="this.style.display='none'">
-                    <div class="nameplate">ROCK</div>
-                    <div class="player-action-text" id="action-ROCK"></div>
-                </div>
-
-                <div class="seat" id="seat-gambit">
-                    <div class="opp-hand" id="hand-gambit"></div>
-                    <img src="avatar_gambit.png" class="avatar" alt="Gambit" onerror="this.style.display='none'">
-                    <div class="nameplate">GAMBIT</div>
-                    <div class="player-action-text" id="action-GAMBIT"></div>
-                </div>
-
-                <div class="seat" id="seat-wild">
-                    <div class="opp-hand" id="hand-wild"></div>
-                    <img src="avatar_wildcard.png" class="avatar" alt="Wild" onerror="this.style.display='none'">
-                    <div class="nameplate">WILD</div>
-                    <div class="player-action-text" id="action-WILD"></div>
-                </div>
-
-                <div class="seat" id="seat-pro">
-                    <div class="opp-hand" id="hand-pro"></div>
-                    <img src="avatar_pro.png" class="avatar" alt="Pro" onerror="this.style.display='none'">
-                    <div class="nameplate">PRO</div>
-                    <div class="player-action-text" id="action-PRO"></div>
-                </div>
-            </div>
-
-            <div id="controls">
-                <div class="stat-box">
-                    <div class="stat-label">Bankroll</div>
-                    <div class="stat-value" id="ui-bankroll">$3,256,000</div>
-                </div>
-                <div class="action-group">
-                    <button class="poker-btn btn-fold" id="btn-fold">FOLD</button>
-                    <button class="poker-btn btn-call" id="btn-call">CALL</button>
-                    <button class="poker-btn btn-raise" id="btn-raise">RAISE</button>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-label">Raise Amt</div>
-                    <div class="bet-controls">
-                        <button class="bet-btn" id="btn-minus">-</button>
-                        <div class="stat-value" id="ui-raise-amt">$5,000</div>
-                        <button class="bet-btn" id="btn-plus">+</button>
-                    </div>
-                </div>
-            </div>
+    <!-- INITIAL CLOUD LOGIN OVERLAY -->
+    <div id="login-screen">
+        <div class="login-box">
+            <div class="login-title">CLOUD SYNC LOGIN</div>
+            <input type="text" id="player-id-input" class="login-input" placeholder="ENTER PLAYER ID" autocomplete="off">
+            <button id="btn-login" class="poker-btn btn-connect">CONNECT TO CLOUD</button>
+            <div id="login-status" style="margin-top: 15px; color: var(--neon-cyan); font-family: 'Rajdhani', sans-serif; letter-spacing: 2px; text-transform: uppercase;"></div>
         </div>
+    </div>
 
-        <div class="sidebar">
-            <div class="side-panel">
-                <h2 class="panel-header">Game Dash</h2>
-                <div class="dash-stats">
-                    <div>Blinds: <span>$1K/$2K</span></div>
-                    <div>Bet: <span id="ui-stat-bet">$0</span></div>
-                    <div>Round: <span id="ui-stat-round">Pre-Flop</span></div>
+    <!-- GAME UI (HIDDEN UNTIL SYNCED) -->
+    <div id="game-screen">
+        <div class="master-layout">
+            <div class="main-game-area">
+                <div class="poker-table">
+                    <div class="table-center">
+                        <div class="main-pot">
+                            <div class="pot-amount" id="ui-pot">$0</div>
+                        </div>
+                        <div class="community-cards" id="ui-community"></div>
+                    </div>
+
+                    <div class="seat active" id="seat-user">
+                        <div class="player-hand" id="ui-user-hand"></div>
+                        <img src="avatar_user.png" class="avatar" alt="You" onerror="this.src='data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='">
+                        <div class="nameplate">YOU</div>
+                        <div class="player-action-text" id="action-YOU"></div>
+                    </div>
+
+                    <div class="seat" id="seat-hustler">
+                        <div class="opp-hand" id="hand-hustler"></div>
+                        <img src="avatar_hustler.png" class="avatar" alt="Hustler" onerror="this.style.display='none'">
+                        <div class="nameplate">HUSTLER</div>
+                        <div class="player-action-text" id="action-HUSTLER"></div>
+                    </div>
+
+                    <div class="seat" id="seat-shark">
+                        <div class="opp-hand" id="hand-shark"></div>
+                        <img src="avatar_shark.png" class="avatar" alt="Shark" onerror="this.style.display='none'">
+                        <div class="nameplate">SHARK</div>
+                        <div class="player-action-text" id="action-SHARK"></div>
+                    </div>
+
+                    <div class="seat" id="seat-rock">
+                        <div class="opp-hand" id="hand-rock"></div>
+                        <img src="avatar_rock.png" class="avatar" alt="Rock" onerror="this.style.display='none'">
+                        <div class="nameplate">ROCK</div>
+                        <div class="player-action-text" id="action-ROCK"></div>
+                    </div>
+
+                    <div class="seat" id="seat-gambit">
+                        <div class="opp-hand" id="hand-gambit"></div>
+                        <img src="avatar_gambit.png" class="avatar" alt="Gambit" onerror="this.style.display='none'">
+                        <div class="nameplate">GAMBIT</div>
+                        <div class="player-action-text" id="action-GAMBIT"></div>
+                    </div>
+
+                    <div class="seat" id="seat-wild">
+                        <div class="opp-hand" id="hand-wild"></div>
+                        <img src="avatar_wildcard.png" class="avatar" alt="Wild" onerror="this.style.display='none'">
+                        <div class="nameplate">WILD</div>
+                        <div class="player-action-text" id="action-WILD"></div>
+                    </div>
+
+                    <div class="seat" id="seat-pro">
+                        <div class="opp-hand" id="hand-pro"></div>
+                        <img src="avatar_pro.png" class="avatar" alt="Pro" onerror="this.style.display='none'">
+                        <div class="nameplate">PRO</div>
+                        <div class="player-action-text" id="action-PRO"></div>
+                    </div>
                 </div>
-                <ul class="log-list" id="ui-log">
-                    <li class="log-item"><span><strong>Dealer</strong> shuffles deck</span><span class="log-action">--</span></li>
-                </ul>
+
+                <div id="controls">
+                    <div class="stat-box">
+                        <div class="stat-label">Bankroll</div>
+                        <div class="stat-value" id="ui-bankroll">$0</div>
+                    </div>
+                    <div class="action-group">
+                        <button class="poker-btn btn-fold" id="btn-fold">FOLD</button>
+                        <button class="poker-btn btn-call" id="btn-call">CALL</button>
+                        <button class="poker-btn btn-raise" id="btn-raise">RAISE</button>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Raise Amt</div>
+                        <div class="bet-controls">
+                            <button class="bet-btn" id="btn-minus">-</button>
+                            <div class="stat-value" id="ui-raise-amt">$5,000</div>
+                            <button class="bet-btn" id="btn-plus">+</button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div class="side-panel">
-                <h2 class="panel-header">Player Ledger</h2>
-                <div id="ui-ledger"></div>
+            <div class="sidebar">
+                <div class="side-panel">
+                    <h2 class="panel-header">Game Dash</h2>
+                    <div class="dash-stats">
+                        <div>Blinds: <span>$1K/$2K</span></div>
+                        <div>Bet: <span id="ui-stat-bet">$0</span></div>
+                        <div>Round: <span id="ui-stat-round">Pre-Flop</span></div>
+                    </div>
+                    <ul class="log-list" id="ui-log">
+                        <li class="log-item"><span><strong>System</strong> cloud sync established</span><span class="log-action">--</span></li>
+                    </ul>
+                </div>
+
+                <div class="side-panel">
+                    <h2 class="panel-header">Player Ledger</h2>
+                    <div id="ui-ledger"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -317,8 +352,24 @@
         </div>
     </div>
 
-    <!-- POKER JAVASCRIPT ENGINE -->
-    <script>
+    <!-- POKER CLOUD ENGINE (TYPE=MODULE FOR FIREBASE IMPORTS) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCSWZMLtsbybfGo0ZUaH7UhLVHcokgkhcA",
+            authDomain: "vegas-pro-6256c.firebaseapp.com",
+            projectId: "vegas-pro-6256c",
+            storageBucket: "vegas-pro-6256c.firebasestorage.app",
+            messagingSenderId: "943834106696",
+            appId: "1:943834106696:web:24169c1adf1d83a815017d"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        let cloudDocRef = null;
+
         const sfx = {
             shuffle: new Audio('snd_shuffle.mp3'), deal: new Audio('snd_deal.mp3'),
             turn: new Audio('snd_turn.mp3'), chip: new Audio('snd_chip.mp3'),
@@ -338,8 +389,9 @@
             try { let s = sfx[soundName].cloneNode(); s.volume = sfx[soundName].volume; s.play().catch(e => {}); } catch(e) {} 
         }
 
-        let bankroll = 3256000; 
-        let aiBankrolls = { 'PRO': 150000, 'HUSTLER': 125000, 'GAMBIT': 95000, 'WILD': 80000, 'SHARK': 45000, 'ROCK': 12000 };
+        // GLOBALS
+        let bankroll = 0; 
+        let aiBankrolls = {};
         
         let pot = 0; let currentCallAmount = 2000; let customRaiseAmount = 5000;
         let gamePhase = 0; let deck = []; let communityCards = []; let isProcessing = false; let currentWinAmount = 0;
@@ -361,6 +413,43 @@
         const btnCall = document.getElementById('btn-call'); const btnRaise = document.getElementById('btn-raise');
         const btnFold = document.getElementById('btn-fold'); const btnPlus = document.getElementById('btn-plus');
         const btnMinus = document.getElementById('btn-minus');
+
+        // CLOUD LOGIN LOGIC
+        document.getElementById('btn-login').addEventListener('click', async () => {
+            const playerId = document.getElementById('player-id-input').value.trim().toUpperCase();
+            if (!playerId) return;
+
+            document.getElementById('login-status').innerText = "SYNCING WITH CLOUD...";
+            cloudDocRef = doc(db, "saves", playerId);
+            
+            try {
+                const docSnap = await getDoc(cloudDocRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    bankroll = data.bankroll;
+                    aiBankrolls = data.aiBankrolls;
+                } else {
+                    // New user -> Set defaults
+                    bankroll = 3256000;
+                    aiBankrolls = { 'PRO': 150000, 'HUSTLER': 125000, 'GAMBIT': 95000, 'WILD': 80000, 'SHARK': 45000, 'ROCK': 12000 };
+                    await setDoc(cloudDocRef, { bankroll, aiBankrolls });
+                }
+
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('game-screen').style.display = 'flex';
+                startNewHand();
+            } catch (error) {
+                console.error(error);
+                document.getElementById('login-status').innerText = "ERROR CONNECTING TO DATABASE";
+                document.getElementById('login-status').style.color = "var(--neon-red)";
+            }
+        });
+
+        async function saveGameStateToCloud() {
+            if (!cloudDocRef) return;
+            try { await setDoc(cloudDocRef, { bankroll, aiBankrolls }, { merge: true }); } 
+            catch (e) { console.error("Cloud Save Failed:", e); }
+        }
 
         function formatMoney(num) { return '$' + num.toLocaleString(); }
         
@@ -512,10 +601,6 @@
             updateUI(); setTimeout(() => { document.getElementById('payout-modal').style.display = 'flex'; }, 2000);
         }
 
-        // -----------------------------------------------------------
-        // BULLETPROOF NATIVE POKER EVALUATOR 
-        // Silently scores hands without relying on external CDN blocks
-        // -----------------------------------------------------------
         function getNativeScore(cardsStrArray) {
             const rVals = {'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'T':10,'J':11,'Q':12,'K':13,'A':14};
             let vals = cardsStrArray.map(c => rVals[c[0]]).sort((a,b) => b-a);
@@ -548,13 +633,12 @@
             
             if (activePlayers.length === 1) {
                 let winnerID = activePlayers[0]; playerStates[winnerID].lastAction = 'WINNER';
-                if (winnerID === 'YOU') { 
-                    currentWinAmount = pot; bankroll += currentWinAmount; playSound('win'); 
-                } else { 
-                    currentWinAmount = 0; aiBankrolls[winnerID] += pot; playSound('chip'); 
-                }
+                if (winnerID === 'YOU') { currentWinAmount = pot; bankroll += currentWinAmount; playSound('win'); } 
+                else { currentWinAmount = 0; aiBankrolls[winnerID] += pot; playSound('chip'); }
+                
                 logHandResult(winnerID, "OPPONENTS FOLDED", formatMoney(pot));
-                triggerPayoutModal(winnerID, "OPPONENTS FOLDED", pot, false); return;
+                triggerPayoutModal(winnerID, "OPPONENTS FOLDED", pot, false); 
+                saveGameStateToCloud(); return;
             }
             while (communityCards.length < 5 && deck.length > 0) { let c = deck.pop(); if(c) communityCards.push(c); }
             uiCommunity.innerHTML = communityCards.map(c => generateCardHTML(c)).join(''); animateCardsIn(uiCommunity);
@@ -572,7 +656,7 @@
 
             try {
                 const Solver = (typeof window.pokersolver !== 'undefined') ? window.pokersolver.Hand : (typeof window.Hand !== 'undefined' ? window.Hand : null);
-                if (!Solver) throw new Error("CDN Blocked - Engaging Native Fallback");
+                if (!Solver) throw new Error("CDN Blocked");
 
                 activePlayers.forEach(p => {
                     let pCardsStr = playerStates[p].hand.slice(0, 2).filter(c => c && c.rank && c.suit).map(c => c.rank + c.suit.toLowerCase());
@@ -602,13 +686,10 @@
                     logHandResult(winnerID, winningHands[0].name, formatMoney(pot));
                     triggerPayoutModal(winnerID, winningHands[0].name, pot, false);
                 }
+                saveGameStateToCloud();
             } catch (error) { 
-                console.warn(error.message); 
-                
-                // NATIVE EVALUATOR FALLBACK (Fires if browser blocks external scripts)
-                let bestScore = -1;
-                let winners = [];
-                let winningHandName = "";
+                console.warn("Falling back to Native Evaluator."); 
+                let bestScore = -1; let winners = []; let winningHandName = "";
 
                 activePlayers.forEach(p => {
                     let pCardsStr = playerStates[p].hand.slice(0, 2).filter(c => c && c.rank && c.suit).map(c => c.rank + c.suit.toLowerCase());
@@ -616,12 +697,8 @@
                     let nativeResult = getNativeScore(allCards);
                     
                     if (nativeResult.score > bestScore) {
-                        bestScore = nativeResult.score;
-                        winners = [p];
-                        winningHandName = nativeResult.name;
-                    } else if (nativeResult.score === bestScore) {
-                        winners.push(p);
-                    }
+                        bestScore = nativeResult.score; winners = [p]; winningHandName = nativeResult.name;
+                    } else if (nativeResult.score === bestScore) { winners.push(p); }
                 });
 
                 winners.forEach(w => playerStates[w].lastAction = 'WINNER');
@@ -641,6 +718,7 @@
                     logHandResult(winnerID, winningHandName, formatMoney(pot));
                     triggerPayoutModal(winnerID, winningHandName, pot, false);
                 }
+                saveGameStateToCloud();
             }
         }
 
@@ -761,6 +839,7 @@
                     logHandResult('YOU (ROULETTE)', `BUSTED`, '$0');
                 }
                 updateUI();
+                saveGameStateToCloud();
             }, 3500); 
         }
 
@@ -768,7 +847,6 @@
         document.getElementById('btn-guess-black').addEventListener('click', () => { handleRouletteSpin('black'); });
         document.getElementById('btn-guess-green').addEventListener('click', () => { handleRouletteSpin('green'); });
 
-        window.onload = () => { setTimeout(startNewHand, 500); };
     </script>
 </body>
 </html>
