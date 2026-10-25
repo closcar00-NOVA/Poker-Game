@@ -419,7 +419,7 @@
             const li = document.createElement('li'); 
             li.className = 'log-item';
             li.style.borderBottom = '1px dashed var(--neon-gold)';
-            li.innerHTML = `<span style="color: var(--neon-gold);"><strong>${winnerText}</strong> +${amountStr}</span><span style="color: var(--neon-cyan); font-size: 0.65rem; text-transform: uppercase;">${handName}</span>`;
+            li.innerHTML = `<span style="color: var(--neon-gold);"><strong>${winnerText}</strong> +${amountStr}</span><span style="color: var(--neon-cyan); font-size: 0.65rem; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 40%; text-align: right;">${handName}</span>`;
             uiLog.prepend(li);
         }
 
@@ -529,18 +529,21 @@
             uiCommunity.innerHTML = communityCards.map(c => generateCardHTML(c)).join(''); animateCardsIn(uiCommunity);
             
             try {
-                // BUG FIX: Directly reference the window namespace for the pokersolver library 
-                const Hand = window.pokersolver.Hand;
+                // FIXED: Direct mapped variable to prevent crashing the evaluation logic
+                const Solver = (typeof pokersolver !== 'undefined') ? pokersolver.Hand : (typeof window.pokersolver !== 'undefined' ? window.pokersolver.Hand : window.Hand);
+                if (!Solver) throw new Error("Solver engine not loaded properly.");
 
                 let validCommCardsStr = communityCards.slice(0, 5).filter(c => c && c.rank && c.suit).map(c => c.rank + c.suit.toLowerCase());
                 activePlayers.forEach(p => {
                     let pCardsStr = playerStates[p].hand.slice(0, 2).filter(c => c && c.rank && c.suit).map(c => c.rank + c.suit.toLowerCase());
-                    if (pCardsStr.length === 2 && validCommCardsStr.length === 5) { playerStates[p].solved = Hand.solve(pCardsStr.concat(validCommCardsStr)); } else { throw new Error("Missing Card Data"); }
+                    if (pCardsStr.length === 2 && validCommCardsStr.length === 5) { playerStates[p].solved = Solver.solve(pCardsStr.concat(validCommCardsStr)); } else { throw new Error("Missing Card Data"); }
                 });
                 
                 let solvedHands = activePlayers.map(p => playerStates[p].solved).filter(h => h !== undefined);
                 if (solvedHands.length === 0) throw new Error("No hands to evaluate");
-                let winningHands = Hand.winners(solvedHands);
+                
+                // FIXED: Solver.winners instead of Hand.winners 
+                let winningHands = Solver.winners(solvedHands);
                 
                 let winners = activePlayers.filter(p => playerStates[p].solved && winningHands.includes(playerStates[p].solved));
                 if (winners.length === 0) winners = [activePlayers[0]]; 
