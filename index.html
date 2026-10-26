@@ -38,6 +38,15 @@
         #sound-toggle:hover { border-color: var(--neon-cyan); }
         #sound-toggle.muted { color: #64748b; border-color: var(--border-dim); }
 
+        #rebuy-toggle {
+            position: fixed; top: 20px; left: 20px; z-index: 1000;
+            background: rgba(0,0,0,0.6); border: 1px solid var(--neon-gold); border-radius: 4px;
+            padding: 6px 12px; font-family: 'Rajdhani', sans-serif; font-size: 0.85rem; font-weight: 600; letter-spacing: 2px;
+            color: var(--neon-gold); cursor: pointer; backdrop-filter: blur(5px); transition: 0.2s;
+            display: none;
+        }
+        #rebuy-toggle:hover { box-shadow: 0 0 15px rgba(255, 215, 0, 0.3); background: rgba(255, 215, 0, 0.1); }
+
         /* CLOUD LOGIN OVERLAY */
         #login-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -205,6 +214,7 @@
 <body>
     
     <div id="sound-toggle">SOUND: ON</div>
+    <div id="rebuy-toggle">REBUY OPPONENTS ($150K)</div>
 
     <!-- INITIAL CLOUD LOGIN OVERLAY -->
     <div id="login-screen">
@@ -429,19 +439,30 @@
                     bankroll = data.bankroll;
                     aiBankrolls = data.aiBankrolls;
                 } else {
-                    // New user -> Set defaults
                     bankroll = 3256000;
-                    aiBankrolls = { 'PRO': 150000, 'HUSTLER': 125000, 'GAMBIT': 95000, 'WILD': 80000, 'SHARK': 45000, 'ROCK': 12000 };
+                    aiBankrolls = { 'PRO': 150000, 'HUSTLER': 150000, 'GAMBIT': 150000, 'WILD': 150000, 'SHARK': 150000, 'ROCK': 150000 };
                     await setDoc(cloudDocRef, { bankroll, aiBankrolls });
                 }
 
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('game-screen').style.display = 'flex';
+                document.getElementById('rebuy-toggle').style.display = 'block';
                 startNewHand();
             } catch (error) {
                 console.error(error);
                 document.getElementById('login-status').innerText = "ERROR CONNECTING TO DATABASE";
                 document.getElementById('login-status').style.color = "var(--neon-red)";
+            }
+        });
+
+        // REBUY LOGIC
+        document.getElementById('rebuy-toggle').addEventListener('click', () => {
+            if(confirm("Rebuy all AI opponents for $150,000 each? Your bankroll will remain untouched.")) {
+                AI_PLAYERS.forEach(ai => aiBankrolls[ai] = 150000);
+                saveGameStateToCloud();
+                logHandResult('SYSTEM', 'TABLE RESET', 'AIs REBOUGHT');
+                playSound('chip');
+                startNewHand();
             }
         });
 
@@ -568,7 +589,10 @@
                 } else {
                     playerStates[p] = { isActive: true, hand: [], lastAction: 'WAITING' };
                     let seat = document.getElementById('seat-' + p.toLowerCase());
-                    if(seat) seat.classList.remove('folded', 'active');
+                    if(seat) {
+                        seat.style.display = 'flex';
+                        seat.classList.remove('folded', 'active');
+                    }
                 }
             });
             
