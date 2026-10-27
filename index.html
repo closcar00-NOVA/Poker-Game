@@ -214,7 +214,7 @@
 <body>
     
     <div id="sound-toggle">SOUND: ON</div>
-    <div id="rebuy-toggle">REBUY OPPONENTS ($150K)</div>
+    <div id="rebuy-toggle">REBUY OPPONENTS ($1M)</div>
 
     <!-- INITIAL CLOUD LOGIN OVERLAY -->
     <div id="login-screen">
@@ -440,7 +440,7 @@
                     aiBankrolls = data.aiBankrolls;
                 } else {
                     bankroll = 3256000;
-                    aiBankrolls = { 'PRO': 150000, 'HUSTLER': 150000, 'GAMBIT': 150000, 'WILD': 150000, 'SHARK': 150000, 'ROCK': 150000 };
+                    aiBankrolls = { 'PRO': 1000000, 'HUSTLER': 1000000, 'GAMBIT': 1000000, 'WILD': 1000000, 'SHARK': 1000000, 'ROCK': 1000000 };
                     await setDoc(cloudDocRef, { bankroll, aiBankrolls });
                 }
 
@@ -457,8 +457,8 @@
 
         // REBUY LOGIC
         document.getElementById('rebuy-toggle').addEventListener('click', () => {
-            if(confirm("Rebuy all AI opponents for $150,000 each? Your bankroll will remain untouched.")) {
-                AI_PLAYERS.forEach(ai => aiBankrolls[ai] = 150000);
+            if(confirm("Rebuy all AI opponents for $1,000,000 each? Your bankroll will remain untouched.")) {
+                AI_PLAYERS.forEach(ai => aiBankrolls[ai] = 1000000);
                 saveGameStateToCloud();
                 logHandResult('SYSTEM', 'TABLE RESET', 'AIs REBOUGHT');
                 playSound('chip');
