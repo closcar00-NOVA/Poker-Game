@@ -215,7 +215,7 @@
         .log-action.call { color: var(--neon-cyan); }
         .log-action.fold { color: var(--neon-red); }
 
-        .ledger-row { display: grid; grid-template-columns: 2fr 1.5fr 2fr; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.75rem; }
+        .ledger-row { display: grid; grid-template-columns: 2fr 1.5fr 2fr; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.75rem; transition: opacity 0.3s ease; }
         .ledger-row:last-child { border-bottom: none; padding-bottom: 0; }
         .l-name { font-weight: 600; color: white; letter-spacing: 1px; font-family: 'Montserrat', sans-serif;}
         .l-state { font-family: 'Montserrat', sans-serif; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; font-size: 0.70rem; text-align: center; }
@@ -226,6 +226,7 @@
         .state-called { color: var(--neon-cyan); }
         .state-waiting { color: #64748b; }
         .state-winner { color: var(--neon-gold); text-shadow: 0 0 5px rgba(254, 209, 1, 0.5); }
+        .state-out { color: #334155; } /* Darker ghosted gray for OUT players */
 
         #payout-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 5, 5, 0.95); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(10px); }
         .modal-box { background: var(--panel-bg); border: 1px solid var(--neon-cyan); border-radius: 8px; padding: 50px 80px; width: 600px; text-align: center; display: flex; flex-direction: column; align-items: center; box-shadow: 0 0 40px rgba(0, 243, 255, 0.1); }
@@ -555,17 +556,46 @@
         function updatePlayerStatuses() {
             const container = document.getElementById('ui-ledger'); if(!container) return;
             let html = '';
-            ALL_SEATS.forEach(p => {
+            
+            // DYNAMIC SORTING: YOU pinned top, then rich to poor, $0 OUTs at the bottom
+            let sortedSeats = [...ALL_SEATS].sort((a, b) => {
+                if (a === 'YOU') return -1;
+                if (b === 'YOU') return 1;
+                let aBank = aiBankrolls[a];
+                let bBank = aiBankrolls[b];
+                
+                if (aBank > 0 && bBank <= 0) return -1;
+                if (aBank <= 0 && bBank > 0) return 1;
+                
+                return bBank - aBank; 
+            });
+
+            sortedSeats.forEach(p => {
                 let state = playerStates[p] ? playerStates[p].lastAction : 'WAITING';
-                if(!playerStates[p]?.isActive) state = 'FOLDED';
+                let pBank = p === 'YOU' ? bankroll : aiBankrolls[p];
+                
+                // Force OUT state if bankroll is 0
+                if (pBank <= 0) {
+                    state = 'OUT';
+                } else if (!playerStates[p]?.isActive) {
+                    state = 'FOLDED';
+                }
+                
                 let stateClass = 'state-waiting';
-                if(state === 'FOLDED') stateClass = 'state-folded';
+                let rowOpacity = '1';
+                
+                if (state === 'OUT') {
+                    stateClass = 'state-out';
+                    rowOpacity = '0.35'; // Ghost the row to background
+                } else if (state === 'FOLDED') {
+                    stateClass = 'state-folded';
+                    rowOpacity = '0.7';
+                }
                 else if(state === 'RAISED' || state === 'RAISE') stateClass = 'state-raised';
                 else if(state === 'CALLED' || state === 'CALL' || state === 'ALL IN') stateClass = 'state-called';
                 else if(state === 'WINNER') stateClass = 'state-winner';
                 
-                let pBank = p === 'YOU' ? bankroll : aiBankrolls[p];
-                html += `<div class="ledger-row"><span class="l-name">${p}</span><span class="l-state ${stateClass}">${state}</span><span class="l-bank">${formatMoney(pBank)}</span></div>`;
+                html += `<div class="ledger-row" style="opacity: ${rowOpacity};"><span class="l-name">${p}</span><span class="l-state ${stateClass}">${state}</span><span class="l-bank">${formatMoney(pBank)}</span></div>`;
             });
             container.innerHTML = html;
         }
