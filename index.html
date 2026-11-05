@@ -47,6 +47,15 @@
         }
         #rebuy-toggle:hover { box-shadow: 0 0 15px rgba(255, 215, 0, 0.3); background: rgba(255, 215, 0, 0.1); }
 
+        #stakes-toggle {
+            position: fixed; top: 65px; left: 20px; z-index: 1000;
+            background: rgba(0,0,0,0.6); border: 1px solid var(--neon-cyan); border-radius: 4px;
+            padding: 6px 12px; font-family: 'Rajdhani', sans-serif; font-size: 0.85rem; font-weight: 600; letter-spacing: 2px;
+            color: var(--neon-cyan); cursor: pointer; backdrop-filter: blur(5px); transition: 0.2s;
+            display: none;
+        }
+        #stakes-toggle:hover { box-shadow: 0 0 15px rgba(0, 243, 255, 0.3); background: rgba(0, 243, 255, 0.1); }
+
         /* CLOUD LOGIN OVERLAY */
         #login-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -226,7 +235,7 @@
         .state-called { color: var(--neon-cyan); }
         .state-waiting { color: #64748b; }
         .state-winner { color: var(--neon-gold); text-shadow: 0 0 5px rgba(254, 209, 1, 0.5); }
-        .state-out { color: #334155; } /* Darker ghosted gray for OUT players */
+        .state-out { color: #334155; }
 
         #payout-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 5, 5, 0.95); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(10px); }
         .modal-box { background: var(--panel-bg); border: 1px solid var(--neon-cyan); border-radius: 8px; padding: 50px 80px; width: 600px; text-align: center; display: flex; flex-direction: column; align-items: center; box-shadow: 0 0 40px rgba(0, 243, 255, 0.1); }
@@ -247,6 +256,7 @@
     
     <div id="sound-toggle">SOUND: ON</div>
     <div id="rebuy-toggle">REBUY OPPONENTS ($1.5M)</div>
+    <div id="stakes-toggle">STAKES: $50K/$100K</div>
 
     <!-- INITIAL CLOUD LOGIN OVERLAY -->
     <div id="login-screen">
@@ -367,7 +377,7 @@
                 <div class="side-panel">
                     <h2 class="panel-header">Game Dash</h2>
                     <div class="dash-stats">
-                        <div>Blinds: <span>$50K/$100K</span></div>
+                        <div>Blinds: <span id="ui-blinds-dash">$50K/$100K</span></div>
                         <div>Bet: <span id="ui-stat-bet">$0</span></div>
                         <div>Round: <span id="ui-stat-round">Pre-Flop</span></div>
                     </div>
@@ -457,7 +467,19 @@
         let bankroll = 0; 
         let aiBankrolls = {};
         
-        let pot = 0; let currentCallAmount = 100000; let customRaiseAmount = 100000;
+        // NEW STAKES LOGIC
+        const STAKES_TIERS = [
+            { label: "$50K/$100K", bigBlind: 100000 },
+            { label: "$100K/$200K", bigBlind: 200000 },
+            { label: "$250K/$500K", bigBlind: 500000 },
+            { label: "$500K/$1M", bigBlind: 1000000 },
+            { label: "$1M/$2M", bigBlind: 2000000 }
+        ];
+        let currentStakesIdx = 0;
+
+        let pot = 0; 
+        let currentCallAmount = STAKES_TIERS[currentStakesIdx].bigBlind; 
+        let customRaiseAmount = STAKES_TIERS[currentStakesIdx].bigBlind;
         let gamePhase = 0; let deck = []; let communityCards = []; let isProcessing = false; let currentWinAmount = 0;
 
         let playerStates = {};
@@ -505,6 +527,7 @@
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('game-screen').style.display = 'flex';
                 document.getElementById('rebuy-toggle').style.display = 'block';
+                document.getElementById('stakes-toggle').style.display = 'block';
                 startNewHand();
             } catch (error) {
                 console.error(error);
@@ -521,6 +544,30 @@
                 logHandResult('SYSTEM', 'TABLE RESET', 'AIs REBOUGHT');
                 playSound('chip');
                 startNewHand();
+            }
+        });
+
+        // STAKES TOGGLE LOGIC
+        document.getElementById('stakes-toggle').addEventListener('click', () => {
+            if (isProcessing) return;
+            if (pot > 0) {
+                if(!confirm("Changing stakes will reset the current hand. Continue?")) return;
+            }
+            
+            currentStakesIdx = (currentStakesIdx + 1) % STAKES_TIERS.length;
+            let newStakes = STAKES_TIERS[currentStakesIdx];
+            
+            document.getElementById('stakes-toggle').innerText = `STAKES: ${newStakes.label}`;
+            document.getElementById('ui-blinds-dash').innerText = newStakes.label;
+            
+            playSound('chip');
+            
+            if (pot > 0) {
+                startNewHand();
+            } else {
+                currentCallAmount = newStakes.bigBlind;
+                customRaiseAmount = newStakes.bigBlind;
+                updateUI();
             }
         });
 
@@ -689,7 +736,10 @@
                 }
             });
             
-            communityCards = []; pot = 0; currentCallAmount = 100000; customRaiseAmount = 100000; gamePhase = 0; uiCommunity.innerHTML = '';
+            communityCards = []; pot = 0; 
+            currentCallAmount = STAKES_TIERS[currentStakesIdx].bigBlind; 
+            customRaiseAmount = STAKES_TIERS[currentStakesIdx].bigBlind; 
+            gamePhase = 0; uiCommunity.innerHTML = '';
             
             ALL_SEATS.forEach(p => { if(playerStates[p].isActive) { playerStates[p].hand = [deck.pop(), deck.pop()]; } });
             
@@ -880,9 +930,9 @@
                     if (action === 'raise') {
                         if (isManiac) {
                             let multiplier = Math.floor(Math.random() * 4) + 2; 
-                            amt = (currentCallAmount === 0 ? 100000 : currentCallAmount) * multiplier;
+                            amt = (currentCallAmount === 0 ? STAKES_TIERS[currentStakesIdx].bigBlind : currentCallAmount) * multiplier;
                         } else {
-                            amt = (currentCallAmount === 0 ? 100000 : currentCallAmount) * 2;
+                            amt = (currentCallAmount === 0 ? STAKES_TIERS[currentStakesIdx].bigBlind : currentCallAmount) * 2;
                         }
                     }
 
@@ -940,7 +990,7 @@
             if (bankroll >= totalBet && !isProcessing) {
                 isProcessing = true; setButtonsEnabled(false);
                 bankroll -= totalBet; pot += totalBet; currentCallAmount = totalBet; 
-                logAction('YOU', 'raise', totalBet); playSound('chip'); customRaiseAmount = 100000; updateUI(); 
+                logAction('YOU', 'raise', totalBet); playSound('chip'); customRaiseAmount = STAKES_TIERS[currentStakesIdx].bigBlind; updateUI(); 
                 
                 await processAITurns();
                 let activeCount = Object.values(playerStates).filter(p => p.isActive).length;
@@ -963,16 +1013,29 @@
 
         let holdTimer; let holdInterval;
         function updateRaiseAmount(direction) {
-            let step = customRaiseAmount >= 1000000 ? 100000 : (customRaiseAmount >= 500000 ? 50000 : 10000); 
-            if (direction === 'up' && customRaiseAmount < bankroll) { customRaiseAmount += step; playSound('chip'); } 
-            else if (direction === 'down' && customRaiseAmount > 100000) { 
-                if (customRaiseAmount === 1000000) step = 100000; 
-                else if (customRaiseAmount === 500000) step = 50000; 
-                customRaiseAmount -= step; 
+            let bb = STAKES_TIERS[currentStakesIdx].bigBlind;
+            let step;
+            if (customRaiseAmount >= 2000000) step = 500000;
+            else if (customRaiseAmount >= 1000000) step = 100000;
+            else if (customRaiseAmount >= 500000) step = 50000;
+            else step = 10000;
+
+            if (direction === 'up' && customRaiseAmount < bankroll) { 
+                customRaiseAmount += step; 
+                playSound('chip'); 
+            } 
+            else if (direction === 'down' && customRaiseAmount > bb) { 
+                if (customRaiseAmount === 2000000) step = 100000;
+                else if (customRaiseAmount === 1000000) step = 50000;
+                else if (customRaiseAmount === 500000) step = 10000;
+                
+                customRaiseAmount -= step;
+                if (customRaiseAmount < bb) customRaiseAmount = bb;
                 playSound('chip'); 
             }
             updateUI();
         }
+        
         function startRaiseChange(dir) { updateRaiseAmount(dir); holdTimer = setTimeout(() => { holdInterval = setInterval(() => updateRaiseAmount(dir), 100); }, 400); }
         function stopRaiseChange() { clearTimeout(holdTimer); clearInterval(holdInterval); }
 
