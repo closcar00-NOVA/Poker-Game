@@ -138,6 +138,13 @@
         .suit-spades, .suit-clubs { color: #1a1a1a; text-shadow: none; } 
 
         .opp-hand { position: absolute; display: flex; top: 10px; left: 55px; z-index: -1; }
+        
+        /* FLIP CARDS INWARD FOR RIGHT-SIDE PLAYERS */
+        #seat-scooter .opp-hand, #seat-robby .opp-hand, #seat-pro .opp-hand {
+            left: auto;
+            right: 65px;
+        }
+
         .opp-hand .css-card { width: 45px; height: 65px; border-width: 1px; box-shadow: 2px 2px 5px rgba(0,0,0,0.5); }
         .opp-hand .css-card:nth-child(2) { margin-left: -20px; } 
 
