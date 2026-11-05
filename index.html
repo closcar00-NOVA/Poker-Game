@@ -214,7 +214,7 @@
 <body>
     
     <div id="sound-toggle">SOUND: ON</div>
-    <div id="rebuy-toggle">REBUY OPPONENTS ($150K)</div>
+    <div id="rebuy-toggle">REBUY OPPONENTS ($1.5M)</div>
 
     <!-- INITIAL CLOUD LOGIN OVERLAY -->
     <div id="login-screen">
@@ -302,7 +302,7 @@
                         <div class="stat-label">Raise Amt</div>
                         <div class="bet-controls">
                             <button class="bet-btn" id="btn-minus">-</button>
-                            <div class="stat-value" id="ui-raise-amt">$5,000</div>
+                            <div class="stat-value" id="ui-raise-amt">$100,000</div>
                             <button class="bet-btn" id="btn-plus">+</button>
                         </div>
                     </div>
@@ -313,7 +313,7 @@
                 <div class="side-panel">
                     <h2 class="panel-header">Game Dash</h2>
                     <div class="dash-stats">
-                        <div>Blinds: <span>$1K/$2K</span></div>
+                        <div>Blinds: <span>$50K/$100K</span></div>
                         <div>Bet: <span id="ui-stat-bet">$0</span></div>
                         <div>Round: <span id="ui-stat-round">Pre-Flop</span></div>
                     </div>
@@ -403,7 +403,7 @@
         let bankroll = 0; 
         let aiBankrolls = {};
         
-        let pot = 0; let currentCallAmount = 2000; let customRaiseAmount = 5000;
+        let pot = 0; let currentCallAmount = 100000; let customRaiseAmount = 100000;
         let gamePhase = 0; let deck = []; let communityCards = []; let isProcessing = false; let currentWinAmount = 0;
 
         let playerStates = {};
@@ -440,7 +440,7 @@
                     aiBankrolls = data.aiBankrolls;
                 } else {
                     bankroll = 3256000;
-                    aiBankrolls = { 'PRO': 150000, 'HUSTLER': 150000, 'GAMBIT': 150000, 'WILD': 150000, 'SHARK': 150000, 'ROCK': 150000 };
+                    aiBankrolls = { 'PRO': 1500000, 'HUSTLER': 1500000, 'GAMBIT': 1500000, 'WILD': 1500000, 'SHARK': 1500000, 'ROCK': 1500000 };
                     await setDoc(cloudDocRef, { bankroll, aiBankrolls });
                 }
 
@@ -457,8 +457,8 @@
 
         // REBUY LOGIC
         document.getElementById('rebuy-toggle').addEventListener('click', () => {
-            if(confirm("Rebuy all AI opponents for $150,000 each? Your bankroll will remain untouched.")) {
-                AI_PLAYERS.forEach(ai => aiBankrolls[ai] = 150000);
+            if(confirm("Rebuy all AI opponents for $1,500,000 each? Your bankroll will remain untouched.")) {
+                AI_PLAYERS.forEach(ai => aiBankrolls[ai] = 1500000);
                 saveGameStateToCloud();
                 logHandResult('SYSTEM', 'TABLE RESET', 'AIs REBOUGHT');
                 playSound('chip');
@@ -596,7 +596,7 @@
                 }
             });
             
-            communityCards = []; pot = 0; currentCallAmount = 2000; customRaiseAmount = 5000; gamePhase = 0; uiCommunity.innerHTML = '';
+            communityCards = []; pot = 0; currentCallAmount = 100000; customRaiseAmount = 100000; gamePhase = 0; uiCommunity.innerHTML = '';
             
             ALL_SEATS.forEach(p => { if(playerStates[p].isActive) { playerStates[p].hand = [deck.pop(), deck.pop()]; } });
             
@@ -750,9 +750,6 @@
             let htmlStr = ""; cardsToDeal.forEach(c => htmlStr += generateCardHTML(c)); uiCommunity.insertAdjacentHTML('beforeend', htmlStr); await animateCardsIn(uiCommunity);
         }
 
-        // -----------------------------------------------------------
-        // NEW DECOUPLED AI BETTING LOGIC
-        // -----------------------------------------------------------
         async function processAITurns() {
             let activeCount = Object.values(playerStates).filter(p => p.isActive).length;
             if (activeCount <= 1) return;
@@ -783,9 +780,6 @@
             }
         }
 
-        // -----------------------------------------------------------
-        // REWRITTEN ADVANCE PHASE (DEALS CARDS ONLY)
-        // -----------------------------------------------------------
         async function advancePhase() {
             gamePhase++; clearAllOnTableActions(); document.querySelectorAll('.seat').forEach(s => s.classList.remove('active'));
             ALL_SEATS.forEach(p => { if (playerStates[p] && playerStates[p].isActive) { playerStates[p].lastAction = 'WAITING'; } }); updatePlayerStatuses();
@@ -802,7 +796,6 @@
             if (activeCount === 1) { 
                 executeShowdown(); 
             } else if (!playerStates['YOU'].isActive || bankroll <= 0) { 
-                // Auto-advance if YOU are folded or bankrupt
                 await processAITurns();
                 let newActiveCount = Object.values(playerStates).filter(p => p.isActive).length;
                 if (newActiveCount === 1) { executeShowdown(); } else { advancePhase(); }
@@ -830,7 +823,7 @@
             if (bankroll >= totalBet && !isProcessing) {
                 isProcessing = true; setButtonsEnabled(false);
                 bankroll -= totalBet; pot += totalBet; currentCallAmount = totalBet; 
-                logAction('YOU', 'raise', totalBet); playSound('chip'); customRaiseAmount = 5000; updateUI(); 
+                logAction('YOU', 'raise', totalBet); playSound('chip'); customRaiseAmount = 100000; updateUI(); 
                 
                 await processAITurns();
                 let activeCount = Object.values(playerStates).filter(p => p.isActive).length;
@@ -853,9 +846,14 @@
 
         let holdTimer; let holdInterval;
         function updateRaiseAmount(direction) {
-            let step = customRaiseAmount >= 50000 ? 10000 : (customRaiseAmount >= 10000 ? 5000 : 1000); 
+            let step = customRaiseAmount >= 1000000 ? 100000 : (customRaiseAmount >= 500000 ? 50000 : 10000); 
             if (direction === 'up' && customRaiseAmount < bankroll) { customRaiseAmount += step; playSound('chip'); } 
-            else if (direction === 'down' && customRaiseAmount > 1000) { if (customRaiseAmount === 10000) step = 1000; else if (customRaiseAmount === 50000) step = 5000; customRaiseAmount -= step; playSound('chip'); }
+            else if (direction === 'down' && customRaiseAmount > 100000) { 
+                if (customRaiseAmount === 1000000) step = 100000; 
+                else if (customRaiseAmount === 500000) step = 50000; 
+                customRaiseAmount -= step; 
+                playSound('chip'); 
+            }
             updateUI();
         }
         function startRaiseChange(dir) { updateRaiseAmount(dir); holdTimer = setTimeout(() => { holdInterval = setInterval(() => updateRaiseAmount(dir), 100); }, 400); }
