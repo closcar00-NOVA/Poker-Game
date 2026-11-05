@@ -214,7 +214,7 @@
 <body>
     
     <div id="sound-toggle">SOUND: ON</div>
-    <div id="rebuy-toggle">REBUY OPPONENTS ($1M)</div>
+    <div id="rebuy-toggle">REBUY OPPONENTS ($150K)</div>
 
     <!-- INITIAL CLOUD LOGIN OVERLAY -->
     <div id="login-screen">
@@ -440,7 +440,7 @@
                     aiBankrolls = data.aiBankrolls;
                 } else {
                     bankroll = 3256000;
-                    aiBankrolls = { 'PRO': 1000000, 'HUSTLER': 1000000, 'GAMBIT': 1000000, 'WILD': 1000000, 'SHARK': 1000000, 'ROCK': 1000000 };
+                    aiBankrolls = { 'PRO': 150000, 'HUSTLER': 150000, 'GAMBIT': 150000, 'WILD': 150000, 'SHARK': 150000, 'ROCK': 150000 };
                     await setDoc(cloudDocRef, { bankroll, aiBankrolls });
                 }
 
@@ -457,8 +457,8 @@
 
         // REBUY LOGIC
         document.getElementById('rebuy-toggle').addEventListener('click', () => {
-            if(confirm("Rebuy all AI opponents for $1,000,000 each? Your bankroll will remain untouched.")) {
-                AI_PLAYERS.forEach(ai => aiBankrolls[ai] = 1000000);
+            if(confirm("Rebuy all AI opponents for $150,000 each? Your bankroll will remain untouched.")) {
+                AI_PLAYERS.forEach(ai => aiBankrolls[ai] = 150000);
                 saveGameStateToCloud();
                 logHandResult('SYSTEM', 'TABLE RESET', 'AIs REBOUGHT');
                 playSound('chip');
@@ -750,8 +750,43 @@
             let htmlStr = ""; cardsToDeal.forEach(c => htmlStr += generateCardHTML(c)); uiCommunity.insertAdjacentHTML('beforeend', htmlStr); await animateCardsIn(uiCommunity);
         }
 
+        // -----------------------------------------------------------
+        // NEW DECOUPLED AI BETTING LOGIC
+        // -----------------------------------------------------------
+        async function processAITurns() {
+            let activeCount = Object.values(playerStates).filter(p => p.isActive).length;
+            if (activeCount <= 1) return;
+
+            for (let i = 0; i < AI_PLAYERS.length; i++) {
+                let currentActive = Object.values(playerStates).filter(p => p.isActive).length; 
+                if (currentActive === 1) break; 
+                let ai = AI_PLAYERS[i]; if (!playerStates[ai].isActive) continue; 
+                
+                let seatEl = document.getElementById('seat-' + ai.toLowerCase()); seatEl.classList.add('active'); playSound('turn');
+                await new Promise(r => setTimeout(r, 1500 + Math.random() * 1000)); 
+                
+                let rand = Math.random(); let action = 'call';
+                if (rand > 0.85) action = 'raise'; else if (rand < 0.15) action = 'fold';
+
+                if (action === 'fold') { 
+                    foldPlayer(ai); logAction(ai, 'fold'); playSound('fold'); 
+                } else { 
+                    let amt = action === 'raise' ? currentCallAmount * 2 : currentCallAmount; 
+                    if (amt > aiBankrolls[ai]) { amt = aiBankrolls[ai]; action = 'all in'; }
+                    
+                    aiBankrolls[ai] -= amt;
+                    pot += amt; 
+                    if(action === 'raise') currentCallAmount = amt; 
+                    logAction(ai, action, amt); playSound('chip'); 
+                }
+                updateUI(); seatEl.classList.remove('active'); await new Promise(r => setTimeout(r, 500)); 
+            }
+        }
+
+        // -----------------------------------------------------------
+        // REWRITTEN ADVANCE PHASE (DEALS CARDS ONLY)
+        // -----------------------------------------------------------
         async function advancePhase() {
-            if (isProcessing) return; isProcessing = true; setButtonsEnabled(false);
             gamePhase++; clearAllOnTableActions(); document.querySelectorAll('.seat').forEach(s => s.classList.remove('active'));
             ALL_SEATS.forEach(p => { if (playerStates[p] && playerStates[p].isActive) { playerStates[p].lastAction = 'WAITING'; } }); updatePlayerStatuses();
 
@@ -764,51 +799,56 @@
             cardsToDeal = cardsToDeal.filter(c => c !== undefined); communityCards.push(...cardsToDeal); await dealCommunityCardsAnimation(cardsToDeal); updateUI(); await new Promise(r => setTimeout(r, 1000)); 
 
             let activeCount = Object.values(playerStates).filter(p => p.isActive).length;
-            if (activeCount > 1) {
-                for (let i = 0; i < AI_PLAYERS.length; i++) {
-                    let currentActive = Object.values(playerStates).filter(p => p.isActive).length; if (currentActive === 1) break; 
-                    let ai = AI_PLAYERS[i]; if (!playerStates[ai].isActive) continue; 
-                    let seatEl = document.getElementById('seat-' + ai.toLowerCase()); seatEl.classList.add('active'); playSound('turn');
-                    await new Promise(r => setTimeout(r, 2000 + Math.random() * 1500)); 
-                    let rand = Math.random(); let action = 'call';
-                    if (rand > 0.85) action = 'raise'; else if (rand < 0.15) action = 'fold';
-
-                    if (action === 'fold') { 
-                        foldPlayer(ai); logAction(ai, 'fold'); playSound('fold'); 
-                    } else { 
-                        let amt = action === 'raise' ? currentCallAmount * 2 : currentCallAmount; 
-                        if (amt > aiBankrolls[ai]) { amt = aiBankrolls[ai]; action = 'all in'; }
-                        
-                        aiBankrolls[ai] -= amt;
-                        pot += amt; 
-                        if(action === 'raise') currentCallAmount = amt; 
-                        logAction(ai, action, amt); playSound('chip'); 
-                    }
-                    updateUI(); seatEl.classList.remove('active'); await new Promise(r => setTimeout(r, 500)); 
-                }
+            if (activeCount === 1) { 
+                executeShowdown(); 
+            } else if (!playerStates['YOU'].isActive || bankroll <= 0) { 
+                // Auto-advance if YOU are folded or bankrupt
+                await processAITurns();
+                let newActiveCount = Object.values(playerStates).filter(p => p.isActive).length;
+                if (newActiveCount === 1) { executeShowdown(); } else { advancePhase(); }
+            } 
+            else { 
+                document.getElementById('seat-user').classList.add('active'); playSound('turn'); isProcessing = false; setButtonsEnabled(true); 
             }
-            activeCount = Object.values(playerStates).filter(p => p.isActive).length;
-            if (activeCount === 1) { executeShowdown(); } else if (!playerStates['YOU'].isActive || bankroll <= 0) { isProcessing = false; setTimeout(advancePhase, 2000); } 
-            else { document.getElementById('seat-user').classList.add('active'); playSound('turn'); isProcessing = false; setButtonsEnabled(true); }
         }
 
-        btnCall.addEventListener('click', () => {
+        btnCall.addEventListener('click', async () => {
             if (!isProcessing) {
+                isProcessing = true; setButtonsEnabled(false);
                 let callAmt = Math.min(bankroll, currentCallAmount); bankroll -= callAmt; pot += callAmt;
                 if (callAmt < currentCallAmount || bankroll === 0) { logAction('YOU', 'all in', callAmt); } else { logAction('YOU', 'call', callAmt); }
-                playSound('chip'); updateUI(); advancePhase();
+                playSound('chip'); updateUI(); 
+                
+                await processAITurns();
+                let activeCount = Object.values(playerStates).filter(p => p.isActive).length;
+                if (activeCount <= 1) { executeShowdown(); } else { advancePhase(); }
             }
         });
 
-        btnRaise.addEventListener('click', () => {
+        btnRaise.addEventListener('click', async () => {
             let totalBet = currentCallAmount + customRaiseAmount;
             if (bankroll >= totalBet && !isProcessing) {
+                isProcessing = true; setButtonsEnabled(false);
                 bankroll -= totalBet; pot += totalBet; currentCallAmount = totalBet; 
-                logAction('YOU', 'raise', totalBet); playSound('chip'); customRaiseAmount = 5000; updateUI(); advancePhase();
+                logAction('YOU', 'raise', totalBet); playSound('chip'); customRaiseAmount = 5000; updateUI(); 
+                
+                await processAITurns();
+                let activeCount = Object.values(playerStates).filter(p => p.isActive).length;
+                if (activeCount <= 1) { executeShowdown(); } else { advancePhase(); }
             }
         });
 
-        btnFold.addEventListener('click', () => { if(!isProcessing) { logAction('YOU', 'fold'); foldPlayer('YOU'); playSound('fold'); setButtonsEnabled(false); advancePhase(); } });
+        btnFold.addEventListener('click', async () => { 
+            if(!isProcessing) { 
+                isProcessing = true; setButtonsEnabled(false);
+                logAction('YOU', 'fold'); foldPlayer('YOU'); playSound('fold'); 
+                
+                await processAITurns();
+                let activeCount = Object.values(playerStates).filter(p => p.isActive).length;
+                if (activeCount <= 1) { executeShowdown(); } else { advancePhase(); }
+            } 
+        });
+
         document.getElementById('btn-next-hand').addEventListener('click', () => { document.getElementById('payout-modal').style.display = 'none'; startNewHand(); });
 
         let holdTimer; let holdInterval;
