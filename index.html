@@ -750,6 +750,9 @@
             let htmlStr = ""; cardsToDeal.forEach(c => htmlStr += generateCardHTML(c)); uiCommunity.insertAdjacentHTML('beforeend', htmlStr); await animateCardsIn(uiCommunity);
         }
 
+        // -----------------------------------------------------------
+        // MANIAC HIGH-ROLLER AI LOGIC
+        // -----------------------------------------------------------
         async function processAITurns() {
             let activeCount = Object.values(playerStates).filter(p => p.isActive).length;
             if (activeCount <= 1) return;
@@ -763,17 +766,27 @@
                 await new Promise(r => setTimeout(r, 1500 + Math.random() * 1000)); 
                 
                 let rand = Math.random(); let action = 'call';
-                if (rand > 0.85) action = 'raise'; else if (rand < 0.15) action = 'fold';
+                
+                // Aggressive Distribution: 40% Raise, 35% Fold, 25% Call
+                if (rand > 0.60) action = 'raise'; 
+                else if (rand < 0.35) action = 'fold';
 
                 if (action === 'fold') { 
                     foldPlayer(ai); logAction(ai, 'fold'); playSound('fold'); 
                 } else { 
-                    let amt = action === 'raise' ? currentCallAmount * 2 : currentCallAmount; 
-                    if (amt > aiBankrolls[ai]) { amt = aiBankrolls[ai]; action = 'all in'; }
+                    let amt = currentCallAmount; 
+                    
+                    if (action === 'raise') {
+                        // AI raises 2x to 5x the current bet to force players out
+                        let multiplier = Math.floor(Math.random() * 4) + 2; 
+                        amt = (currentCallAmount === 0 ? 100000 : currentCallAmount) * multiplier;
+                    }
+
+                    if (amt >= aiBankrolls[ai]) { amt = aiBankrolls[ai]; action = 'all in'; }
                     
                     aiBankrolls[ai] -= amt;
                     pot += amt; 
-                    if(action === 'raise') currentCallAmount = amt; 
+                    if(action === 'raise' || action === 'all in') currentCallAmount = amt; 
                     logAction(ai, action, amt); playSound('chip'); 
                 }
                 updateUI(); seatEl.classList.remove('active'); await new Promise(r => setTimeout(r, 500)); 
