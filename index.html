@@ -83,13 +83,17 @@
         .seat { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 6px; transform: translate(-50%, -50%); z-index: 10; transition: opacity 0.5s ease; }
         .seat.folded { opacity: 0.25; filter: grayscale(1); } 
         
-        #seat-user     { top: 100%; left: 50%; }  
-        #seat-hustler  { top: 85%;  left: 10%; }
-        #seat-shark    { top: 30%;  left: 5%; }   
-        #seat-rock     { top: 0%;   left: 30%; }
-        #seat-gambit   { top: 0%;   left: 70%; }
-        #seat-wild     { top: 30%;  left: 95%; }  
-        #seat-pro      { top: 85%;  left: 90%; } 
+        /* 10-PLAYER OVAL LAYOUT */
+        #seat-user    { top: 100%; left: 50%; }  
+        #seat-hustler { top: 85%;  left: 15%; }
+        #seat-shark   { top: 50%;  left: -5%; }   
+        #seat-rock    { top: 15%;  left: 10%; }
+        #seat-gambit  { top: -5%;  left: 30%; }
+        #seat-smooth  { top: -5%;  left: 50%; }
+        #seat-wild    { top: -5%;  left: 70%; }  
+        #seat-pro     { top: 15%;  left: 90%; } 
+        #seat-scooter { top: 50%;  left: 105%; }
+        #seat-robby   { top: 85%;  left: 85%; }
 
         .avatar { width: 55px; height: 55px; border-radius: 50%; background: #1e293b; border: 1px solid var(--border-dim); object-fit: cover; box-shadow: 0 5px 15px rgba(0,0,0,0.8); transition: all 0.3s ease; }
         
@@ -184,10 +188,10 @@
         .log-action.call { color: var(--neon-cyan); }
         .log-action.fold { color: var(--neon-red); }
 
-        .ledger-row { display: grid; grid-template-columns: 2fr 1.5fr 2fr; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.8rem; }
+        .ledger-row { display: grid; grid-template-columns: 2fr 1.5fr 2fr; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.75rem; }
         .ledger-row:last-child { border-bottom: none; padding-bottom: 0; }
         .l-name { font-weight: 600; color: white; letter-spacing: 1px; font-family: 'Montserrat', sans-serif;}
-        .l-state { font-family: 'Montserrat', sans-serif; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; font-size: 0.75rem; text-align: center; }
+        .l-state { font-family: 'Montserrat', sans-serif; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; font-size: 0.70rem; text-align: center; }
         .l-bank { text-align: right; color: var(--neon-gold); font-family: 'Montserrat', sans-serif; font-weight: 500; letter-spacing: 2px;}
         
         .state-folded { color: var(--neon-red); }
@@ -238,53 +242,75 @@
                         <div class="community-cards" id="ui-community"></div>
                     </div>
 
+                    <!-- SEAT MAP: 10 PLAYERS -->
                     <div class="seat active" id="seat-user">
                         <div class="player-hand" id="ui-user-hand"></div>
-                        <img src="avatar_user.png" class="avatar" alt="You" onerror="this.src='data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='">
+                        <img src="avatar_user.png" class="avatar" alt="You" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><rect width=\'100\' height=\'100\' fill=\'%231e293b\'/><circle cx=\'50\' cy=\'40\' r=\'20\' fill=\'%2394a3b8\'/><path d=\'M 20 100 Q 50 60 80 100 Z\' fill=\'%2394a3b8\'/></svg>'">
                         <div class="nameplate">YOU</div>
                         <div class="player-action-text" id="action-YOU"></div>
                     </div>
 
                     <div class="seat" id="seat-hustler">
                         <div class="opp-hand" id="hand-hustler"></div>
-                        <img src="avatar_hustler.png" class="avatar" alt="Hustler" onerror="this.style.display='none'">
+                        <img src="avatar_hustler.png" class="avatar" alt="Hustler" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><rect width=\'100\' height=\'100\' fill=\'%231e293b\'/><circle cx=\'50\' cy=\'40\' r=\'20\' fill=\'%2394a3b8\'/><path d=\'M 20 100 Q 50 60 80 100 Z\' fill=\'%2394a3b8\'/></svg>'">
                         <div class="nameplate">HUSTLER</div>
                         <div class="player-action-text" id="action-HUSTLER"></div>
                     </div>
 
                     <div class="seat" id="seat-shark">
                         <div class="opp-hand" id="hand-shark"></div>
-                        <img src="avatar_shark.png" class="avatar" alt="Shark" onerror="this.style.display='none'">
+                        <img src="avatar_shark.png" class="avatar" alt="Shark" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><rect width=\'100\' height=\'100\' fill=\'%231e293b\'/><circle cx=\'50\' cy=\'40\' r=\'20\' fill=\'%2394a3b8\'/><path d=\'M 20 100 Q 50 60 80 100 Z\' fill=\'%2394a3b8\'/></svg>'">
                         <div class="nameplate">SHARK</div>
                         <div class="player-action-text" id="action-SHARK"></div>
                     </div>
 
                     <div class="seat" id="seat-rock">
                         <div class="opp-hand" id="hand-rock"></div>
-                        <img src="avatar_rock.png" class="avatar" alt="Rock" onerror="this.style.display='none'">
+                        <img src="avatar_rock.png" class="avatar" alt="Rock" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><rect width=\'100\' height=\'100\' fill=\'%231e293b\'/><circle cx=\'50\' cy=\'40\' r=\'20\' fill=\'%2394a3b8\'/><path d=\'M 20 100 Q 50 60 80 100 Z\' fill=\'%2394a3b8\'/></svg>'">
                         <div class="nameplate">ROCK</div>
                         <div class="player-action-text" id="action-ROCK"></div>
                     </div>
 
                     <div class="seat" id="seat-gambit">
                         <div class="opp-hand" id="hand-gambit"></div>
-                        <img src="avatar_gambit.png" class="avatar" alt="Gambit" onerror="this.style.display='none'">
+                        <img src="avatar_gambit.png" class="avatar" alt="Gambit" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><rect width=\'100\' height=\'100\' fill=\'%231e293b\'/><circle cx=\'50\' cy=\'40\' r=\'20\' fill=\'%2394a3b8\'/><path d=\'M 20 100 Q 50 60 80 100 Z\' fill=\'%2394a3b8\'/></svg>'">
                         <div class="nameplate">GAMBIT</div>
                         <div class="player-action-text" id="action-GAMBIT"></div>
                     </div>
 
+                    <div class="seat" id="seat-smooth">
+                        <div class="opp-hand" id="hand-smooth"></div>
+                        <img src="avatar_smooth.png" class="avatar" alt="Smooth" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><rect width=\'100\' height=\'100\' fill=\'%231e293b\'/><circle cx=\'50\' cy=\'40\' r=\'20\' fill=\'%2394a3b8\'/><path d=\'M 20 100 Q 50 60 80 100 Z\' fill=\'%2394a3b8\'/></svg>'">
+                        <div class="nameplate">SMOOTH</div>
+                        <div class="player-action-text" id="action-SMOOTH"></div>
+                    </div>
+
                     <div class="seat" id="seat-wild">
                         <div class="opp-hand" id="hand-wild"></div>
-                        <img src="avatar_wildcard.png" class="avatar" alt="Wild" onerror="this.style.display='none'">
+                        <img src="avatar_wildcard.png" class="avatar" alt="Wild" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><rect width=\'100\' height=\'100\' fill=\'%231e293b\'/><circle cx=\'50\' cy=\'40\' r=\'20\' fill=\'%2394a3b8\'/><path d=\'M 20 100 Q 50 60 80 100 Z\' fill=\'%2394a3b8\'/></svg>'">
                         <div class="nameplate">WILD</div>
                         <div class="player-action-text" id="action-WILD"></div>
                     </div>
 
                     <div class="seat" id="seat-pro">
                         <div class="opp-hand" id="hand-pro"></div>
-                        <img src="avatar_pro.png" class="avatar" alt="Pro" onerror="this.style.display='none'">
+                        <img src="avatar_pro.png" class="avatar" alt="Pro" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><rect width=\'100\' height=\'100\' fill=\'%231e293b\'/><circle cx=\'50\' cy=\'40\' r=\'20\' fill=\'%2394a3b8\'/><path d=\'M 20 100 Q 50 60 80 100 Z\' fill=\'%2394a3b8\'/></svg>'">
                         <div class="nameplate">PRO</div>
                         <div class="player-action-text" id="action-PRO"></div>
+                    </div>
+
+                    <div class="seat" id="seat-robby">
+                        <div class="opp-hand" id="hand-robby"></div>
+                        <img src="avatar_robby.png" class="avatar" alt="Robby" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><rect width=\'100\' height=\'100\' fill=\'%231e293b\'/><circle cx=\'50\' cy=\'40\' r=\'20\' fill=\'%2394a3b8\'/><path d=\'M 20 100 Q 50 60 80 100 Z\' fill=\'%2394a3b8\'/></svg>'">
+                        <div class="nameplate">ROBBY</div>
+                        <div class="player-action-text" id="action-ROBBY"></div>
+                    </div>
+
+                    <div class="seat" id="seat-scooter">
+                        <div class="opp-hand" id="hand-scooter"></div>
+                        <img src="avatar_scooter.png" class="avatar" alt="Scooter" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><rect width=\'100\' height=\'100\' fill=\'%231e293b\'/><circle cx=\'50\' cy=\'40\' r=\'20\' fill=\'%2394a3b8\'/><path d=\'M 20 100 Q 50 60 80 100 Z\' fill=\'%2394a3b8\'/></svg>'">
+                        <div class="nameplate">SCOOTER</div>
+                        <div class="player-action-text" id="action-SCOOTER"></div>
                     </div>
                 </div>
 
@@ -407,7 +433,7 @@
         let gamePhase = 0; let deck = []; let communityCards = []; let isProcessing = false; let currentWinAmount = 0;
 
         let playerStates = {};
-        const AI_PLAYERS = ['PRO', 'HUSTLER', 'GAMBIT', 'WILD', 'SHARK', 'ROCK'];
+        const AI_PLAYERS = ['PRO', 'HUSTLER', 'GAMBIT', 'SMOOTH', 'WILD', 'SHARK', 'ROBBY', 'SCOOTER', 'ROCK'];
         const ALL_SEATS = ['YOU', ...AI_PLAYERS];
 
         ALL_SEATS.forEach(p => playerStates[p] = { isActive: true, hand: [], lastAction: 'WAITING' });
@@ -438,9 +464,13 @@
                     const data = docSnap.data();
                     bankroll = data.bankroll;
                     aiBankrolls = data.aiBankrolls;
+                    
+                    // Fallback to fill in new players if syncing an old save file
+                    AI_PLAYERS.forEach(ai => { if(aiBankrolls[ai] === undefined) aiBankrolls[ai] = 1500000; });
                 } else {
                     bankroll = 3256000;
-                    aiBankrolls = { 'PRO': 1500000, 'HUSTLER': 1500000, 'GAMBIT': 1500000, 'WILD': 1500000, 'SHARK': 1500000, 'ROCK': 1500000 };
+                    aiBankrolls = {};
+                    AI_PLAYERS.forEach(ai => aiBankrolls[ai] = 1500000);
                     await setDoc(cloudDocRef, { bankroll, aiBankrolls });
                 }
 
@@ -751,7 +781,7 @@
         }
 
         // -----------------------------------------------------------
-        // MANIAC HIGH-ROLLER AI LOGIC
+        // MIXED-ECOSYSTEM AI LOGIC
         // -----------------------------------------------------------
         async function processAITurns() {
             let activeCount = Object.values(playerStates).filter(p => p.isActive).length;
@@ -765,11 +795,19 @@
                 let seatEl = document.getElementById('seat-' + ai.toLowerCase()); seatEl.classList.add('active'); playSound('turn');
                 await new Promise(r => setTimeout(r, 1500 + Math.random() * 1000)); 
                 
-                let rand = Math.random(); let action = 'call';
+                let rand = Math.random(); 
+                let action = 'call';
                 
-                // Aggressive Distribution: 40% Raise, 35% Fold, 25% Call
-                if (rand > 0.60) action = 'raise'; 
-                else if (rand < 0.35) action = 'fold';
+                // Maniacs (Hyper-Aggressive) vs Rocks (Tight/Conservative)
+                const isManiac = ['PRO', 'HUSTLER', 'WILD', 'SHARK'].includes(ai);
+
+                if (isManiac) {
+                    if (rand > 0.60) action = 'raise'; 
+                    else if (rand < 0.35) action = 'fold';
+                } else {
+                    if (rand > 0.90) action = 'raise';
+                    else if (rand < 0.60) action = 'fold';
+                }
 
                 if (action === 'fold') { 
                     foldPlayer(ai); logAction(ai, 'fold'); playSound('fold'); 
@@ -777,9 +815,12 @@
                     let amt = currentCallAmount; 
                     
                     if (action === 'raise') {
-                        // AI raises 2x to 5x the current bet to force players out
-                        let multiplier = Math.floor(Math.random() * 4) + 2; 
-                        amt = (currentCallAmount === 0 ? 100000 : currentCallAmount) * multiplier;
+                        if (isManiac) {
+                            let multiplier = Math.floor(Math.random() * 4) + 2; 
+                            amt = (currentCallAmount === 0 ? 100000 : currentCallAmount) * multiplier;
+                        } else {
+                            amt = (currentCallAmount === 0 ? 100000 : currentCallAmount) * 2;
+                        }
                     }
 
                     if (amt >= aiBankrolls[ai]) { amt = aiBankrolls[ai]; action = 'all in'; }
