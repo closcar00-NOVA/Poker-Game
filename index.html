@@ -160,9 +160,29 @@
         .stat-label { font-family: 'Montserrat', sans-serif; font-weight: 300; font-size: 0.75rem; color: #b29a34; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 8px; }
         .stat-value { font-family: 'Montserrat', sans-serif; text-align: center; font-size: 1.3rem; font-weight: 500; color: white; letter-spacing: 2px; }
         
-        .action-group { display: flex; gap: 15px; flex: 2.5; padding: 0 25px; border-right: 1px solid var(--border-dim); align-items: center; justify-content: center; }
+        /* NEW ALIGNMENT FOR BUTTON GROUP */
+        .action-group { display: flex; gap: 15px; flex: 2.5; padding: 0 25px; border-right: 1px solid var(--border-dim); align-items: stretch; justify-content: center; }
         
-        .poker-btn { flex: 1; font-family: 'Inter', sans-serif; font-size: 1rem; font-weight: 600; border-radius: 6px; padding: 16px 0; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; background: transparent; transition: all 0.2s ease; }
+        .poker-btn { 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            font-family: 'Inter', sans-serif; 
+            font-size: 1rem; 
+            font-weight: 600; 
+            border-radius: 6px; 
+            padding: 12px 5px; 
+            cursor: pointer; 
+            text-transform: uppercase; 
+            letter-spacing: 2px; 
+            background: transparent; 
+            transition: all 0.2s ease;
+            line-height: 1.2;
+            min-height: 60px;
+        }
+
         .poker-btn:disabled { opacity: 0.25; cursor: not-allowed; border-color: #334155 !important; color: #64748b !important; box-shadow: none !important; }
         
         .btn-fold { border: 1px solid var(--neon-red); color: var(--neon-red); }
@@ -599,7 +619,13 @@
         function updateUI() {
             uiBankroll.innerText = formatMoney(bankroll); uiPot.innerText = formatMoney(pot); uiRaiseAmt.innerText = formatMoney(customRaiseAmount); uiStatBet.innerText = formatMoney(currentCallAmount);
             const rounds = ["Pre-Flop", "The Flop", "The Turn", "The River", "Showdown"]; uiStatRound.innerText = rounds[gamePhase];
-            if (bankroll <= currentCallAmount) { btnCall.innerText = `ALL IN ${formatMoney(bankroll)}`; } else { btnCall.innerText = `CALL ${formatMoney(currentCallAmount)}`; }
+            
+            if (bankroll <= currentCallAmount) { 
+                btnCall.innerHTML = `ALL IN<br><span style="font-size: 0.75em; opacity: 0.8;">${formatMoney(bankroll)}</span>`; 
+            } else { 
+                btnCall.innerHTML = `CALL<br><span style="font-size: 0.75em; opacity: 0.8;">${formatMoney(currentCallAmount)}</span>`; 
+            }
+            
             updatePlayerStatuses();
         }
 
