@@ -47,8 +47,17 @@
         }
         #rebuy-toggle:hover { box-shadow: 0 0 15px rgba(255, 215, 0, 0.3); background: rgba(255, 215, 0, 0.1); }
 
-        #stakes-toggle {
+        #buyin-toggle {
             position: fixed; top: 65px; left: 20px; z-index: 1000;
+            background: rgba(0,0,0,0.6); border: 1px solid var(--neon-green); border-radius: 4px;
+            padding: 6px 12px; font-family: 'Rajdhani', sans-serif; font-size: 0.85rem; font-weight: 600; letter-spacing: 2px;
+            color: var(--neon-green); cursor: pointer; backdrop-filter: blur(5px); transition: 0.2s;
+            display: none;
+        }
+        #buyin-toggle:hover { box-shadow: 0 0 15px rgba(0, 255, 102, 0.3); background: rgba(0, 255, 102, 0.1); }
+
+        #stakes-toggle {
+            position: fixed; top: 110px; left: 20px; z-index: 1000;
             background: rgba(0,0,0,0.6); border: 1px solid var(--neon-cyan); border-radius: 4px;
             padding: 6px 12px; font-family: 'Rajdhani', sans-serif; font-size: 0.85rem; font-weight: 600; letter-spacing: 2px;
             color: var(--neon-cyan); cursor: pointer; backdrop-filter: blur(5px); transition: 0.2s;
@@ -169,7 +178,7 @@
         .stat-label { font-family: 'Montserrat', sans-serif; font-weight: 300; font-size: 0.75rem; color: #b29a34; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 8px; }
         .stat-value { font-family: 'Montserrat', sans-serif; text-align: center; font-size: 1.3rem; font-weight: 500; color: white; letter-spacing: 2px; }
         
-        /* NEW ALIGNMENT FOR BUTTON GROUP */
+        /* ALIGNMENT FOR BUTTON GROUP */
         .action-group { display: flex; gap: 15px; flex: 2.5; padding: 0 25px; border-right: 1px solid var(--border-dim); align-items: stretch; justify-content: center; }
         
         .poker-btn { 
@@ -255,7 +264,9 @@
 <body>
     
     <div id="sound-toggle">SOUND: ON</div>
-    <div id="rebuy-toggle">REBUY OPPONENTS ($1.5M)</div>
+    
+    <div id="rebuy-toggle">REBUY ALL OPPONENTS</div>
+    <div id="buyin-toggle">AI BUY-IN: $1.5M</div>
     <div id="stakes-toggle">STAKES: $50K/$100K</div>
 
     <!-- INITIAL CLOUD LOGIN OVERLAY -->
@@ -477,6 +488,17 @@
         ];
         let currentStakesIdx = 0;
 
+        // NEW BUY-IN LOGIC
+        const BUYIN_TIERS = [
+            { label: "$1.5M", amount: 1500000 },
+            { label: "$5M", amount: 5000000 },
+            { label: "$10M", amount: 10000000 },
+            { label: "$25M", amount: 25000000 },
+            { label: "$50M", amount: 50000000 },
+            { label: "$100M", amount: 100000000 }
+        ];
+        let currentBuyinIdx = 0;
+
         let pot = 0; 
         let currentCallAmount = STAKES_TIERS[currentStakesIdx].bigBlind; 
         let customRaiseAmount = STAKES_TIERS[currentStakesIdx].bigBlind;
@@ -515,18 +537,18 @@
                     bankroll = data.bankroll;
                     aiBankrolls = data.aiBankrolls;
                     
-                    // Fallback to fill in new players if syncing an old save file
-                    AI_PLAYERS.forEach(ai => { if(aiBankrolls[ai] === undefined) aiBankrolls[ai] = 1500000; });
+                    AI_PLAYERS.forEach(ai => { if(aiBankrolls[ai] === undefined) aiBankrolls[ai] = BUYIN_TIERS[currentBuyinIdx].amount; });
                 } else {
                     bankroll = 3256000;
                     aiBankrolls = {};
-                    AI_PLAYERS.forEach(ai => aiBankrolls[ai] = 1500000);
+                    AI_PLAYERS.forEach(ai => aiBankrolls[ai] = BUYIN_TIERS[currentBuyinIdx].amount);
                     await setDoc(cloudDocRef, { bankroll, aiBankrolls });
                 }
 
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('game-screen').style.display = 'flex';
                 document.getElementById('rebuy-toggle').style.display = 'block';
+                document.getElementById('buyin-toggle').style.display = 'block';
                 document.getElementById('stakes-toggle').style.display = 'block';
                 startNewHand();
             } catch (error) {
@@ -536,12 +558,24 @@
             }
         });
 
+        // AI BUY-IN TOGGLE LOGIC
+        document.getElementById('buyin-toggle').addEventListener('click', () => {
+            if (isProcessing) return;
+            currentBuyinIdx = (currentBuyinIdx + 1) % BUYIN_TIERS.length;
+            let newBuyin = BUYIN_TIERS[currentBuyinIdx];
+            document.getElementById('buyin-toggle').innerText = `AI BUY-IN: ${newBuyin.label}`;
+            playSound('chip');
+        });
+
         // REBUY LOGIC
         document.getElementById('rebuy-toggle').addEventListener('click', () => {
-            if(confirm("Rebuy all AI opponents for $1,500,000 each? Your bankroll will remain untouched.")) {
-                AI_PLAYERS.forEach(ai => aiBankrolls[ai] = 1500000);
+            let currentAmt = BUYIN_TIERS[currentBuyinIdx].amount;
+            let currentLabel = BUYIN_TIERS[currentBuyinIdx].label;
+            
+            if(confirm(`Rebuy all AI opponents for ${currentLabel} each? Your bankroll will remain untouched.`)) {
+                AI_PLAYERS.forEach(ai => aiBankrolls[ai] = currentAmt);
                 saveGameStateToCloud();
-                logHandResult('SYSTEM', 'TABLE RESET', 'AIs REBOUGHT');
+                logHandResult('SYSTEM', 'TABLE RESET', `AIs REBOUGHT FOR ${currentLabel}`);
                 playSound('chip');
                 startNewHand();
             }
