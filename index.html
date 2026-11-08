@@ -249,7 +249,7 @@
         .ledger-row:last-child { border-bottom: none; padding-bottom: 0; }
         .l-name { font-weight: 600; color: white; letter-spacing: 1px; font-family: 'Montserrat', sans-serif;}
         .l-state { font-family: 'Montserrat', sans-serif; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; font-size: 0.70rem; text-align: center; }
-        .l-bank { text-align: right; color: var(--neon-gold); font-family: 'Montserrat', sans-serif; font-weight: 500; letter-spacing: 2px;}
+        .l-bank { text-align: right; color: var(--neon-gold); font-family: 'Montserrat', sans-serif; font-weight: 500; letter-spacing: 2px; position: relative; }
         
         .state-folded { color: var(--neon-red); }
         .state-raised { color: var(--neon-green); }
@@ -507,6 +507,8 @@
         // GLOBALS
         let bankroll = 0; 
         let aiBankrolls = {};
+        let lastHandDeltas = {};
+        let previousBankrolls = {};
         
         // NEW STAKES LOGIC
         const STAKES_TIERS = [
@@ -604,6 +606,8 @@
             
             if(confirm(`Rebuy all AI opponents for ${currentLabel} each? Your bankroll will remain untouched.`)) {
                 AI_PLAYERS.forEach(ai => aiBankrolls[ai] = currentAmt);
+                lastHandDeltas = {}; 
+                previousBankrolls = {};
                 saveGameStateToCloud();
                 logHandResult('SYSTEM', 'TABLE RESET', `AIs REBOUGHT FOR ${currentLabel}`);
                 playSound('chip');
@@ -625,6 +629,9 @@
             document.getElementById('ui-blinds-dash').innerText = newStakes.label;
             
             playSound('chip');
+            
+            lastHandDeltas = {}; 
+            previousBankrolls = {};
             
             if (pot > 0) {
                 startNewHand();
@@ -697,7 +704,7 @@
                 
                 if (state === 'OUT') {
                     stateClass = 'state-out';
-                    rowOpacity = '0.35'; // Ghost the row to background
+                    rowOpacity = '0.35'; 
                 } else if (state === 'FOLDED') {
                     stateClass = 'state-folded';
                     rowOpacity = '0.7';
@@ -706,7 +713,15 @@
                 else if(state === 'CALLED' || state === 'CALL' || state === 'ALL IN') stateClass = 'state-called';
                 else if(state === 'WINNER') stateClass = 'state-winner';
                 
-                html += `<div class="ledger-row" style="opacity: ${rowOpacity};"><span class="l-name">${p}</span><span class="l-state ${stateClass}">${state}</span><span class="l-bank">${formatMoney(pBank)}</span></div>`;
+                let deltaHtml = '';
+                if (lastHandDeltas[p] !== undefined && lastHandDeltas[p] !== 0) {
+                    let d = lastHandDeltas[p];
+                    let dColor = d > 0 ? 'var(--neon-green)' : 'var(--neon-red)';
+                    let dText = d > 0 ? '+$' + d.toLocaleString() : '-$' + Math.abs(d).toLocaleString();
+                    deltaHtml = `<br><span style="color: ${dColor}; font-size: 0.65rem; letter-spacing: 1px;">${dText}</span>`;
+                }
+
+                html += `<div class="ledger-row" style="opacity: ${rowOpacity};"><span class="l-name">${p}</span><span class="l-state ${stateClass}">${state}</span><span class="l-bank">${formatMoney(pBank)}${deltaHtml}</span></div>`;
             });
             container.innerHTML = html;
         }
@@ -779,6 +794,15 @@
         }
 
         async function startNewHand() {
+            if (Object.keys(previousBankrolls).length > 0) {
+                ALL_SEATS.forEach(p => {
+                    let currentBank = p === 'YOU' ? bankroll : aiBankrolls[p];
+                    let prevBank = previousBankrolls[p] || 0;
+                    lastHandDeltas[p] = currentBank - prevBank;
+                });
+            }
+            ALL_SEATS.forEach(p => { previousBankrolls[p] = p === 'YOU' ? bankroll : aiBankrolls[p]; });
+
             isProcessing = false; setButtonsEnabled(true); clearAllOnTableActions(); createDeck(); playSound('shuffle');
             document.getElementById('recap-view').style.display = 'flex'; document.getElementById('double-view').style.display = 'none';
             document.getElementById('modal-action-btns').style.display = 'flex'; document.getElementById('modal-title-text').innerText = "HAND COMPLETE";
@@ -964,7 +988,6 @@
             let activeCount = Object.values(playerStates).filter(p => p.isActive).length;
             if (activeCount <= 1) return;
             
-            // Get the API key securely from the input box
             const apiKey = vegasApiKeyInput.value.trim();
 
             for (let i = 0; i < AI_PLAYERS.length; i++) {
@@ -976,13 +999,10 @@
                 
                 let action = 'call';
                 
-                // If we have an API key, ping Gemini for the decision. 
-                // If not, fall back to the built-in Math.random logic.
                 if (apiKey) {
                     const aiBankroll = aiBankrolls[ai];
                     const bb = STAKES_TIERS[currentStakesIdx].bigBlind;
                     
-                    // Convert hand to readable format
                     const handCards = playerStates[ai].hand.map(c => `${c.rank} of ${c.suit}`).join(", ");
                     const commCards = communityCards.map(c => `${c.rank} of ${c.suit}`).join(", ");
                     
@@ -1015,7 +1035,7 @@
                             
                             if (aiDecision.includes('FOLD')) action = 'fold';
                             else if (aiDecision.includes('RAISE') || aiDecision.includes('ALL IN')) action = 'raise';
-                            else action = 'call'; // Default to call for anything else
+                            else action = 'call'; 
                         } else {
                             throw new Error("Gemini Request Failed");
                         }
@@ -1024,7 +1044,6 @@
                         action = calculateRandomAction(ai);
                     }
                 } else {
-                    // Fallback local engine if no API key is entered
                     action = calculateRandomAction(ai);
                 }
 
@@ -1054,7 +1073,6 @@
             }
         }
         
-        // Helper function for the local random engine
         function calculateRandomAction(aiName) {
             let rand = Math.random(); 
             const isManiac = ['PRO', 'HUSTLER', 'WILD', 'SHARK'].includes(aiName);
