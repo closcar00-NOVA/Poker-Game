@@ -37,6 +37,17 @@
         }
         #sound-toggle:hover { border-color: var(--neon-cyan); }
         #sound-toggle.muted { color: #64748b; border-color: var(--border-dim); }
+        
+        #api-key-container {
+            position: fixed; top: 65px; right: 20px; z-index: 1000;
+        }
+        #vegas-api-key {
+            background-color: rgba(10, 10, 12, 0.9); border: 1px solid var(--neon-gold); border-radius: 4px; padding: 6px 12px; color: white; font-family: 'Montserrat', sans-serif; font-size: 12px; outline: none; transition: box-shadow 0.2s;
+            width: 180px; text-align: center;
+        }
+        #vegas-api-key:focus {
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
 
         #rebuy-toggle {
             position: fixed; top: 20px; left: 20px; z-index: 1000;
@@ -265,6 +276,10 @@
     
     <div id="sound-toggle">SOUND: ON</div>
     
+    <div id="api-key-container">
+        <input type="password" id="vegas-api-key" placeholder="Gemini API Key" autocomplete="off">
+    </div>
+    
     <div id="rebuy-toggle">REBUY ALL OPPONENTS</div>
     <div id="buyin-toggle">AI BUY-IN: $1.5M</div>
     <div id="stakes-toggle">STAKES: $50K/$100K</div>
@@ -441,6 +456,20 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Initialize the API Key Input
+        const vegasApiKeyInput = document.getElementById('vegas-api-key');
+
+        // Load the API key if it exists in local storage
+        const savedApiKey = localStorage.getItem('vegas_pro_api_key');
+        if (savedApiKey) {
+            vegasApiKeyInput.value = savedApiKey;
+        }
+
+        // Auto-save the API key whenever it is pasted or changed
+        vegasApiKeyInput.addEventListener('change', (e) => {
+            localStorage.setItem('vegas_pro_api_key', e.target.value.trim());
+        });
 
         const firebaseConfig = {
             apiKey: "",
@@ -933,6 +962,9 @@
         async function processAITurns() {
             let activeCount = Object.values(playerStates).filter(p => p.isActive).length;
             if (activeCount <= 1) return;
+            
+            // Get the API key securely from the input box
+            const apiKey = vegasApiKeyInput.value.trim();
 
             for (let i = 0; i < AI_PLAYERS.length; i++) {
                 let currentActive = Object.values(playerStates).filter(p => p.isActive).length; 
@@ -940,20 +972,59 @@
                 let ai = AI_PLAYERS[i]; if (!playerStates[ai].isActive) continue; 
                 
                 let seatEl = document.getElementById('seat-' + ai.toLowerCase()); seatEl.classList.add('active'); playSound('turn');
-                await new Promise(r => setTimeout(r, 1500 + Math.random() * 1000)); 
                 
-                let rand = Math.random(); 
                 let action = 'call';
                 
-                // Maniacs (Hyper-Aggressive) vs Rocks (Tight/Conservative)
-                const isManiac = ['PRO', 'HUSTLER', 'WILD', 'SHARK'].includes(ai);
+                // If we have an API key, ping Gemini for the decision. 
+                // If not, fall back to the built-in Math.random logic.
+                if (apiKey) {
+                    const aiBankroll = aiBankrolls[ai];
+                    const bb = STAKES_TIERS[currentStakesIdx].bigBlind;
+                    
+                    // Convert hand to readable format
+                    const handCards = playerStates[ai].hand.map(c => `${c.rank} of ${c.suit}`).join(", ");
+                    const commCards = communityCards.map(c => `${c.rank} of ${c.suit}`).join(", ");
+                    
+                    const prompt = `You are playing Texas Hold'em as the character "${ai}".
+                    You have a bankroll of ${aiBankroll}. The pot is ${pot}. The current bet to call is ${currentCallAmount}. The big blind is ${bb}.
+                    Your hand: ${handCards}.
+                    Community cards: ${commCards || "None"}.
+                    
+                    Respond strictly with ONLY ONE of these actions based on your hand strength and character:
+                    FOLD
+                    CALL
+                    RAISE (Small)
+                    RAISE (Medium)
+                    RAISE (Large)
+                    ALL IN`;
 
-                if (isManiac) {
-                    if (rand > 0.60) action = 'raise'; 
-                    else if (rand < 0.35) action = 'fold';
+                    try {
+                        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`;
+                        const response = await fetch(endpoint, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                contents: [{ role: "user", parts: [{ text: prompt }] }]
+                            })
+                        });
+
+                        if (response.ok) {
+                            const data = await response.json();
+                            const aiDecision = data.candidates[0].content.parts[0].text.trim().toUpperCase();
+                            
+                            if (aiDecision.includes('FOLD')) action = 'fold';
+                            else if (aiDecision.includes('RAISE') || aiDecision.includes('ALL IN')) action = 'raise';
+                            else action = 'call'; // Default to call for anything else
+                        } else {
+                            throw new Error("Gemini Request Failed");
+                        }
+                    } catch (error) {
+                        console.warn("API Error, falling back to random engine", error);
+                        action = calculateRandomAction(ai);
+                    }
                 } else {
-                    if (rand > 0.90) action = 'raise';
-                    else if (rand < 0.60) action = 'fold';
+                    // Fallback local engine if no API key is entered
+                    action = calculateRandomAction(ai);
                 }
 
                 if (action === 'fold') { 
@@ -962,6 +1033,7 @@
                     let amt = currentCallAmount; 
                     
                     if (action === 'raise') {
+                        const isManiac = ['PRO', 'HUSTLER', 'WILD', 'SHARK'].includes(ai);
                         if (isManiac) {
                             let multiplier = Math.floor(Math.random() * 4) + 2; 
                             amt = (currentCallAmount === 0 ? STAKES_TIERS[currentStakesIdx].bigBlind : currentCallAmount) * multiplier;
@@ -979,6 +1051,20 @@
                 }
                 updateUI(); seatEl.classList.remove('active'); await new Promise(r => setTimeout(r, 500)); 
             }
+        }
+        
+        // Helper function for the local random engine
+        function calculateRandomAction(aiName) {
+            let rand = Math.random(); 
+            const isManiac = ['PRO', 'HUSTLER', 'WILD', 'SHARK'].includes(aiName);
+            if (isManiac) {
+                if (rand > 0.60) return 'raise'; 
+                if (rand < 0.35) return 'fold';
+            } else {
+                if (rand > 0.90) return 'raise';
+                if (rand < 0.60) return 'fold';
+            }
+            return 'call';
         }
 
         async function advancePhase() {
