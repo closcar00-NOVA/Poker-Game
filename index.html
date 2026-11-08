@@ -182,7 +182,8 @@
         .player-hand .css-card .card-center { font-size: 2.5rem; }
         .player-hand .css-card .card-corner { font-size: 0.9rem; }
 
-        #controls { display: flex; justify-content: space-between; align-items: stretch; gap: 20px; background: #0c0c0e; padding: 20px 30px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); width: 100%; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
+        /* NEON WHITE BOX SECTIONS */
+        #controls { display: flex; justify-content: space-between; align-items: stretch; gap: 20px; background: #0c0c0e; padding: 20px 30px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.8); width: 100%; box-shadow: 0 0 15px rgba(255, 255, 255, 0.15), inset 0 0 10px rgba(255, 255, 255, 0.05), 0 20px 50px rgba(0,0,0,0.8); }
         .stat-box { display: flex; flex-direction: column; align-items: center; justify-content: center; background: transparent; padding: 0 20px; flex: 1; border-right: 1px solid var(--border-dim); }
         #controls .stat-box:last-child { border-right: none; }
         
@@ -228,7 +229,7 @@
         .bet-btn:hover:not(:disabled) { border-color: white; }
 
         .sidebar { display: flex; flex-direction: column; gap: 20px; width: 320px; flex-shrink: 0; }
-        .side-panel { background: var(--panel-bg); border: 1px solid var(--border-dim); border-radius: 6px; padding: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .side-panel { background: var(--panel-bg); border: 1px solid rgba(255, 255, 255, 0.8); border-radius: 6px; padding: 15px; box-shadow: 0 0 15px rgba(255, 255, 255, 0.15), inset 0 0 10px rgba(255, 255, 255, 0.05), 0 10px 30px rgba(0,0,0,0.5); }
         .panel-header { font-family: 'Montserrat', sans-serif; color: #b29a34; font-size: 0.9rem; font-weight: 600; margin: 0 0 12px 0; border-bottom: 1px solid var(--border-dim); padding-bottom: 8px; letter-spacing: 3px; text-transform: uppercase; }
         
         .dash-stats { display: flex; justify-content: space-between; font-family: 'Nunito', sans-serif; font-size: 0.6rem; letter-spacing: 1px; color: #94a3b8; margin-bottom: 15px; border-bottom: 1px solid var(--border-dim); padding-bottom: 10px; text-transform: uppercase; }
@@ -472,7 +473,7 @@
         });
 
         const firebaseConfig = {
-            apiKey: "",
+            apiKey: "AIzaSyCSWZMLtsbybfGo0ZUaH7UhLVHcokgkhcA",
             authDomain: "vegas-pro-6256c.firebaseapp.com",
             projectId: "vegas-pro-6256c",
             storageBucket: "vegas-pro-6256c.firebasestorage.app",
