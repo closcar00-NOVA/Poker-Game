@@ -1046,8 +1046,10 @@
             const apiKey = vegasApiKeyInput.value.trim();
 
             for (let i = 0; i < AI_PLAYERS.length; i++) {
+                // Re-evaluate active players in case someone folded
                 let currentActive = Object.values(playerStates).filter(p => p.isActive).length; 
                 if (currentActive === 1) break; 
+                
                 let ai = AI_PLAYERS[i]; if (!playerStates[ai].isActive) continue; 
                 
                 let seatEl = document.getElementById('seat-' + ai.toLowerCase()); seatEl.classList.add('active'); playSound('turn');
@@ -1061,10 +1063,16 @@
                     const handCards = playerStates[ai].hand.map(c => `${c.rank} of ${c.suit}`).join(", ");
                     const commCards = communityCards.map(c => `${c.rank} of ${c.suit}`).join(", ");
                     
+                    // Inject short-handed/heads-up context into the API prompt
+                    let dynamicAdvice = currentActive <= 2 
+                        ? "You are playing HEADS UP (1-on-1). Widen your range significantly, fold much less, and play very aggressively." 
+                        : (currentActive <= 4 ? "The table is short-handed. Play slightly more aggressively than usual." : "Play your standard character style.");
+
                     const prompt = `You are playing Texas Hold'em as the character "${ai}".
                     You have a bankroll of ${aiBankroll}. The pot is ${pot}. The current bet to call is ${currentCallAmount}. The big blind is ${bb}.
                     Your hand: ${handCards}.
                     Community cards: ${commCards || "None"}.
+                    Table state: ${dynamicAdvice}
                     
                     Respond strictly with ONLY ONE of these actions based on your hand strength and character:
                     FOLD
@@ -1096,10 +1104,10 @@
                         }
                     } catch (error) {
                         console.warn("API Error, falling back to random engine", error);
-                        action = calculateRandomAction(ai);
+                        action = calculateRandomAction(ai, currentActive);
                     }
                 } else {
-                    action = calculateRandomAction(ai);
+                    action = calculateRandomAction(ai, currentActive);
                 }
 
                 if (action === 'fold') { 
@@ -1128,15 +1136,36 @@
             }
         }
         
-        function calculateRandomAction(aiName) {
+        function calculateRandomAction(aiName, activeCount) {
             let rand = Math.random(); 
             const isManiac = ['PRO', 'HUSTLER', 'WILD', 'SHARK'].includes(aiName);
-            if (isManiac) {
-                if (rand > 0.60) return 'raise'; 
-                if (rand < 0.35) return 'fold';
+            
+            // HEADS-UP / SHORT-HANDED MODIFIER
+            if (activeCount <= 2) {
+                if (isManiac) {
+                    if (rand > 0.50) return 'raise'; 
+                    if (rand < 0.15) return 'fold';
+                } else {
+                    if (rand > 0.70) return 'raise';
+                    if (rand < 0.25) return 'fold';
+                }
+            } else if (activeCount <= 4) {
+                if (isManiac) {
+                    if (rand > 0.55) return 'raise'; 
+                    if (rand < 0.25) return 'fold';
+                } else {
+                    if (rand > 0.80) return 'raise';
+                    if (rand < 0.35) return 'fold';
+                }
             } else {
-                if (rand > 0.90) return 'raise';
-                if (rand < 0.45) return 'fold';
+                // STANDARD FULL RING
+                if (isManiac) {
+                    if (rand > 0.60) return 'raise'; 
+                    if (rand < 0.35) return 'fold';
+                } else {
+                    if (rand > 0.90) return 'raise';
+                    if (rand < 0.45) return 'fold';
+                }
             }
             return 'call';
         }
