@@ -29,17 +29,39 @@
             min-height: 100vh; overflow-x: hidden; user-select: none; 
         }
 
+        /* SOUND CONTROLS */
         #sound-toggle {
-            position: fixed; top: 20px; right: 20px; z-index: 1000;
+            position: fixed; top: 20px; right: 20px; z-index: 1000; width: 110px; text-align: center;
             background: rgba(0,0,0,0.6); border: 1px solid var(--border-dim); border-radius: 4px;
             padding: 6px 12px; font-family: 'Rajdhani', sans-serif; font-size: 0.85rem; font-weight: 600; letter-spacing: 2px;
             color: var(--neon-cyan); cursor: pointer; backdrop-filter: blur(5px); transition: 0.2s;
         }
         #sound-toggle:hover { border-color: var(--neon-cyan); }
         #sound-toggle.muted { color: #64748b; border-color: var(--border-dim); }
+
+        #volume-slider {
+            position: fixed; top: 60px; right: 20px; z-index: 1000;
+            width: 110px; height: 12px;
+            -webkit-appearance: none;
+            background: rgba(0,0,0,0.6);
+            border: 1px solid var(--border-dim);
+            border-radius: 4px;
+            outline: none;
+            backdrop-filter: blur(5px);
+            transition: 0.2s;
+        }
+        #volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 12px; height: 12px;
+            background: var(--neon-cyan);
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
+        }
         
         #api-key-container {
-            position: fixed; top: 65px; right: 20px; z-index: 1000;
+            position: fixed; top: 85px; right: 20px; z-index: 1000;
         }
         #vegas-api-key {
             background-color: rgba(10, 10, 12, 0.9); border: 1px solid var(--neon-gold); border-radius: 4px; padding: 6px 12px; color: white; font-family: 'Montserrat', sans-serif; font-size: 12px; outline: none; transition: box-shadow 0.2s;
@@ -276,6 +298,7 @@
 <body>
     
     <div id="sound-toggle">SOUND: ON</div>
+    <input type="range" id="volume-slider" min="0" max="1" step="0.05" value="0.5">
     
     <div id="api-key-container">
         <input type="password" id="vegas-api-key" placeholder="Gemini API Key" autocomplete="off">
@@ -490,18 +513,50 @@
             turn: new Audio('snd_turn.mp3'), chip: new Audio('snd_chip.mp3'),
             fold: new Audio('snd_fold.mp3'), win: new Audio('snd_win.mp3')
         };
-        Object.values(sfx).forEach(s => s.volume = 0.5);
+        
+        let currentVolume = 0.5;
+        Object.values(sfx).forEach(s => s.volume = currentVolume);
 
         let soundEnabled = true;
+        
+        // Volume Slider Logic
+        document.getElementById('volume-slider').addEventListener('input', (e) => {
+            currentVolume = parseFloat(e.target.value);
+            Object.values(sfx).forEach(s => s.volume = currentVolume);
+            
+            let toggleBtn = document.getElementById('sound-toggle');
+            if (currentVolume > 0 && !soundEnabled) {
+                soundEnabled = true;
+                toggleBtn.innerText = "SOUND: ON";
+                toggleBtn.classList.remove('muted');
+            } else if (currentVolume === 0 && soundEnabled) {
+                soundEnabled = false;
+                toggleBtn.innerText = "SOUND: OFF";
+                toggleBtn.classList.add('muted');
+            }
+        });
+
+        // Toggle Button Logic
         document.getElementById('sound-toggle').addEventListener('click', (e) => {
             soundEnabled = !soundEnabled;
-            e.target.innerText = soundEnabled ? "SOUND: ON" : "SOUND: OFF";
-            if(soundEnabled) { e.target.classList.remove('muted'); } else { e.target.classList.add('muted'); }
+            let slider = document.getElementById('volume-slider');
+            if (soundEnabled) { 
+                e.target.innerText = "SOUND: ON"; 
+                e.target.classList.remove('muted'); 
+                if (currentVolume === 0) currentVolume = 0.5; 
+                slider.value = currentVolume;
+                Object.values(sfx).forEach(s => s.volume = currentVolume);
+            } else { 
+                e.target.innerText = "SOUND: OFF"; 
+                e.target.classList.add('muted'); 
+                slider.value = 0;
+                Object.values(sfx).forEach(s => s.volume = 0);
+            }
         });
 
         function playSound(soundName) { 
-            if(!soundEnabled) return;
-            try { let s = sfx[soundName].cloneNode(); s.volume = sfx[soundName].volume; s.play().catch(e => {}); } catch(e) {} 
+            if(!soundEnabled || currentVolume === 0) return;
+            try { let s = sfx[soundName].cloneNode(); s.volume = currentVolume; s.play().catch(e => {}); } catch(e) {} 
         }
 
         // GLOBALS
